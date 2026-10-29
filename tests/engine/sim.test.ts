@@ -1,0 +1,125 @@
+import { describe, expect, test } from 'vitest';
+import { decodeBoard } from '../../src/engine/codec.ts';
+import { createRun, simulate, trackCount } from '../../src/engine/sim.ts';
+import { COLOR, SEGMENT, SIDE } from '../../src/engine/types.ts';
+import { at, board, dummyGoal, goal, outlet, painter, rock, splitter, track } from './helpers.ts';
+
+const { T, R, B, L } = SIDE;
+const { red, yellow, blue, orange, green, purple } = COLOR;
+const { TR, TL, TB, LR } = SEGMENT;
+
+function stepTo(b: ReturnType<typeof board>, halfSteps: number) {
+  const run = createRun(b);
+  for (let i = 0; i < halfSteps; i++) run.halfStep();
+  return run;
+}
+
+describe('simulate', () => {
+  test('straight line delivers', () => {
+    // steps is a hypothesis confirmed against trainyard.ca fixtures in tests/accuracy.test.ts
+    expect(simulate(decodeBoard('hh002Oja3Giaa00_003QQQ00'))).toMatchObject({ outcome: 'won', steps: 4 });
+  });
+
+  test('mixes colors on merge', () => {
+    const b = board({ '0,3': outlet(R, red), '1,3': track(LR), '2,1': outlet(B, blue), '2,2': track(TB), '2,3': track(LR, TR), '3,3': goal([L], purple) });
+    expect(simulate(b).outcome).toBe('won');
+  });
+
+  test('head-on swap mixes both', () => {
+    const run = stepTo(board({ '0,3': outlet(R, red), '1,3': track(LR), '2,3': track(LR), '3,3': outlet(L, blue), ...dummyGoal }), 4);
+    expect(run.trains.filter((t) => t.alive).map((t) => t.color)).toEqual([purple, purple]);
+  });
+
+  test('crossing mixes when both are on the cross together', () => {
+    const run = stepTo(board({ '2,3': outlet(R, red), '3,2': outlet(B, blue), '3,3': track(LR, TB), ...dummyGoal }), 3);
+    expect(run.trains.map((t) => t.color)).toEqual([purple, purple]);
+  });
+
+  test('crossing does not mix trains that pass at different times', () => {
+    const b = board({ '2,3': outlet(R, red), '3,1': outlet(B, blue), '3,2': track(TB), '3,3': track(LR, TB), '4,3': track(LR), '5,3': track(LR), '3,4': track(TB), '3,5': track(TB), ...dummyGoal });
+    const run = stepTo(b, 5);
+    // trains are created in cell order, so blue (row 1) precedes red (row 3)
+    expect(run.trains.filter((t) => t.alive).map((t) => t.color)).toEqual([blue, red]);
+  });
+
+  test('painter recolors', () => {
+    const b = board({ '0,3': outlet(R, red), '1,3': painter(blue, L, R), '2,3': track(LR), '3,3': goal([L], blue) });
+    expect(simulate(b).outcome).toBe('won');
+  });
+
+  test('splitter splits secondaries into primaries in order', () => {
+    const run = stepTo(board({ '3,0': outlet(B, orange), '3,1': splitter(T), ...dummyGoal }), 3);
+    const bySide = Object.fromEntries(run.trains.filter((t) => t.alive).map((t) => [t.nextSide, t.color]));
+    expect(bySide).toEqual({ [R]: yellow, [L]: red });
+  });
+
+  test('splitter duplicates primaries', () => {
+    const run = stepTo(board({ '3,0': outlet(B, blue), '3,1': splitter(T), ...dummyGoal }), 3);
+    expect(run.trains.filter((t) => t.alive).map((t) => t.color)).toEqual([blue, blue]);
+  });
+
+  test('splitter entered from the wrong side crashes', () => {
+    expect(simulate(board({ '2,1': outlet(R, red), '3,1': splitter(T), ...dummyGoal })).outcome).toBe('crashed');
+  });
+
+  test('switch toggles after a train passes', () => {
+    const b = board({ '3,0': outlet(B, red, red), '3,1': track(TR, TL), '4,1': goal([L], red), '2,1': goal([R], red) });
+    expect(simulate(b).outcome).toBe('won');
+  });
+
+  test('switch toggles once per train in the same half-step', () => {
+    const b = board({ '2,3': outlet(R, red), '3,2': outlet(B, blue), '3,3': track(LR, TR), ...dummyGoal });
+    const run = stepTo(b, 4);
+    expect(run.board.cells[at(3, 3)]).toEqual(track(LR, TR));
+  });
+
+  test('wrong color into a goal crashes', () => {
+    expect(simulate(board({ '0,3': outlet(R, red), '1,3': goal([L], blue) })).outcome).toBe('crashed');
+  });
+
+  test('surplus color into a goal crashes', () => {
+    expect(simulate(board({ '0,3': outlet(R, red, red, blue), '1,3': goal([L], red, blue) })).outcome).toBe('crashed');
+  });
+
+  test('wins with trains still in an outlet', () => {
+    // three trains, so the outlet still holds one when the first is delivered
+    expect(simulate(board({ '0,3': outlet(R, red, red, red), '1,3': goal([L], red) })).outcome).toBe('won');
+  });
+
+  describe('leaving the board crashes', () => {
+    test.each([
+      ['right', { '5,2': outlet(R, red), '6,2': track(LR) }],
+      ['left', { '1,2': outlet(L, red), '0,2': track(LR) }],
+      ['top', { '2,1': outlet(T, red), '2,0': track(TB) }],
+      ['bottom', { '2,5': outlet(B, red), '2,6': track(TB) }],
+      ['straight out of an edge outlet', { '6,2': outlet(R, red) }],
+    ])('%s', (_name, spec) => {
+      expect(simulate(board({ ...spec, '0,6': goal([T], green) })).outcome).toBe('crashed');
+    });
+
+    test('never wraps onto the next row', () => {
+      const run = createRun(board({ '5,2': outlet(R, red), '6,2': track(LR), '0,3': track(LR), '0,6': goal([T], green) }));
+      for (let i = 0; i < 10; i++) {
+        run.halfStep();
+        expect(run.trains.some((t) => t.alive && t.cell === at(0, 3))).toBe(false);
+      }
+      expect(run.outcome).toBe('crashed');
+    });
+  });
+
+  test.each([
+    ['an empty cell', {}],
+    ['a rock', { '1,0': rock }],
+    ['an outlet', { '1,0': outlet(B, red) }],
+  ])('entering %s crashes', (_name, spec) => {
+    expect(simulate(board({ '0,0': outlet(R, red), ...spec, ...dummyGoal })).outcome).toBe('crashed');
+  });
+
+  test('stalls when nothing can move', () => {
+    expect(simulate(board({ '0,3': outlet(R, red), '1,3': goal([L], red, blue) })).outcome).toBe('stalled');
+  });
+});
+
+test('trackCount counts primaries and secondaries', () => {
+  expect(trackCount(board({ '0,0': track(LR), '1,0': track(TB), '2,0': track(LR, TB) }))).toEqual({ major: 3, minor: 1 });
+});
