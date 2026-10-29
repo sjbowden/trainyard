@@ -50,7 +50,7 @@ Time moves in half-steps that alternate between *center* and *edge*. It starts w
    - In the same piece and leaving by the same side: they merge into one train of the mixed color.
    - Swapping cells head-on: both become the mixed color.
    After the pairs for a train are checked, if that train is on a switch, the switch flips. A switch is a track cell whose two segments share a side. It flips once per train on the cell, so two trains together leave it as it was.
-2. Each train moves to the neighbouring cell and enters it by the facing side:
+2. Each train moves to the neighboring cell and enters it by the facing side:
    - Track: it follows the primary segment if that segment uses the entry side, otherwise the secondary. If neither does, it crashes.
    - Painter: it must enter by one of the painter's two sides.
    - Goal: it must enter by one of the goal's sides.
