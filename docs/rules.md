@@ -1,6 +1,6 @@
 # Trainyard rules and code format
 
-These are the rules as implemented in `src/engine/`. They match the original game. They were worked out from the original's solution viewer and are confirmed by replaying real player solutions (`tests/accuracy.test.ts`).
+These are the rules as implemented in `src/engine/`. They match the original game. They were worked out from the original's solution viewer and are confirmed by replaying 1,667 real player solutions covering all 233 original puzzles (`tests/accuracy.test.ts`).
 
 ## Codes
 
@@ -51,7 +51,7 @@ Time moves in half-steps that alternate between *center* and *edge*. It starts w
    - Swapping cells head-on: both become the mixed color.
    After the pairs for a train are checked, if that train is on a switch, the switch flips. A switch is a track cell whose two segments share a side. It flips once per train on the cell, so two trains together leave it as it was.
 2. Each train moves to the neighboring cell and enters it by the facing side:
-   - Track: it follows the primary segment if that segment uses the entry side, otherwise the secondary. If neither does, it crashes.
+   - Track: it follows the primary segment if that segment uses the entry side, otherwise the secondary. If neither does, it crashes. (A cell may hold its only segment as the secondary. It carries trains normally and never switches.)
    - Painter: it must enter by one of the painter's two sides.
    - Goal: it must enter by one of the goal's sides.
    - Splitter: it must enter by its entry side.
@@ -61,7 +61,7 @@ A run with no trains left, nothing waiting to leave an outlet or splitter, and u
 
 ## Counts
 
-- **Track count** `major+minor`: major is the number of track cells, and minor the number of cells that also hold a second segment. trainyard.ca stores it as major·1000+minor.
+- **Track count** `major+minor`: major is the number of track cells, and minor the number of track cells with a non-empty secondary segment. A cell whose only segment is stored as its secondary counts in both. trainyard.ca stores it as major·1000+minor.
 - **Steps:** the number of edge half-steps before the winning center half-step.
 
 ## Where we differ from the original viewer

@@ -228,7 +228,7 @@ class RunImpl implements Run {
   /** Flips a switch whose two segments share a side. Returns true if it flipped. */
   private toggle(piece: Extract<Piece, { kind: 'track' }>): boolean {
     const { primary, secondary } = piece;
-    if (secondary === 0) return false;
+    if (primary === 0 || secondary === 0) return false;
     const [a, b] = segmentSides(primary)!;
     if (!hasSide(secondary, a) && !hasSide(secondary, b)) return false;
     piece.primary = secondary;
@@ -282,12 +282,13 @@ export function simulate(
   return { outcome, steps: run.steps, halfSteps: run.halfSteps };
 }
 
+/** Major is the number of track cells; minor the number that also hold a secondary segment. */
 export function trackCount(board: Board): { major: number; minor: number } {
   let major = 0;
   let minor = 0;
   for (const c of board.cells) {
     if (c.kind !== 'track') continue;
-    if (c.primary !== 0) major++;
+    major++;
     if (c.secondary !== 0) minor++;
   }
   return { major, minor };

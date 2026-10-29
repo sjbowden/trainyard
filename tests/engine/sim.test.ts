@@ -73,6 +73,11 @@ describe('simulate', () => {
     expect(run.board.cells[at(3, 3)]).toEqual(track(LR, TR));
   });
 
+  test('a track cell holding only a secondary segment carries trains and never switches', () => {
+    const b = board({ '0,3': outlet(R, red), '1,3': track(0, LR), '2,3': goal([L], red) });
+    expect(simulate(b).outcome).toBe('won');
+  });
+
   test('wrong color into a goal crashes', () => {
     expect(simulate(board({ '0,3': outlet(R, red), '1,3': goal([L], blue) })).outcome).toBe('crashed');
   });
@@ -118,6 +123,11 @@ describe('simulate', () => {
   test('stalls when nothing can move', () => {
     expect(simulate(board({ '0,3': outlet(R, red), '1,3': goal([L], red, blue) })).outcome).toBe('stalled');
   });
+});
+
+test('trackCount counts a cell whose only segment is its secondary as both', () => {
+  // trainyard.ca "youDid" solution 7FGz: 25 single cells plus one such cell → 26001
+  expect(trackCount(board({ '0,0': track(LR), '1,0': track(0, LR) }))).toEqual({ major: 2, minor: 1 });
 });
 
 test('trackCount counts primaries and secondaries', () => {
