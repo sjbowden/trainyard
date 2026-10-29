@@ -147,8 +147,11 @@ function encodePiece(piece: Piece): string {
     case 'painter':
       return 'P' + ALPHABET[piece.color] + ALPHABET[piece.a * 7 + piece.b];
     case 'outlet':
+      if (piece.colors.length < 1 || piece.colors.length > 9) throw new CodecError('An outlet must hold 1 to 9 trains');
       return 'O' + ALPHABET[piece.side * 9 + piece.colors.length - 1] + packColors(piece.colors);
     case 'goal': {
+      // n-1 must stay below 63: the 64th alphabet character is the solution separator
+      if (piece.colors.length < 1 || piece.colors.length > 63) throw new CodecError('A goal must need 1 to 63 trains');
       const mask = piece.sides.reduce<number>((m, s) => m | (1 << s), 0);
       return 'G' + ALPHABET[mask] + ALPHABET[piece.colors.length - 1] + packColors(piece.colors);
     }
@@ -179,8 +182,11 @@ function encodePart(cells: Piece[], tokenFor: (p: Piece) => string | null): stri
   return tokens === 0 ? '' : out;
 }
 
+/** Throws CodecError for boards the format cannot represent, e.g. a mid-run board with an empty goal. */
 export function encodeBoard(board: Board, parts: { puzzle?: boolean; solution?: boolean } = {}): string {
   const { puzzle = true, solution = true } = parts;
+  if (board.cols < 1 || board.cols > 63 || board.rows < 1 || board.rows > 63) throw new CodecError('A board must be 1 to 63 cells on a side');
+  if (board.cells.length !== board.cols * board.rows) throw new CodecError('Board has the wrong number of cells');
   let out = ALPHABET[board.cols]! + ALPHABET[board.rows]!;
   if (puzzle) {
     out += encodePart(board.cells, (c) => (c.kind === 'empty' || c.kind === 'track' ? null : encodePiece(c)));

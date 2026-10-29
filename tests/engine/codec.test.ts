@@ -61,6 +61,20 @@ describe('encodeBoard', () => {
     }
   });
 
+  test('refuses boards the format cannot represent', () => {
+    const base = decodeBoard(RED_LINE);
+    const withCell = (i: number, piece: Parameters<typeof encodeBoard>[0]['cells'][number]) => ({ ...base, cells: base.cells.map((c, j) => (j === i ? piece : c)) });
+    const bad = [
+      withCell(26, { kind: 'goal', sides: [3], colors: [] }),
+      withCell(26, { kind: 'goal', sides: [3], colors: Array(64).fill(0) }),
+      withCell(22, { kind: 'outlet', side: 1, colors: [] }),
+      withCell(22, { kind: 'outlet', side: 1, colors: Array(10).fill(0) }),
+      { ...base, cols: 64 },
+      { ...base, cells: base.cells.slice(1) },
+    ];
+    for (const b of bad) expect(() => encodeBoard(b)).toThrow(CodecError);
+  });
+
   test('can emit the puzzle or solution alone', () => {
     const b = decodeBoard(RED_LINE_SOLVED);
     expect(encodeBoard(b, { solution: false })).toBe(RED_LINE);
