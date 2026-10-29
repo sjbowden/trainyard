@@ -149,7 +149,7 @@ function encodePiece(piece: Piece): string {
     case 'outlet':
       return 'O' + ALPHABET[piece.side * 9 + piece.colors.length - 1] + packColors(piece.colors);
     case 'goal': {
-      const mask = piece.sides.reduce((m, s) => m | (1 << s), 0);
+      const mask = piece.sides.reduce<number>((m, s) => m | (1 << s), 0);
       return 'G' + ALPHABET[mask] + ALPHABET[piece.colors.length - 1] + packColors(piece.colors);
     }
     default:
