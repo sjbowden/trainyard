@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.apk
+local/
+*.swf
+.DS_Store
+.superpowers/

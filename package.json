@@ -1,0 +1,27 @@
+{
+  "name": "trainyard",
+  "version": "1.0.0",
+  "description": "Personal web remake of Trainyard",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "extract": "tsx scripts/extract-apk.ts",
+    "scrape:fixtures": "tsx scripts/scrape-fixtures.ts"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/sql.js": "^1.4.11",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  },
+  "dependencies": {
+    "fflate": "^0.8.3",
+    "sql.js": "^1.15.2"
+  },
+  "private": true
+}
