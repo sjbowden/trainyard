@@ -7,6 +7,7 @@ type CollectionId = Collection['id'];
 export type Route =
   | { name: 'home' }
   | { name: 'load' }
+  | { name: 'settings' }
   | { name: 'collection'; collection: CollectionId }
   | { name: 'city'; collection: CollectionId; world: string }
   | { name: 'puzzle'; collection: CollectionId; slug: string };
@@ -22,6 +23,7 @@ export function parseRoute(hash: string): Route {
   }
   const [first, c, rest] = parts;
   if (first === 'load') return { name: 'load' };
+  if (first === 'settings') return { name: 'settings' };
   if (first === 'c' && isCollection(c)) return rest ? { name: 'city', collection: c, world: rest } : { name: 'collection', collection: c };
   if (first === 'p' && isCollection(c) && rest) return { name: 'puzzle', collection: c, slug: rest };
   return { name: 'home' };
@@ -33,6 +35,8 @@ export function buildRoute(r: Route): string {
       return '#/';
     case 'load':
       return '#/load';
+    case 'settings':
+      return '#/settings';
     case 'collection':
       return `#/c/${r.collection}`;
     case 'city':

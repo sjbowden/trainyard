@@ -19,6 +19,8 @@ export interface PuzzleScreenProps {
   onResult(solution: string, solved: boolean): void;
   onBack(): void;
   onNext?: () => void;
+  /** When false, a win moves on to the next puzzle by itself instead of showing the card. */
+  showSolvedCard?: boolean;
   theme?: Theme;
   /** Shown above the board, e.g. tutorial text. */
   children?: preact.ComponentChildren;
@@ -41,7 +43,7 @@ function initialBoard(code: string, solution: string): Board {
   return decodeBoard(code);
 }
 
-export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult, onBack, onNext, theme = defaultTheme, children }: PuzzleScreenProps) {
+export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult, onBack, onNext, showSolvedCard = true, theme = defaultTheme, children }: PuzzleScreenProps) {
   const [, setVersion] = useState(0);
   const refresh = () => setVersion((v) => v + 1);
   const [mode, setMode] = useState<'draw' | 'erase'>('draw');
@@ -50,6 +52,10 @@ export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult
   const effects = useRef<(DrawnEffect & { born: number })[]>([]);
   const results = useRef(onResult);
   results.current = onResult;
+  const next = useRef({ onNext, showSolvedCard });
+  next.current = { onNext, showSolvedCard };
+  const advanceTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(advanceTimer.current), []);
 
   const controller = useMemo(() => {
     const onEvents = (ev: HalfStepEvents) => {
@@ -70,6 +76,8 @@ export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult
       if (f === 'won') {
         theme.playSound('win');
         results.current(c.solution, true);
+        const { onNext: go, showSolvedCard: card } = next.current;
+        if (!card && go) advanceTimer.current = setTimeout(go, 1200); // a moment to see the win
       }
     };
     const c = new PuzzleController(initialBoard(puzzleCode, savedSolution), onFinish, onEvents);
@@ -126,13 +134,13 @@ export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult
       {children}
       <div class="board-wrap" onPointerDown={unlockAudio}>
         <BoardCanvas controller={controller} theme={theme} mode={mode} speed={speedFromSlider(slider)} effects={effects} onEdit={edited} />
-        {finish === 'won' && (
+        {finish === 'won' && (showSolvedCard || !onNext) && (
           <div class="overlay">
             <div class="card">
               <h2>Solved!</h2>
               <p class="stars big">{'★'.repeat(Math.min(stars, 5))}{stars > 5 ? ` ${stars}` : ''}</p>
               <div class="row">
-                <button onClick={onBack}>Back to city</button>
+                <button onClick={onBack}>Back</button>
                 {onNext && <button class="primary" onClick={onNext}>Next puzzle</button>}
               </div>
             </div>

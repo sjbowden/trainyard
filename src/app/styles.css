@@ -114,4 +114,13 @@ h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: 
 .tutorial .box { white-space: pre-line; line-height: 1.45; margin: 8px 0; }
 .tutorial .row { justify-content: space-between; align-items: center; margin-top: 16px; }
 .tutorial .count { color: var(--muted); }
+.collection { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+.collection .heading { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+.play { width: 100%; min-height: 56px; font-size: 19px !important; gap: 8px; }
+.play .next-name { font-weight: 400; opacity: 0.8; }
+.choose { display: block; text-align: center; margin-top: 12px; min-height: 32px; }
+.done { color: var(--muted); text-align: center; }
+.setting { gap: 16px; padding: 12px 16px; }
+.setting .hint { display: block; color: var(--muted); font-size: 14px; margin-top: 4px; }
+.setting input { width: 28px; height: 28px; accent-color: var(--accent); flex: none; }
 .notice { background: var(--panel); border: 1px solid #ffd23f; border-radius: 12px; padding: 10px 14px; line-height: 1.4; }

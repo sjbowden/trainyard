@@ -39,10 +39,9 @@ test('load the APK, solve Red Line, and keep it offline', async ({ page, context
   await page.locator('input[type=file]').setInputFiles(apk!);
   await expect(page.getByText('Trainyard Express')).toBeVisible({ timeout: 20_000 });
 
-  await page.getByText('Trainyard', { exact: true }).nth(1).click();
-  await page.getByText('Abbotsford').click();
-  await page.getByRole('button', { name: 'Close' }).click(); // first-visit tutorial
-  await page.getByText('Red Line').click();
+  // Play starts at the very first puzzle, with Abbotsford's tutorial
+  await page.getByRole('link', { name: /^Play Red Line/ }).click();
+  await page.getByRole('button', { name: 'Close' }).click();
   await expect(page.locator('canvas.board')).toBeVisible();
   await page.waitForTimeout(300);
 
@@ -50,10 +49,14 @@ test('load the APK, solve Red Line, and keep it offline', async ({ page, context
   await page.getByRole('button', { name: 'Start' }).click();
   await expect(page.getByText('Solved!')).toBeVisible({ timeout: 15_000 });
 
-  await page.getByText('Back to city').click();
-  await expect(page.getByText('1 / 6 ★')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Next puzzle' })).toBeVisible();
+  await page.getByRole('button', { name: 'Back' }).first().click();
+  await expect(page.getByRole('link', { name: /^Continue Grorange lines/ })).toBeVisible();
 
   // an edit made just before leaving is saved, not lost
+  await page.getByRole('link', { name: 'Choose a puzzle' }).first().click();
+  await page.getByText('Abbotsford').click();
+  await expect(page.getByText('1 / 6 ★')).toBeVisible();
   await page.getByText('Red Line').click();
   await page.getByRole('button', { name: 'Clear' }).click();
   await page.getByRole('button', { name: 'Back' }).click();
@@ -63,4 +66,22 @@ test('load the APK, solve Red Line, and keep it offline', async ({ page, context
   await context.setOffline(true);
   await page.reload();
   await expect(page.getByLabel('Solved')).toHaveCount(1);
+});
+
+test('with the Solved! card turned off, a win opens the next puzzle', async ({ page }) => {
+  await page.goto('./');
+  await page.getByText('Load APK').click();
+  await page.locator('input[type=file]').setInputFiles(apk!);
+  await expect(page.getByText('Trainyard Express')).toBeVisible({ timeout: 20_000 });
+  await page.getByRole('link', { name: 'Settings' }).click();
+  await page.getByRole('switch').click();
+  await page.getByRole('link', { name: 'Back' }).click();
+
+  await page.getByRole('link', { name: /^Play Red Line/ }).click();
+  await page.getByRole('button', { name: 'Close' }).click();
+  await page.waitForTimeout(300);
+  await dragAcrossRow(page, 3, 1, 5);
+  await page.getByRole('button', { name: 'Start' }).click();
+  await expect(page.getByRole('heading', { name: 'Grorange lines' })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText('Solved!')).toHaveCount(0);
 });

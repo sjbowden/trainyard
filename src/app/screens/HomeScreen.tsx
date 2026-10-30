@@ -1,4 +1,5 @@
 import type { Collection } from '../../data/apk.ts';
+import { firstUnsolved } from '../levels.ts';
 import { starsEarned, type Progress } from '../progress.ts';
 import { buildRoute } from '../router.ts';
 
@@ -11,16 +12,28 @@ export function HomeScreen({ collections, progress, notice }: { collections: Col
       {notice && <p class="notice">{notice}</p>}
       {collections ? (
         <>
-          <nav class="list">
-            {collections.map((c) => (
-              <a class="tile" href={buildRoute({ name: 'collection', collection: c.id })} key={c.id}>
-                <span class="name">{COLLECTION_NAMES[c.id]}</span>
-                <span class="stars">{starsEarned(c, progress)} ★</span>
-              </a>
-            ))}
-          </nav>
+          {collections.map((c) => {
+            const next = firstUnsolved(c, progress);
+            const started = starsEarned(c, progress) > 0;
+            return (
+              <section class="collection" key={c.id}>
+                <div class="heading">
+                  <h2>{COLLECTION_NAMES[c.id]}</h2>
+                  <span class="stars">{starsEarned(c, progress)} ★</span>
+                </div>
+                {next ? (
+                  <a class="button primary play" href={buildRoute({ name: 'puzzle', collection: c.id, slug: next.slug })}>
+                    {started ? 'Continue' : 'Play'} <span class="next-name">{next.name}</span>
+                  </a>
+                ) : (
+                  <p class="done">Every unlocked puzzle is solved.</p>
+                )}
+                <a class="choose" href={buildRoute({ name: 'collection', collection: c.id })}>Choose a puzzle</a>
+              </section>
+            );
+          })}
           <p class="footer">
-            <a href={buildRoute({ name: 'load' })}>Load a different APK</a>
+            <a href={buildRoute({ name: 'settings' })}>Settings</a>
           </p>
         </>
       ) : (
