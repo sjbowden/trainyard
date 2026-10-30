@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { Collection, Level } from '../data/apk.ts';
+import { encodeBoard } from '../engine/codec.ts';
+import { customKey, deleteCustomPuzzle, listCustomPuzzles, newPuzzleId, saveCustomPuzzle, type CustomPuzzle } from './customPuzzles.ts';
+import { emptyBoard } from './editor.ts';
 import { firstOfCity, nextLevel } from './levels.ts';
+import { EditorScreen } from './screens/EditorScreen.tsx';
+import { MyPuzzlesScreen } from './screens/MyPuzzlesScreen.tsx';
 import { loadSettings } from './settings.ts';
 import { SettingsScreen } from './screens/SettingsScreen.tsx';
 import { markTutorialSeen, tutorialSeen } from './tutorialsSeen.ts';
@@ -90,13 +95,16 @@ export function App() {
   const latest = useRef(progress);
   latest.current = progress;
   const [notice, setNotice] = useState<string | undefined>(undefined);
+  const [custom, setCustom] = useState<CustomPuzzle[]>([]);
+  const refreshCustom = () => void listCustomPuzzles().then(setCustom);
 
   useEffect(() => {
     const onHash = () => setRoute(parseRoute(location.hash));
     addEventListener('hashchange', onHash);
-    void Promise.all([loadCollections(), loadProgress()]).then(([c, p]) => {
+    void Promise.all([loadCollections(), loadProgress(), listCustomPuzzles()]).then(([c, p, mine]) => {
       setCollections(c);
       setProgress(p);
+      setCustom(mine);
     });
     return () => removeEventListener('hashchange', onHash);
   }, []);
@@ -117,6 +125,63 @@ export function App() {
   switch (route.name) {
     case 'settings':
       return <SettingsScreen />;
+    case 'mine':
+      return (
+        <MyPuzzlesScreen
+          puzzles={custom}
+          onNew={() => {
+            const p: CustomPuzzle = { id: newPuzzleId(), source: 'mine', name: 'Untitled', code: encodeBoard(emptyBoard(), { solution: false }), proof: null, created: Date.now() };
+            setCustom((list) => [p, ...list]);
+            void saveCustomPuzzle(p);
+            go({ name: 'edit', id: p.id });
+          }}
+          onPaste={() => {}}
+        />
+      );
+    case 'edit': {
+      const puzzle = custom.find((p) => p.id === route.id && p.source === 'mine');
+      if (!puzzle) break;
+      return (
+        <EditorScreen
+          key={puzzle.id}
+          puzzle={puzzle}
+          onSave={(p) => {
+            setCustom((list) => list.map((x) => (x.id === p.id ? p : x)));
+            void saveCustomPuzzle(p);
+          }}
+          onTest={() => go({ name: 'play', id: puzzle.id })}
+          onDelete={() =>
+            void deleteCustomPuzzle(puzzle.id).then(() => {
+              refreshCustom();
+              go({ name: 'mine' });
+            })
+          }
+        />
+      );
+    }
+    case 'play': {
+      const puzzle = custom.find((p) => p.id === route.id);
+      if (!puzzle) break;
+      const key = customKey(puzzle.id);
+      return (
+        <PuzzleScreen
+          key={key}
+          title={puzzle.name}
+          stars={0}
+          puzzleCode={puzzle.code}
+          savedSolution={progress.levels[key]?.solution ?? ''}
+          onResult={(solution, solved) => {
+            record(key, solution, solved);
+            if (solved && puzzle.source === 'mine') {
+              const proven = { ...puzzle, proof: solution };
+              setCustom((list) => list.map((x) => (x.id === puzzle.id ? proven : x)));
+              void saveCustomPuzzle(proven);
+            }
+          }}
+          onBack={() => go(puzzle.source === 'mine' ? { name: 'edit', id: puzzle.id } : { name: 'mine' })}
+        />
+      );
+    }
     case 'load':
       return (
         <LoadApkScreen

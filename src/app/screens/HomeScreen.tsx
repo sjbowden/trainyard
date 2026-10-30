@@ -32,9 +32,6 @@ export function HomeScreen({ collections, progress, notice }: { collections: Col
               </section>
             );
           })}
-          <p class="footer">
-            <a href={buildRoute({ name: 'settings' })}>Settings</a>
-          </p>
         </>
       ) : (
         <section class="intro">
@@ -42,6 +39,13 @@ export function HomeScreen({ collections, progress, notice }: { collections: Col
           <a class="button primary" href={buildRoute({ name: 'load' })}>Load APK</a>
         </section>
       )}
+      <a class="tile spaced" href={buildRoute({ name: 'mine' })}>
+        <span class="name">My puzzles</span>
+        <span class="muted">Make and share</span>
+      </a>
+      <p class="footer">
+        <a href={buildRoute({ name: 'settings' })}>Settings</a>
+      </p>
     </main>
   );
 }
