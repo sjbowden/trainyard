@@ -1,6 +1,6 @@
 # Trainyard rules and code format
 
-These are the rules as implemented in `src/engine/`. They match the original game. They were worked out from the original's solution viewer and are confirmed by replaying 1,667 real player solutions covering all 233 original puzzles (`tests/accuracy.test.ts`).
+These are the rules as implemented in `src/engine/`. They match the original game's rules, except for leaving the board (below). They were worked out from the original's solution viewer and are confirmed by replaying 1,667 real player solutions covering all 233 original puzzles (`tests/accuracy.test.ts`).
 
 ## Codes
 
@@ -57,7 +57,7 @@ Time moves in half-steps that alternate between *center* and *edge*. It starts w
    - Splitter: it must enter by its entry side.
    - Rock, outlet, empty cell, or off the board: it crashes.
 
-A run with no trains left, nothing waiting to leave an outlet or splitter, and unfinished goals has **stalled**.
+A run with no trains left, nothing waiting to leave an outlet or splitter, and unfinished goals has **stalled**. A run is *ended* once it is won, stalled, or crashed and finished moving. `simulate` reports **timeout** if it hits its half-step limit first.
 
 ## Counts
 
@@ -66,4 +66,4 @@ A run with no trains left, nothing waiting to leave an outlet or splitter, and u
 
 ## Where we differ from the original viewer
 
-The viewer lets a train leaving the left or right edge reappear on the adjacent row. That is a viewer bug, and here leaving the board always crashes.
+The viewer has no edge check. A train leaving the left or right edge reappears on the adjacent row, and one leaving the top or bottom edge is fed back into its own cell. Both are viewer bugs. Here leaving the board always crashes.

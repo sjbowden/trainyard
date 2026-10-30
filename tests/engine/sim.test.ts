@@ -133,3 +133,39 @@ test('trackCount counts a cell whose only segment is its secondary as both', () 
 test('trackCount counts primaries and secondaries', () => {
   expect(trackCount(board({ '0,0': track(LR), '1,0': track(TB), '2,0': track(LR, TB) }))).toEqual({ major: 3, minor: 1 });
 });
+
+describe('run lifecycle', () => {
+  test('ended is false while running and true after a win', () => {
+    const run = createRun(decodeBoard('hh002Oja3Giaa00_003QQQ00'));
+    run.halfStep();
+    expect(run.ended).toBe(false);
+    while (!run.ended) run.halfStep();
+    expect(run.outcome).toBe('won');
+  });
+
+  test('a crashed run keeps stepping until it ends', () => {
+    // the second outlet's train crashes at once; the first keeps going and is delivered later
+    const run = createRun(board({ '0,3': outlet(R, red), '1,3': track(LR), '2,3': track(LR), '3,3': goal([L], red, blue), '6,0': outlet(R, blue) }));
+    run.halfStep();
+    run.halfStep();
+    expect(run.outcome).toBe('crashed');
+    expect(run.ended).toBe(false);
+    while (!run.ended) run.halfStep();
+    expect(run.outcome).toBe('crashed');
+  });
+
+  test('simulate reports timeout for a looping run', () => {
+    // enters the 2x2 square at (2,2) and circles it forever
+    const loop = board({ '1,2': outlet(R, red), '2,2': track(LR, SEGMENT.BR), '3,2': track(SEGMENT.BL), '3,3': track(TL), '2,3': track(TR), ...dummyGoal });
+    expect(simulate(loop, 50).outcome).toBe('timeout');
+  });
+
+  test('trainsBefore holds each train\'s previous cell', () => {
+    const run = createRun(decodeBoard('hh002Oja3Giaa00_003QQQ00'));
+    run.halfStep(); // spawn at 22
+    run.halfStep(); // move to 23
+    expect(run.trainsBefore.map((t) => t.cell)).toEqual([22]);
+    expect(run.trains.map((t) => t.cell)).toEqual([23]);
+  });
+});
+

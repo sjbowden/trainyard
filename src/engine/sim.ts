@@ -31,6 +31,10 @@ export interface Run {
   readonly outcome: Outcome;
   readonly halfSteps: number;
   readonly steps: number;
+  /** True once the run is over. A crashed run keeps moving until then, as in the original. */
+  readonly ended: boolean;
+  /** The trains as they were at the start of the last half-step, including any that then died. */
+  readonly trainsBefore: readonly TrainState[];
   halfStep(): HalfStepEvents;
 }
 
@@ -79,8 +83,12 @@ class RunImpl implements Run {
   halfSteps = 0;
   steps = 0;
   private crashed = false;
+  get ended(): boolean {
+    return this.over;
+  }
   /** Set when the run has ended; a crashed run keeps stepping until then, as in the original. */
   private over = false;
+  trainsBefore: TrainState[] = [];
   private nextId = 0;
   private queued = new Map<number, TrainState[]>();
 
@@ -113,6 +121,7 @@ class RunImpl implements Run {
     const phase = this.halfSteps % 2 === 0 ? 'A' : 'B';
     const ev: HalfStepEvents = { phase, crashes: [], painted: [], splits: [], delivered: [], switched: [], merged: [] };
     if (this.over) return ev;
+    this.trainsBefore = this.trains.map((t) => ({ ...t }));
     if (phase === 'A') this.centerHalf(ev);
     else this.edgeHalf(ev);
     this.halfSteps++;
@@ -276,10 +285,10 @@ export function createRun(board: Board): Run {
 export function simulate(
   board: Board,
   maxHalfSteps = 2000,
-): { outcome: Exclude<Outcome, 'running'>; steps: number; halfSteps: number } {
+): { outcome: Exclude<Outcome, 'running'> | 'timeout'; steps: number; halfSteps: number } {
   const run = createRun(board);
   while (run.outcome === 'running' && run.halfSteps < maxHalfSteps) run.halfStep();
-  const outcome = run.outcome === 'running' ? 'stalled' : run.outcome;
+  const outcome = run.outcome === 'running' ? 'timeout' : run.outcome;
   return { outcome, steps: run.steps, halfSteps: run.halfSteps };
 }
 
