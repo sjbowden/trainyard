@@ -49,7 +49,7 @@ describe('decodeBoard', () => {
   });
 
   test('rejects malformed codes', () => {
-    const bad = ['', 'h', 'hhO', 'hhGa', 'hh!', 'hh002Oja3Giaa00_00#', 'hhOz', 'hh' + 'R'.repeat(50), 'hh_' + 'Q'.repeat(50)];
+    const bad = ['__', '_h', 'hhO', 'hhGa', 'hh!', 'hh002Oja3Giaa00_00#', 'hhOz', 'hh' + 'R'.repeat(50), 'hh_' + 'Q'.repeat(50)];
     for (const code of bad) expect(() => decodeBoard(code), code).toThrow(CodecError);
   });
 });
@@ -69,10 +69,35 @@ describe('encodeBoard', () => {
       withCell(26, { kind: 'goal', sides: [3], colors: Array(64).fill(0) }),
       withCell(22, { kind: 'outlet', side: 1, colors: [] }),
       withCell(22, { kind: 'outlet', side: 1, colors: Array(10).fill(0) }),
-      { ...base, cols: 64 },
       { ...base, cells: base.cells.slice(1) },
+      withCell(22, { kind: 'outlet', side: 4 as never, colors: [0] }),
+      withCell(22, { kind: 'outlet', side: 1, colors: [7 as never] }),
+      withCell(23, { kind: 'track', primary: 7 as never, secondary: 0 }),
+      withCell(23, { kind: 'splitter', in: -1 as never }),
+      withCell(23, { kind: 'painter', color: 0, a: 1, b: 9 as never }),
     ];
     for (const b of bad) expect(() => encodeBoard(b)).toThrow(CodecError);
+  });
+
+  test.each([
+    ['63 wide (the separator character)', 63, 1],
+    ['63 tall', 1, 63],
+    ['zero wide', 0, 1],
+    ['fractional', 3.5, 2],
+  ])('refuses a board %s', (_name, cols, rows) => {
+    const cells = Array.from({ length: cols * rows }, () => ({ kind: 'rock' as const }));
+    expect(() => encodeBoard({ cols, rows, cells })).toThrow(CodecError);
+  });
+
+  test('round-trips the largest boards and counts the format allows', () => {
+    const wide = { cols: 62, rows: 1, cells: Array.from({ length: 62 }, () => ({ kind: 'rock' as const })) };
+    const code = encodeBoard(wide);
+    expect(splitCode(code).puzzle).toBe(code);
+    expect(decodeBoard(code)).toEqual(wide);
+    const big = decodeBoard(RED_LINE);
+    big.cells[22] = { kind: 'outlet', side: 1, colors: Array(9).fill(2) };
+    big.cells[26] = { kind: 'goal', sides: [3], colors: Array(63).fill(2) };
+    expect(decodeBoard(encodeBoard(big))).toEqual(big);
   });
 
   test('can emit the puzzle or solution alone', () => {

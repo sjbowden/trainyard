@@ -25,6 +25,7 @@ export interface HalfStepEvents {
 }
 
 export interface Run {
+  /** Live state: switches flip and outlets and goals empty as the run goes. Not for encoding or saving. */
   readonly board: Board;
   readonly trains: readonly TrainState[];
   readonly outcome: Outcome;
