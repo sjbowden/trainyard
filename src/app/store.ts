@@ -90,3 +90,39 @@ async function mergeAndSave(p: Progress): Promise<void> {
     // Nothing to do: progress for this session stays in memory.
   }
 }
+
+/** Reads a stored value, or the fallback if there is none or storage fails. */
+export async function readStored<T>(key: string, fallback: T): Promise<T> {
+  try {
+    return (await withTimeout(get<T>(key, store()))) ?? fallback;
+  } catch {
+    forget();
+    return fallback;
+  }
+}
+
+/**
+ * Read-modify-write of one stored value, queued with every other write so overlapping
+ * updates can't undo each other. Nothing is written if the stored value can't be read.
+ */
+export function updateStored<T>(key: string, change: (old: T | undefined) => T): Promise<void> {
+  saving = saving.then(async () => {
+    try {
+      const kv = store();
+      const old = await withTimeout(get<T>(key, kv));
+      await withTimeout(set(key, change(old), kv));
+    } catch {
+      forget();
+    }
+  });
+  return saving;
+}
+
+/** Removes one level's progress (used when a custom puzzle is deleted). */
+export function forgetProgress(levelKey: string): Promise<void> {
+  return updateStored<Progress>(PROGRESS, (old) => {
+    const levels = { ...(old?.levels ?? {}) };
+    delete levels[levelKey];
+    return { levels };
+  });
+}
