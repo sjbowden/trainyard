@@ -52,7 +52,7 @@ afterEach(() => localStorage.clear());
 
 test('the Solved! card is on unless turned off', () => {
   expect(loadSettings().showSolvedCard).toBe(true);
-  saveSettings({ showSolvedCard: false });
+  saveSettings({ ...loadSettings(), showSolvedCard: false });
   expect(loadSettings().showSolvedCard).toBe(false);
 });
 
@@ -75,3 +75,11 @@ test('the settings screen turns the Solved! card off', async () => {
   toggle.click();
   expect(loadSettings().showSolvedCard).toBe(false);
 });
+
+test('speed is remembered, starting in the middle', () => {
+  expect(loadSettings().speed).toBe(0.5);
+  saveSettings({ ...loadSettings(), speed: 0.8 });
+  expect(loadSettings().speed).toBe(0.8);
+  expect(loadSettings().showSolvedCard).toBe(true);
+});
+

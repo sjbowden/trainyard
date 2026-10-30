@@ -6,6 +6,7 @@ import { speedFromSlider } from '../board/animation.ts';
 import { BoardCanvas } from '../board/BoardCanvas.tsx';
 import { deliveredColors, PuzzleController, type Finish } from '../board/player.ts';
 import { DebouncedSave } from '../saver.ts';
+import { loadSettings, saveSettings } from '../settings.ts';
 import type { DrawnEffect } from '../board/render.ts';
 import { defaultTheme } from '../theme/default.ts';
 import { unlockAudio } from '../theme/sound.ts';
@@ -47,7 +48,7 @@ export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult
   const [, setVersion] = useState(0);
   const refresh = () => setVersion((v) => v + 1);
   const [mode, setMode] = useState<'draw' | 'erase'>('draw');
-  const [slider, setSlider] = useState(0.5);
+  const [slider, setSlider] = useState(() => loadSettings().speed);
   const [finish, setFinish] = useState<Finish | null>(null);
   const effects = useRef<(DrawnEffect & { born: number })[]>([]);
   const results = useRef(onResult);
@@ -158,7 +159,11 @@ export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult
       </div>
       <label class="speed">
         <span>Speed</span>
-        <input type="range" min="0.1" max="1" step="0.01" value={slider} onInput={(e) => setSlider(Number((e.target as HTMLInputElement).value))} />
+        <input type="range" min="0.1" max="1" step="0.01" value={slider} onInput={(e) => {
+            const speed = Number((e.target as HTMLInputElement).value);
+            setSlider(speed);
+            saveSettings({ ...loadSettings(), speed });
+          }} />
       </label>
       {finish && finish !== 'won' && (
         // the run is frozen on the failure; a tap anywhere goes back to editing

@@ -102,3 +102,17 @@ test('after a crash, a tap anywhere goes back to editing', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Undo' })).toBeEnabled(); // the drawing is still there
 });
 
+test('the speed setting carries from puzzle to puzzle', async ({ page }) => {
+  await page.goto('./');
+  await page.getByText('Load APK').click();
+  await page.locator('input[type=file]').setInputFiles(apk!);
+  await expect(page.getByText('Trainyard Express')).toBeVisible({ timeout: 20_000 });
+  await page.getByRole('link', { name: /^Play Red Line/ }).click();
+  await page.getByRole('button', { name: 'Close' }).click();
+  await page.locator('input[type=range]').fill('0.9');
+  await page.getByRole('button', { name: 'Back' }).first().click();
+  await page.getByRole('link', { name: /^Play Green Line/ }).click();
+  await page.getByRole('button', { name: 'Close' }).click();
+  await expect(page.locator('input[type=range]')).toHaveValue('0.9');
+});
+

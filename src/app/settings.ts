@@ -3,10 +3,12 @@
 export interface Settings {
   /** Show the Solved! card after a win; when off, the next puzzle opens by itself. */
   showSolvedCard: boolean;
+  /** The speed slider's position (0.1–1), kept from puzzle to puzzle. */
+  speed: number;
 }
 
 const KEY = 'trainyard.settings';
-const DEFAULTS: Settings = { showSolvedCard: true };
+const DEFAULTS: Settings = { showSolvedCard: true, speed: 0.5 };
 
 export function loadSettings(): Settings {
   try {

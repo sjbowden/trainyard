@@ -5,7 +5,7 @@ import { loadSettings, saveSettings } from '../settings.ts';
 export function SettingsScreen() {
   const [settings, setSettings] = useState(loadSettings);
   const toggle = () => {
-    const next = { ...settings, showSolvedCard: !settings.showSolvedCard };
+    const next = { ...loadSettings(), showSolvedCard: !settings.showSolvedCard };
     saveSettings(next);
     setSettings(next);
   };
