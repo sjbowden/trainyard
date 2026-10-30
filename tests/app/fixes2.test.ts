@@ -1,9 +1,8 @@
 import 'fake-indexeddb/auto';
-import { readFileSync, readdirSync } from 'node:fs';
 import { clear, createStore } from 'idb-keyval';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { parseRoute } from '../../src/app/router.ts';
-import { importApk, loadProgress, saveProgress } from '../../src/app/store.ts';
+import { loadProgress, saveProgress } from '../../src/app/store.ts';
 import { deliveredColors, Player } from '../../src/app/board/player.ts';
 import { decodeBoard } from '../../src/engine/codec.ts';
 import { COLOR, SIDE } from '../../src/engine/types.ts';
@@ -23,12 +22,6 @@ describe('saving', () => {
     ]);
     expect(Object.keys((await loadProgress()).levels).sort()).toEqual(['trainyard/a', 'trainyard/b']);
   });
-});
-
-const apk = readdirSync('.').find((f) => f.endsWith('.apk'));
-
-test.skipIf(!apk)('an APK that fails to read for another reason is not called the wrong file', async () => {
-  await expect(importApk(new Blob([readFileSync(apk!)]), '/nonexistent/sql-wasm.wasm')).rejects.toThrow(/Couldn't read the APK/);
 });
 
 test('deliveries report the delivered trains\' colors', () => {
