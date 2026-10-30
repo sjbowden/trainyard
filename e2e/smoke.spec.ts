@@ -50,7 +50,7 @@ test('load the APK, solve Red Line, and keep it offline', async ({ page, context
   await expect(page.getByText('Solved!')).toBeVisible({ timeout: 15_000 });
 
   await expect(page.getByRole('button', { name: 'Next puzzle' })).toBeVisible();
-  await page.getByRole('button', { name: 'Back' }).first().click();
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
   await expect(page.getByRole('link', { name: /^Continue Grorange lines/ })).toBeVisible();
 
   // an edit made just before leaving is saved, not lost
@@ -126,20 +126,26 @@ test('after a solve, Back to puzzle returns to it, and the header goes home', as
   await page.waitForTimeout(300);
   await dragAcrossRow(page, 3, 1, 5);
   await page.getByRole('button', { name: 'Start' }).click();
+  await expect(page.getByText('Solved!')).toBeVisible({ timeout: 15_000 });
   await page.getByRole('button', { name: 'Next puzzle' }).click();
   await expect(page.getByRole('heading', { name: 'Grorange lines' })).toBeVisible();
 
   // solve nothing here; go back to Red Line through the list and solve again
-  await page.getByRole('button', { name: 'Back' }).click();
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
   await expect(page.getByRole('link', { name: /^Continue Grorange lines/ })).toBeVisible(); // home, not Red Line
 
   await page.getByRole('link', { name: 'Choose a puzzle' }).first().click();
   await page.getByText('Abbotsford').click();
   await page.getByText('Red Line').click();
   await page.getByRole('button', { name: 'Start' }).click();
+  await expect(page.getByText('Solved!')).toBeVisible({ timeout: 15_000 });
   await page.getByRole('button', { name: 'Back to puzzle' }).click();
   await expect(page.getByRole('heading', { name: 'Red Line' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Start' })).toBeVisible();
   await expect(page.getByText('Solved!')).toHaveCount(0);
+
+  // came from the city list, so Back goes to the city
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await expect(page.getByText('1 / 6 ★')).toBeVisible();
 });
 

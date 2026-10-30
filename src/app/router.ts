@@ -45,3 +45,11 @@ export function buildRoute(r: Route): string {
       return `#/p/${r.collection}/${encodeURIComponent(r.slug)}`;
   }
 }
+
+/**
+ * Where a puzzle's Back goes: home if play started from the home screen, otherwise the
+ * puzzle's own city (which may be a city Next has moved into since).
+ */
+export function puzzleBackRoute(lastList: Route | null, collection: CollectionId, world: string): Route {
+  return lastList?.name === 'city' || lastList?.name === 'collection' ? { name: 'city', collection, world } : { name: 'home' };
+}
