@@ -158,3 +158,4 @@ button.danger { border-color: var(--danger); color: var(--danger); }
 .swatch { width: 44px; height: 44px; padding: 0; border-radius: 10px; border: 2px solid transparent; }
 .swatch.on { border-color: #ffffff; }
 .sheet .bar button { font-size: 17px; }
+.add-banner { margin-bottom: 8px; }

@@ -29,8 +29,11 @@ export function saveCustomPuzzle(p: CustomPuzzle): Promise<void> {
   return updateStored<CustomPuzzle[]>(KEY, (old = []) => [...old.filter((x) => x.id !== p.id), p]);
 }
 
+/** A shared puzzle's id comes from its code alone, so the same puzzle is never added twice. */
+export const sharedId = (code: string) => `s-${encodeShare({ name: '', code }).slice(-8)}`;
+
 export async function addShared(s: SharedPuzzle): Promise<CustomPuzzle> {
-  const id = `s-${encodeShare({ name: '', code: s.code }).slice(-8)}`;
+  const id = sharedId(s.code);
   const existing = (await listCustomPuzzles()).find((p) => p.id === id);
   if (existing) return existing;
   const p: CustomPuzzle = { id, source: 'shared', name: s.name, code: s.code, proof: null, created: Date.now() };

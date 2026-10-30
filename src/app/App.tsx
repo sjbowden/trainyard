@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { Collection, Level } from '../data/apk.ts';
 import { encodeBoard } from '../engine/codec.ts';
-import { customKey, deleteCustomPuzzle, listCustomPuzzles, newPuzzleId, saveCustomPuzzle, type CustomPuzzle } from './customPuzzles.ts';
+import { addShared, customKey, deleteCustomPuzzle, listCustomPuzzles, newPuzzleId, saveCustomPuzzle, type CustomPuzzle } from './customPuzzles.ts';
 import { emptyBoard } from './editor.ts';
 import { firstOfCity, nextLevel } from './levels.ts';
 import { EditorScreen } from './screens/EditorScreen.tsx';
 import { MyPuzzlesScreen } from './screens/MyPuzzlesScreen.tsx';
+import { LinkProblem, SharedScreen } from './screens/SharedScreen.tsx';
+import { decodeShare, type SharedPuzzle } from './share.ts';
+import { checkNotOriginal, parsePastedLink } from './sharedLinks.ts';
 import { loadSettings } from './settings.ts';
 import { SettingsScreen } from './screens/SettingsScreen.tsx';
 import { markTutorialSeen, tutorialSeen } from './tutorialsSeen.ts';
@@ -96,6 +99,7 @@ export function App() {
   latest.current = progress;
   const [notice, setNotice] = useState<string | undefined>(undefined);
   const [custom, setCustom] = useState<CustomPuzzle[]>([]);
+  const [pasteMessage, setPasteMessage] = useState<string | undefined>(undefined);
   const refreshCustom = () => void listCustomPuzzles().then(setCustom);
 
   useEffect(() => {
@@ -135,9 +139,40 @@ export function App() {
             void saveCustomPuzzle(p);
             go({ name: 'edit', id: p.id });
           }}
-          onPaste={() => {}}
+          message={pasteMessage}
+          onPaste={async () => {
+            try {
+              const shared = parsePastedLink(await navigator.clipboard.readText());
+              checkNotOriginal(shared, collections);
+              const p = await addShared(shared);
+              refreshCustom();
+              setPasteMessage(`Added “${p.name}”.`);
+            } catch (err) {
+              setPasteMessage(err instanceof Error && err.name === 'LinkError' ? err.message : "Couldn't read the clipboard. Copy the link again and retry.");
+            }
+          }}
         />
       );
+    case 'shared': {
+      let shared: SharedPuzzle;
+      try {
+        shared = decodeShare(route.payload);
+        checkNotOriginal(shared, collections);
+      } catch (err) {
+        return <LinkProblem message={(err as Error).message} />;
+      }
+      return (
+        <SharedScreen
+          puzzle={shared}
+          progress={progress}
+          onResult={record}
+          onAdded={(p) => {
+            setCustom((list) => [p, ...list.filter((x) => x.id !== p.id)]);
+            location.replace(buildRoute({ name: 'play', id: p.id }));
+          }}
+        />
+      );
+    }
     case 'edit': {
       const puzzle = custom.find((p) => p.id === route.id && p.source === 'mine');
       if (!puzzle) break;

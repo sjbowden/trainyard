@@ -66,3 +66,65 @@ test('make a puzzle, solve it to unlock Share, and lose Share by changing it', a
   await expect(page.getByText('Test line')).toBeVisible();
   await expect(page.getByText('Not solved yet')).toBeVisible();
 });
+
+test('share a puzzle, open the link, paste it into the app once, and reject a damaged link', async ({ page, context, browser }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await makePuzzle(page);
+  await page.getByRole('button', { name: 'Test' }).click();
+  await page.waitForTimeout(200);
+  await drag(page, 3, 1, 5);
+  await page.getByRole('button', { name: 'Start' }).click();
+  await expect(page.getByText('Solved!')).toBeVisible({ timeout: 15_000 });
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await page.evaluate(() => {
+    (navigator as { share?: unknown }).share = undefined; // use the copy fallback
+  });
+  await page.getByRole('button', { name: 'Share' }).click();
+  await expect(page.getByText('Link copied.')).toBeVisible();
+  const link = await page.evaluate(() => navigator.clipboard.readText());
+  expect(link).toMatch(/#\/s\/1\./);
+
+  // a friend opens it in Safari: playable, with Add to my app
+  const friend = await (await browser.newContext()).newPage();
+  await friend.goto(link);
+  await expect(friend.getByRole('heading', { name: 'Test line' })).toBeVisible();
+  await expect(friend.getByRole('button', { name: 'Add to my app' })).toBeVisible();
+  await expect(friend.locator('canvas.board')).toBeVisible();
+
+  // pasting it into the app twice keeps one copy
+  await page.getByRole('link', { name: 'Back' }).click();
+  for (let i = 0; i < 2; i++) {
+    await page.getByRole('button', { name: 'Paste puzzle link' }).click();
+    await expect(page.getByText('Added “Test line”.')).toBeVisible();
+  }
+  await expect(page.locator('a[href^="#/play/s-"]')).toHaveCount(1);
+
+  // a damaged link says so
+  await friend.goto(link.slice(0, -2) + 'zz');
+  await expect(friend.getByText('This puzzle link is damaged.')).toBeVisible();
+});
+
+test('in the installed app, opening a link adds the puzzle and opens it', async ({ page, browser, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await makePuzzle(page);
+  await page.getByRole('button', { name: 'Test' }).click();
+  await page.waitForTimeout(200);
+  await drag(page, 3, 1, 5);
+  await page.getByRole('button', { name: 'Start' }).click();
+  await expect(page.getByText('Solved!')).toBeVisible({ timeout: 15_000 });
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await page.evaluate(() => ((navigator as { share?: unknown }).share = undefined));
+  await page.getByRole('button', { name: 'Share' }).click();
+  const link = await page.evaluate(() => navigator.clipboard.readText());
+
+  const app = await (await browser.newContext()).newPage();
+  await app.addInitScript(() => {
+    const real = window.matchMedia.bind(window);
+    window.matchMedia = (q: string) => (q.includes('standalone') ? ({ matches: true } as MediaQueryList) : real(q));
+  });
+  await app.goto(link);
+  await expect(app).toHaveURL(/#\/play\/s-/);
+  await expect(app.getByRole('heading', { name: 'Test line' })).toBeVisible();
+  await app.getByRole('button', { name: 'Back', exact: true }).click();
+  await expect(app.locator('a[href^="#/play/s-"]')).toHaveCount(1);
+});
