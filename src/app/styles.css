@@ -24,9 +24,19 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/*
+ * iOS (seen on 27.0.1) blurs a band across the top of home-screen apps, though not of
+ * Safari: about 105pt from the top of the screen, status bar included. Content starts
+ * clear of it in the home-screen app only.
+ */
+:root { --top-clear: 0px; }
+@media (display-mode: standalone) {
+  :root { --top-clear: 56px; }
+}
+
 .screen {
   min-height: 100%;
-  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  padding: calc(max(16px, env(safe-area-inset-top)) + var(--top-clear)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
 }
 
 h1 { font-size: 28px; margin: 8px 0 16px; letter-spacing: 0.02em; }
@@ -110,7 +120,7 @@ h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: 
 .error { color: var(--danger) !important; }
 .footer { margin-top: 24px; text-align: center; }
 
-.tutorial { position: fixed; inset: 0; display: grid; place-items: center; padding: 16px; background: rgba(5, 12, 14, 0.7); z-index: 10; }
+.tutorial { position: fixed; inset: 0; display: grid; place-items: center; padding: calc(16px + var(--top-clear)) 16px 16px; background: rgba(5, 12, 14, 0.7); z-index: 10; }
 .tutorial .card { width: 100%; max-width: 420px; text-align: left; }
 .tutorial .preview { display: block; width: 100%; aspect-ratio: 1; margin: 4px 0 12px; border-radius: 8px; }
 .tutorial .box { white-space: pre-line; line-height: 1.45; margin: 8px 0; }
