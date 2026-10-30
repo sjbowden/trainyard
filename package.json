@@ -13,7 +13,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "calibrate:solver": "tsx scripts/calibrate-solver.ts"
   },
   "type": "module",
   "devDependencies": {

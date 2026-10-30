@@ -1,0 +1,296 @@
+{
+ "redLine": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 3,
+  "nodes": 10,
+  "ms": 2
+ },
+ "grorangeLines": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 5,
+  "nodes": 40,
+  "ms": 1
+ },
+ "yorpleLines": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 12,
+  "nodes": 22226,
+  "ms": 268
+ },
+ "magicalTrains": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 10,
+  "nodes": 3607,
+  "ms": 47
+ },
+ "theRedCorner": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 7,
+  "nodes": 106,
+  "ms": 1
+ },
+ "purpablu": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 16,
+  "nodes": 60869,
+  "ms": 711
+ },
+ "aRockInTheWay": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 7,
+  "nodes": 70,
+  "ms": 1
+ },
+ "greenWally": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 9,
+  "nodes": 95,
+  "ms": 1
+ },
+ "yellowSnake": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 23,
+  "nodes": 121,
+  "ms": 3
+ },
+ "uTurn": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 26,
+  "nodes": 37001,
+  "ms": 552
+ },
+ "journey": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 11,
+  "nodes": 112,
+  "ms": 1
+ },
+ "rainbow": {
+  "stars": 1,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 8787
+ },
+ "innieOutie": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 13,
+  "nodes": 5338,
+  "ms": 82
+ },
+ "aroundTheBack": {
+  "stars": 2,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 9874
+ },
+ "multiColor": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 8,
+  "nodes": 1987,
+  "ms": 12
+ },
+ "squiggle": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 8,
+  "nodes": 385,
+  "ms": 2
+ },
+ "twoTwo": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 5,
+  "nodes": 16,
+  "ms": 0
+ },
+ "crossover": {
+  "stars": 2,
+  "status": "solved",
+  "segments": 12,
+  "nodes": 41624,
+  "ms": 381
+ },
+ "mellowYellow": {
+  "stars": 2,
+  "status": "solved",
+  "segments": 7,
+  "nodes": 739,
+  "ms": 8
+ },
+ "deliveringOranges": {
+  "stars": 2,
+  "status": "solved",
+  "segments": 7,
+  "nodes": 232,
+  "ms": 6
+ },
+ "purpleParcels": {
+  "stars": 2,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 11412
+ },
+ "prellow": {
+  "stars": 2,
+  "status": "solved",
+  "segments": 7,
+  "nodes": 547,
+  "ms": 3
+ },
+ "aroundTheBend": {
+  "stars": 2,
+  "status": "solved",
+  "segments": 19,
+  "nodes": 610312,
+  "ms": 26909
+ },
+ "preenies": {
+  "stars": 2,
+  "status": "solved",
+  "segments": 24,
+  "nodes": 17054,
+  "ms": 360
+ },
+ "tooMany": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 17,
+  "nodes": 7939,
+  "ms": 137
+ },
+ "yield": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 8,
+  "nodes": 526,
+  "ms": 3
+ },
+ "blueBoys": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 5,
+  "nodes": 67,
+  "ms": 0
+ },
+ "timingTest": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 13,
+  "nodes": 2365,
+  "ms": 19
+ },
+ "grimaceTown": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 12,
+  "nodes": 187891,
+  "ms": 2587
+ },
+ "lemonLatency": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 5,
+  "nodes": 154,
+  "ms": 1
+ },
+ "threeReds": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 13,
+  "nodes": 11362,
+  "ms": 91
+ },
+ "colourTheory": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 6,
+  "nodes": 100,
+  "ms": 1
+ },
+ "secondary": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 15,
+  "nodes": 4325,
+  "ms": 39
+ },
+ "nurple": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 9,
+  "nodes": 11745,
+  "ms": 82
+ },
+ "microMix": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 10,
+  "nodes": 970,
+  "ms": 6
+ },
+ "theFirst": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 10,
+  "nodes": 27396,
+  "ms": 219
+ },
+ "waitOutside": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 25,
+  "nodes": 10879,
+  "ms": 171
+ },
+ "nineMensMorris": {
+  "stars": 3,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 10964
+ },
+ "eeeTee": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 18,
+  "nodes": 70126,
+  "ms": 655
+ },
+ "relish": {
+  "stars": 4,
+  "status": "solved",
+  "segments": 8,
+  "nodes": 406,
+  "ms": 2
+ },
+ "mirrorSquad": {
+  "stars": 3,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 13454
+ },
+ "cuteLoop": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 24,
+  "nodes": 148573,
+  "ms": 3533
+ }
+}
