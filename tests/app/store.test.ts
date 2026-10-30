@@ -27,8 +27,9 @@ describe.skipIf(!apk)('with an APK', () => {
   });
 
   test('importApk still returns the puzzles when the phone will not save them', async () => {
-    vi.spyOn(indexedDB, 'open').mockImplementation(() => {
-      throw new Error('denied');
+    // storage refuses the write, as when the phone is out of space
+    vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(() => {
+      throw new DOMException('quota', 'QuotaExceededError');
     });
     const imported = await importApk(new Blob([readFileSync(apk!)]), wasmUrl);
     expect(imported.saved).toBe(false);

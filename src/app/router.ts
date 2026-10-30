@@ -14,7 +14,13 @@ export type Route =
 const isCollection = (s: string | undefined): s is CollectionId => s === 'trainyard' || s === 'express';
 
 export function parseRoute(hash: string): Route {
-  const [first, c, rest] = hash.replace(/^#\/?/, '').split('/').map(decodeURIComponent);
+  let parts: string[];
+  try {
+    parts = hash.replace(/^#\/?/, '').split('/').map(decodeURIComponent);
+  } catch {
+    return { name: 'home' }; // a damaged link
+  }
+  const [first, c, rest] = parts;
   if (first === 'load') return { name: 'load' };
   if (first === 'c' && isCollection(c)) return rest ? { name: 'city', collection: c, world: rest } : { name: 'collection', collection: c };
   if (first === 'p' && isCollection(c) && rest) return { name: 'puzzle', collection: c, slug: rest };

@@ -20,6 +20,7 @@ export function LoadApkScreen({ onLoaded }: { onLoaded: (c: Collection[], saved:
       setError((err as Error).message);
     } finally {
       setBusy(false);
+      (e.target as HTMLInputElement).value = ''; // so choosing the same file again retries
     }
   };
 

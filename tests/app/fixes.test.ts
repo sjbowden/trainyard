@@ -39,7 +39,7 @@ describe('strokes follow one finger', () => {
     expect(t.up(1)).toEqual({ cells: [22, 23, 24], moved: true });
   });
 
-  test('a cancelled stroke is discarded', () => {
+  test('a canceled stroke is discarded', () => {
     const t = new StrokeTracker();
     t.down(1, 22);
     t.move(1, 23);

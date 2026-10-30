@@ -10,8 +10,15 @@ import { emptyProgress, type Progress } from './progress.ts';
 const COLLECTIONS = 'collections/v1';
 const PROGRESS = 'progress/v1';
 
-// Opened per call, so a storage failure is seen on every call rather than cached.
-const store = (): UseStore => createStore('trainyard', 'kv');
+// One connection, reopened after a failure so a passing storage error isn't remembered.
+let cached: UseStore | null = null;
+const store = (): UseStore => (cached ??= createStore('trainyard', 'kv'));
+const forget = () => {
+  cached = null;
+};
+
+/** Progress saves run one at a time, so overlapping saves can't undo each other. */
+let saving: Promise<void> = Promise.resolve();
 
 /** Some WebKit versions never answer an IndexedDB open; treat that as a failure. */
 const TIMEOUT_MS = 3000;
@@ -30,13 +37,15 @@ export async function importApk(file: Blob, wasmUrl: string): Promise<{ collecti
   let collections: Collection[];
   try {
     collections = await readApk(new Uint8Array(await file.arrayBuffer()), { locateFile: () => wasmUrl });
-  } catch {
-    throw new Error("That file isn't a Trainyard APK.");
+  } catch (err) {
+    if ((err as Error).message === 'Not a Trainyard APK') throw new Error("That file isn't a Trainyard APK.");
+    throw new Error("Couldn't read the APK. Check your connection and try again.");
   }
   try {
     await withTimeout(set(COLLECTIONS, collections, store()));
     return { collections, saved: true };
   } catch {
+    forget();
     return { collections, saved: false };
   }
 }
@@ -45,6 +54,7 @@ export async function loadCollections(): Promise<Collection[] | null> {
   try {
     return (await withTimeout(get<Collection[]>(COLLECTIONS, store()))) ?? null;
   } catch {
+    forget();
     return null;
   }
 }
@@ -53,6 +63,7 @@ export async function loadProgress(): Promise<Progress> {
   try {
     return (await withTimeout(get<Progress>(PROGRESS, store()))) ?? emptyProgress();
   } catch {
+    forget();
     return emptyProgress();
   }
 }
@@ -62,7 +73,12 @@ export async function loadProgress(): Promise<Progress> {
  * launch never overwrites earlier solves. A level stays solved once solved. If the stored
  * record can't be read, nothing is written.
  */
-export async function saveProgress(p: Progress): Promise<void> {
+export function saveProgress(p: Progress): Promise<void> {
+  saving = saving.then(() => mergeAndSave(p));
+  return saving;
+}
+
+async function mergeAndSave(p: Progress): Promise<void> {
   try {
     const kv = store();
     const stored = (await withTimeout(get<Progress>(PROGRESS, kv))) ?? emptyProgress();
@@ -70,6 +86,7 @@ export async function saveProgress(p: Progress): Promise<void> {
     for (const [key, l] of Object.entries(p.levels)) levels[key] = { solved: l.solved || (stored.levels[key]?.solved ?? false), solution: l.solution };
     await withTimeout(set(PROGRESS, { levels }, kv));
   } catch {
+    forget();
     // Nothing to do: progress for this session stays in memory.
   }
 }

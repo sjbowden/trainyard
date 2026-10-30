@@ -23,7 +23,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      # The APK-based accuracy suite runs locally before each push (see CLAUDE.md); these always run.
+      # The APK-based accuracy suite runs locally before each push (CLAUDE.md, "Before every push"); these always run.
       - run: npm run typecheck
       - run: npm test
       - run: npm run build

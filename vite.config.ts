@@ -26,7 +26,8 @@ export default defineConfig({
     preact(),
     devPuzzles,
     VitePWA({
-      registerType: 'autoUpdate',
+      // A new version waits until the app is fully closed, so an update never reloads mid-puzzle.
+      registerType: 'prompt',
       includeAssets: ['apple-touch-icon.png'],
       manifest: {
         name: 'Trainyard',

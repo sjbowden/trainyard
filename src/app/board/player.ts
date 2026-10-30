@@ -1,6 +1,6 @@
 import { splitCode, encodeBoard } from '../../engine/codec.ts';
 import { createRun, type HalfStepEvents, type Run } from '../../engine/sim.ts';
-import type { Board } from '../../engine/types.ts';
+import type { Board, Color } from '../../engine/types.ts';
 import { clearTrack, drawPath, eraseCells, History, toggleSwitch } from '../editing.ts';
 import { HALF_STEP_SECONDS } from './animation.ts';
 
@@ -10,6 +10,14 @@ import { HALF_STEP_SECONDS } from './animation.ts';
 export const MAX_HALF_STEPS = 4000;
 
 export type Finish = 'won' | 'crashed' | 'stalled' | 'stopped';
+
+/** The colors of the trains delivered at these cells in the last half-step. */
+export function deliveredColors(run: Run, cells: number[]): Color[] {
+  return cells.flatMap((cell) => {
+    const t = run.trainsBefore.find((x) => x.cell === cell);
+    return t ? [t.color] : [];
+  });
+}
 
 /** Steps a run on the original's clock. */
 export class Player {

@@ -4,7 +4,7 @@ import type { HalfStepEvents } from '../../engine/sim.ts';
 import type { Board } from '../../engine/types.ts';
 import { speedFromSlider } from '../board/animation.ts';
 import { BoardCanvas } from '../board/BoardCanvas.tsx';
-import { PuzzleController, type Finish } from '../board/player.ts';
+import { deliveredColors, PuzzleController, type Finish } from '../board/player.ts';
 import { DebouncedSave } from '../saver.ts';
 import type { DrawnEffect } from '../board/render.ts';
 import { defaultTheme } from '../theme/default.ts';
@@ -61,7 +61,8 @@ export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult
       if (ev.crashes.length) theme.playSound('crash');
       if (ev.painted.length) theme.playSound('paint');
       if (ev.splits.length) theme.playSound('split');
-      if (ev.delivered.length) theme.playSound('deliver');
+      const run = c.playing?.run;
+      if (run) for (const color of deliveredColors(run, ev.delivered)) theme.playSound('deliver', color);
       if (ev.switched.length) theme.playSound('switch');
     };
     const onFinish = (f: Finish) => {

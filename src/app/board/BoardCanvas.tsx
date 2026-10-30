@@ -56,9 +56,11 @@ export function BoardCanvas({ controller, theme, mode, speed, effects, onEdit }:
       last = now;
       const { controller: c, theme: th, speed: sp } = props.current;
       const l = layout.current;
-      if (c.running) c.advance(dt, sp);
+      // a finished run (e.g. under the Solved! card) is idle: no stepping, no redraws
+      const moving = c.running && !c.playing?.finished;
+      if (moving) c.advance(dt, sp);
       effects.current = effects.current.filter((e) => now - e.born < EFFECT_MS);
-      if (l && (dirty.current || c.running || effects.current.length)) {
+      if (l && (dirty.current || moving || effects.current.length)) {
         dirty.current = false;
         const p = c.playing;
         const board = p ? p.run.board : (preview.current ?? c.board);

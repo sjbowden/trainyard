@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import type { Collection, Level } from '../data/apk.ts';
 import { nextLevel } from './levels.ts';
 import { emptyProgress, isWorldUnlocked, levelKey, recordAttempt, type Progress } from './progress.ts';
@@ -67,6 +67,8 @@ export function App() {
   const [route, setRoute] = useState<Route>(() => parseRoute(location.hash));
   const [collections, setCollections] = useState<Collection[] | null | undefined>(undefined);
   const [progress, setProgress] = useState<Progress>(emptyProgress);
+  const latest = useRef(progress);
+  latest.current = progress;
   const [notice, setNotice] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -83,11 +85,10 @@ export function App() {
   if (collections === undefined) return <main class="screen" />;
 
   const record = (key: string, solution: string, solved: boolean) => {
-    setProgress((p) => {
-      const next = recordAttempt(p, key, solution, solved);
-      void saveProgress(next);
-      return next;
-    });
+    const next = recordAttempt(latest.current, key, solution, solved);
+    latest.current = next;
+    setProgress(next);
+    void saveProgress(next);
   };
 
   const collection = 'collection' in route ? collections?.find((c) => c.id === route.collection) : undefined;
