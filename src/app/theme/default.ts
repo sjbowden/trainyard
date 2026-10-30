@@ -94,6 +94,32 @@ function drawColorDots(ctx: CanvasRenderingContext2D, colors: Color[], x: number
   });
 }
 
+/** The trains still to leave an outlet, as small squares along the side opposite its exit. */
+function drawTrainStrip(ctx: CanvasRenderingContext2D, colors: Color[], exit: Side, x: number, y: number, size: number) {
+  const n = colors.length;
+  if (!n) return;
+  const dot = Math.min(size * 0.13, (size * 0.7) / n);
+  const gap = dot * 0.25;
+  const span = n * dot + (n - 1) * gap;
+  const vertical = exit === 1 || exit === 3; // exit left/right: strip runs top to bottom on the far side
+  const far = size * 0.13;
+  colors.forEach((c, i) => {
+    const along = (size - span) / 2 + i * (dot + gap);
+    let dx: number;
+    let dy: number;
+    if (vertical) {
+      dx = exit === 1 ? far : size - far - dot;
+      dy = along;
+    } else {
+      dx = along;
+      dy = exit === 2 ? far : size - far - dot;
+    }
+    ctx.fillStyle = TRAIN_COLORS[c];
+    roundRect(ctx, x + dx, y + dy, dot, dot, dot * 0.25);
+    ctx.fill();
+  });
+}
+
 /** A white bar on the edge of a station showing where trains leave or enter. */
 function drawSideMark(ctx: CanvasRenderingContext2D, side: Side, x: number, y: number, size: number, color = '#ffffff') {
   const inset = size * 0.08;
@@ -160,17 +186,18 @@ export const defaultTheme: Theme = {
       case 'outlet': {
         drawStation(ctx, x, y, size);
         drawSideMark(ctx, piece.side, x, y, size);
-        if (piece.colors.length) drawColorDots(ctx, piece.colors, x, y, size);
-        else {
-          ctx.strokeStyle = '#8fa9ae';
-          ctx.lineWidth = size * 0.07;
-          ctx.beginPath();
-          ctx.moveTo(cx - size * 0.15, cy);
-          ctx.lineTo(cx + size * 0.15, cy);
-          ctx.moveTo(cx, cy - size * 0.15);
-          ctx.lineTo(cx, cy + size * 0.15);
-          ctx.stroke();
-        }
+        // the tutorials describe outlets by their plus sign
+        ctx.strokeStyle = '#cfe3e6';
+        ctx.lineWidth = size * 0.07;
+        ctx.lineCap = 'round';
+        const arm = size * 0.13;
+        ctx.beginPath();
+        ctx.moveTo(cx - arm, cy);
+        ctx.lineTo(cx + arm, cy);
+        ctx.moveTo(cx, cy - arm);
+        ctx.lineTo(cx, cy + arm);
+        ctx.stroke();
+        drawTrainStrip(ctx, piece.colors, piece.side, x, y, size);
         return;
       }
       case 'goal': {

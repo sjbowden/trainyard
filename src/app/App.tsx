@@ -7,7 +7,43 @@ import { CollectionScreen } from './screens/CollectionScreen.tsx';
 import { HomeScreen } from './screens/HomeScreen.tsx';
 import { LoadApkScreen } from './screens/LoadApkScreen.tsx';
 import { PuzzleScreen } from './screens/PuzzleScreen.tsx';
+import { TutorialOverlay } from './screens/TutorialOverlay.tsx';
+import { defaultTheme } from './theme/default.ts';
 import { loadCollections, loadProgress, saveProgress } from './store.ts';
+
+/** Which cities' tutorials have been offered, kept per device (a convenience, so failures are ignored). */
+const SEEN_KEY = 'trainyard.tutorialsSeen';
+function tutorialSeen(id: string): boolean {
+  try {
+    return (JSON.parse(localStorage.getItem(SEEN_KEY) ?? '[]') as string[]).includes(id);
+  } catch {
+    return true;
+  }
+}
+function markTutorialSeen(id: string): void {
+  try {
+    const seen = JSON.parse(localStorage.getItem(SEEN_KEY) ?? '[]') as string[];
+    localStorage.setItem(SEEN_KEY, JSON.stringify([...new Set([...seen, id])]));
+  } catch {
+    // ignore
+  }
+}
+
+function City({ collection, world, progress }: { collection: Collection; world: string; progress: Progress }) {
+  const id = `${collection.id}/${world}`;
+  const tutorials = collection.tutorials.filter((t) => t.worldSlug === world).sort((a, b) => a.ordinal - b.ordinal);
+  const [open, setOpen] = useState(() => tutorials.length > 0 && !tutorialSeen(id));
+  const close = () => {
+    markTutorialSeen(id);
+    setOpen(false);
+  };
+  return (
+    <>
+      <CityScreen collection={collection} world={world} progress={progress} onTutorial={tutorials.length ? () => setOpen(true) : undefined} />
+      {open && <TutorialOverlay tutorials={tutorials} theme={defaultTheme} onClose={close} />}
+    </>
+  );
+}
 
 const go = (r: Route) => {
   location.hash = buildRoute(r);
@@ -74,7 +110,7 @@ export function App() {
       if (collection) return <CollectionScreen collection={collection} progress={progress} />;
       break;
     case 'city':
-      if (collection) return <CityScreen collection={collection} world={route.world} progress={progress} />;
+      if (collection) return <City key={route.world} collection={collection} world={route.world} progress={progress} />;
       break;
     case 'puzzle': {
       const level = collection?.levels.find((l) => l.slug === route.slug);
