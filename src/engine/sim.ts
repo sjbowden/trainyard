@@ -82,8 +82,22 @@ function isCross(a: Segment | null, b: Segment | null): boolean {
   return (a === 6 && b === 5) || (a === 5 && b === 6);
 }
 
+/** Copies the parts a run changes (switches, outlet and goal lists); everything else is immutable during a run. */
+function copyPiece(c: Piece): Piece {
+  switch (c.kind) {
+    case 'track':
+      return { kind: 'track', primary: c.primary, secondary: c.secondary };
+    case 'outlet':
+      return { kind: 'outlet', side: c.side, colors: c.colors.slice() };
+    case 'goal':
+      return { kind: 'goal', sides: c.sides.slice(), colors: c.colors.slice() };
+    default:
+      return c;
+  }
+}
+
 function cloneBoard(board: Board): Board {
-  return { cols: board.cols, rows: board.rows, cells: board.cells.map((c) => structuredClone(c)) };
+  return { cols: board.cols, rows: board.rows, cells: board.cells.map(copyPiece) };
 }
 
 class RunImpl implements Run {

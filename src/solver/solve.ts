@@ -16,7 +16,8 @@ export interface SolveOptions {
 }
 
 export type SolveResult =
-  | { status: 'solved'; solution: string; segments: number; nodes: number }
+  /** `optimal` is true when the search proved no solution uses fewer segments. */
+  | { status: 'solved'; solution: string; segments: number; nodes: number; optimal: boolean }
   | { status: 'unknown'; nodes: number; reason: 'budget' | 'deadline' | 'exhausted' };
 
 /** Track laid so far: cell → [primary, secondary]. */
@@ -175,49 +176,83 @@ export function solve(puzzleCode: string, opts: SolveOptions = {}): SolveResult 
   const puzzle = decodeBoard(splitCode(puzzleCode).puzzle);
   const goals = puzzle.cells.flatMap((p: Piece, i) => (p.kind === 'goal' ? [i] : []));
   let nodes = 0;
-  let visited = new Set<string>();
-  const key = (layout: Layout) => [...layout].sort((a, b) => a[0] - b[0]).map(([c, [p, q]]) => `${c}:${p}${q}`).join(',');
+  const key = (layout: Layout) => [...layout].sort((x, y) => x[0] - y[0]).map(([c, [p, q]]) => `${c}:${p}${q}`).join(',');
 
-  const search = (layout: Layout, limit: number): Layout | null => {
+  // Best-first search: always extend the layout with the fewest segments plus the waiting
+  // train's distance to the nearest goal. Each layout is played once, when it is created.
+  interface Node { layout: Layout; used: number; outcome: Outcome; f: number }
+  const heap: Node[] = [];
+  const push = (n: Node) => {
+    heap.push(n);
+    for (let i = heap.length - 1; i > 0; ) {
+      const parent = (i - 1) >> 1;
+      if (heap[parent]!.f <= heap[i]!.f) break;
+      [heap[parent], heap[i]] = [heap[i]!, heap[parent]!];
+      i = parent;
+    }
+  };
+  const pop = (): Node | undefined => {
+    const top = heap[0];
+    const last = heap.pop();
+    if (heap.length && last) {
+      heap[0] = last;
+      for (let i = 0; ; ) {
+        const l = 2 * i + 1;
+        const r = l + 1;
+        let m = i;
+        if (l < heap.length && heap[l]!.f < heap[m]!.f) m = l;
+        if (r < heap.length && heap[r]!.f < heap[m]!.f) m = r;
+        if (m === i) break;
+        [heap[m], heap[i]] = [heap[i]!, heap[m]!];
+        i = m;
+      }
+    }
+    return top;
+  };
+  const seen = new Set<string>();
+  const visit = (layout: Layout) => {
     const k = key(layout);
-    if (visited.has(k)) return null;
-    visited.add(k);
+    if (seen.has(k)) return;
+    seen.add(k);
     if (++nodes > maxNodes) throw new Stop('budget');
     if ((nodes & 63) === 0 && performance.now() > deadline) throw new Stop('deadline');
     const outcome = play(puzzle, layout);
-    if (outcome.kind === 'won') return layout;
-    if (outcome.kind === 'dead') return null;
+    if (outcome.kind === 'dead') return;
     const used = countSegments(layout);
-    const options = outcome.kind === 'needsTrack' ? choices(puzzle, layout, goals, outcome.cell, outcome.entry) : forks(layout, outcome.path);
-    for (const [cell, [primary, secondary]] of options) {
-      const before = layout.get(cell);
-      const added = (primary ? 1 : 0) + (secondary ? 1 : 0) - (before ? (before[0] ? 1 : 0) + (before[1] ? 1 : 0) : 0);
-      if (used + added > limit) continue;
-      const next = new Map(layout);
-      next.set(cell, [primary, secondary]);
-      const found = search(next, limit);
-      if (found) return found;
-    }
-    return null;
+    const h = outcome.kind === 'needsTrack' ? Math.max(1, goalDistance(puzzle, goals, outcome.cell)) : outcome.kind === 'wrongGoal' ? 1 : 0;
+    push({ layout, used, outcome, f: used + h });
   };
 
+  let best: Layout | null = null;
+  let stopped: 'budget' | 'deadline' | null = null;
   try {
     if (performance.now() > deadline) throw new Stop('deadline');
-    if (!goalsReachable(puzzle)) return { status: 'unknown', nodes, reason: 'exhausted' };
-    for (let limit = lowerBound(puzzle, goals); limit <= maxSegments; limit++) {
-      visited = new Set();
-      const found = search(new Map(), limit);
-      if (found) {
-        const solved = withTrack(puzzle, found);
-        if (simulate(solved).outcome !== 'won') throw new Error('solver produced a non-winning layout'); // never expected
-        const solution = splitCode(encodeBoard(solved, { puzzle: false })).solution;
-        return { status: 'solved', solution, segments: countSegments(found), nodes };
+    if (goalsReachable(puzzle)) {
+      visit(new Map());
+      for (let node = pop(); node; node = pop()) {
+        if (node.outcome.kind === 'won') {
+          best = node.layout;
+          break;
+        }
+        const o = node.outcome;
+        const options = o.kind === 'needsTrack' ? choices(puzzle, node.layout, goals, o.cell, o.entry) : o.kind === 'wrongGoal' ? forks(node.layout, o.path) : [];
+        for (const [cell, seg] of options) {
+          const next = new Map(node.layout);
+          next.set(cell, seg);
+          if (countSegments(next) > maxSegments) continue;
+          visit(next);
+        }
       }
     }
-    return { status: 'unknown', nodes, reason: 'exhausted' };
   } catch (err) {
-    if (err instanceof Stop) return { status: 'unknown', nodes, reason: err.reason };
-    throw err;
+    if (!(err instanceof Stop)) throw err;
+    stopped = err.reason;
   }
+  if (!best) return { status: 'unknown', nodes, reason: stopped ?? 'exhausted' };
+  const solved = withTrack(puzzle, best);
+  if (simulate(solved).outcome !== 'won') throw new Error('solver produced a non-winning layout'); // never expected
+  const solution = splitCode(encodeBoard(solved, { puzzle: false })).solution;
+  // the distance estimate can overestimate (reused track), so the first solution is short but not proven shortest
+  return { status: 'solved', solution, segments: countSegments(best), nodes, optimal: false };
 }
 

@@ -181,3 +181,12 @@ test('trains record the side they entered their cell by', () => {
   expect(corner.trains[0]).toMatchObject({ cell: at(1, 3), entry: L, nextSide: T });
 });
 
+
+test('a run never changes the board it was given', () => {
+  const b = board({ '3,0': outlet(B, red, red), '3,1': track(TR, TL), '4,1': goal([L], red), '2,1': goal([R], red) });
+  const before = JSON.stringify(b);
+  const run = createRun(b);
+  while (!run.ended) run.halfStep();
+  expect(run.outcome).toBe('won');
+  expect(JSON.stringify(b)).toBe(before);
+});
