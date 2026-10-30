@@ -292,5 +292,236 @@
   "segments": 24,
   "nodes": 148573,
   "ms": 3533
+ },
+ "hourglass": {
+  "stars": 4,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 10161
+ },
+ "gauss": {
+  "stars": 4,
+  "status": "solved",
+  "segments": 10,
+  "nodes": 1576,
+  "ms": 10
+ },
+ "thirdWheel": {
+  "stars": 4,
+  "status": "solved",
+  "segments": 12,
+  "nodes": 11707,
+  "ms": 88
+ },
+ "turtles": {
+  "stars": 4,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 15174
+ },
+ "royals": {
+  "stars": 4,
+  "status": "solved",
+  "segments": 12,
+  "nodes": 1171,
+  "ms": 10
+ },
+ "spiced": {
+  "stars": 4,
+  "status": "solved",
+  "segments": 15,
+  "nodes": 129580,
+  "ms": 1370
+ },
+ "handlebars": {
+  "stars": 4,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 11084
+ },
+ "compact": {
+  "stars": 4,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 8930
+ },
+ "wailing": {
+  "stars": 5,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 14106
+ },
+ "underTheFence": {
+  "stars": 5,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 13257
+ },
+ "squads": {
+  "stars": 6,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 11579
+ },
+ "laserMaster": {
+  "stars": 7,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 13988
+ },
+ "aspire": {
+  "stars": 7,
+  "status": "solved",
+  "segments": 13,
+  "nodes": 7110,
+  "ms": 237
+ },
+ "totemPole": {
+  "stars": 5,
+  "status": "solved",
+  "segments": 14,
+  "nodes": 17605,
+  "ms": 129
+ },
+ "western": {
+  "stars": 6,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 16503
+ },
+ "collider": {
+  "stars": 6,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 9131
+ },
+ "starshipSandwich": {
+  "stars": 6,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 10344
+ },
+ "inverse": {
+  "stars": 7,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 12420
+ },
+ "theClassic": {
+  "stars": 7,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 11785
+ },
+ "redPear": {
+  "stars": 2,
+  "status": "solved",
+  "segments": 12,
+  "nodes": 432338,
+  "ms": 6164
+ },
+ "paintTheTown": {
+  "stars": 4,
+  "status": "solved",
+  "segments": 14,
+  "nodes": 13377,
+  "ms": 183
+ },
+ "lopsided": {
+  "stars": 5,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 16443
+ },
+ "plus": {
+  "stars": 6,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 15166
+ },
+ "orangeWall": {
+  "stars": 7,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 20039
+ },
+ "poddedPeas": {
+  "stars": 4,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 16693
+ },
+ "letThemYellow": {
+  "stars": 7,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 14343
+ },
+ "theOriginal": {
+  "stars": 7,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 13745
+ },
+ "stuckToYou": {
+  "stars": 7,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 16160
+ },
+ "diagonalMirror": {
+  "stars": 7,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 39239
+ },
+ "fourShadowing": {
+  "stars": 8,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 21094
+ },
+ "fireballIsland": {
+  "stars": 10,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 13284
+ },
+ "roundTheTwist": {
+  "stars": 3,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 13311
+ },
+ "moreIsMerrier": {
+  "stars": 4,
+  "status": "solved",
+  "segments": 11,
+  "nodes": 36337,
+  "ms": 1102
  }
 }

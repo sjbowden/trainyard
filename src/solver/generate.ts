@@ -1,7 +1,8 @@
 import { encodeBoard, splitCode } from '../engine/codec.ts';
 import { createRun, segmentFor } from '../engine/sim.ts';
 import type { Board, Color, Piece, Segment, Side } from '../engine/types.ts';
-import type { Difficulty } from './difficulty.ts';
+import { BANDS, grade, type Difficulty } from './difficulty.ts';
+import { solve } from './solve.ts';
 import { between, mulberry32, pick } from './random.ts';
 
 /**
@@ -173,4 +174,55 @@ export function generateCandidate(seed: number, difficulty: Difficulty): { code:
   const proof = splitCode(encodeBoard({ cols: COLS, rows: ROWS, cells: b.cells }, { puzzle: false })).solution;
   const code = encodeBoard({ cols: COLS, rows: ROWS, cells: withoutTrack(b.cells) }, { solution: false });
   return { code, proof };
+}
+
+export interface Generated {
+  code: string;
+  proof: string;
+  difficulty: Difficulty;
+  seed: number;
+  segments: number | null;
+  nodes: number | null;
+  /** True when time ran out and this is the closest candidate found, below the level asked for. */
+  easierThanAsked: boolean;
+}
+
+const RANK: Record<Difficulty | 'tooEasy', number> = { tooEasy: 0, easy: 1, medium: 2, hard: 3, veryHard: 4 };
+
+/** Generates candidates until one grades at the level asked for, or the deadline passes. */
+export function generate(difficulty: Difficulty, opts: { seed?: number; deadline: number; onProgress?: (tried: number) => void }): Generated {
+  const start = opts.seed ?? Math.floor(Math.random() * 1_000_000);
+  const band = BANDS[difficulty];
+  let best: (Generated & { rank: number }) | null = null;
+  let fallback: Generated | null = null; // any graded candidate, used if nothing at or below the level turns up
+  for (let i = 0; ; i++) {
+    const seed = start + i;
+    opts.onProgress?.(i + 1);
+    const c = generateCandidate(seed, difficulty);
+    if (c && performance.now() > opts.deadline && !best && !fallback) {
+      // out of time with nothing graded: take this one ungraded (it is solvable by construction)
+      return { ...c, difficulty, seed, segments: null, nodes: null, easierThanAsked: true };
+    }
+    if (c) {
+      const r = solve(c.code, { maxNodes: band.maxNodes, deadline: opts.deadline });
+      const deadlineHit = r.status === 'unknown' && r.reason === 'deadline';
+      if (!deadlineHit) {
+        const g = grade(r);
+        const fits = g === difficulty && (r.status === 'solved' || band.acceptUnknown);
+        const found: Generated = { ...c, difficulty, seed, segments: r.status === 'solved' ? r.segments : null, nodes: r.nodes, easierThanAsked: false };
+        if (fits) return found;
+        fallback ??= found;
+        // keep the closest candidate that isn't above the level asked for
+        const rank = RANK[g];
+        if (rank <= RANK[difficulty] && (!best || rank > best.rank)) best = { ...found, rank };
+      }
+    }
+    if (performance.now() > opts.deadline) {
+      if (best) {
+        const { rank: _rank, ...g } = best;
+        return { ...g, easierThanAsked: true };
+      }
+      if (fallback) return fallback;
+    }
+  }
 }
