@@ -1,7 +1,9 @@
-node_modules/
-dist/
 *.apk
-local/
 *.swf
 .DS_Store
 .superpowers/
+dist/
+local/
+node_modules/
+playwright-report/
+test-results/

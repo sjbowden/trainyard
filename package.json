@@ -9,18 +9,32 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "extract": "tsx scripts/extract-apk.ts",
-    "scrape:fixtures": "tsx scripts/scrape-fixtures.ts"
+    "scrape:fixtures": "tsx scripts/scrape-fixtures.ts",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "e2e": "playwright test"
   },
   "type": "module",
   "devDependencies": {
+    "@napi-rs/canvas": "^1.1.0",
+    "@playwright/test": "^1.64.1",
+    "@preact/preset-vite": "^2.10.6",
+    "@testing-library/preact": "^3.2.6",
     "@types/node": "^26.6.6",
     "@types/sql.js": "^1.4.11",
+    "fake-indexeddb": "^6.2.7",
+    "happy-dom": "^21.0.4",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vite-plugin-pwa": "^2.0.0",
     "vitest": "^5.0.5"
   },
   "dependencies": {
     "fflate": "^0.8.3",
+    "idb-keyval": "^6.3.0",
+    "preact": "^11.1.0",
     "sql.js": "^1.15.2"
   },
   "private": true
