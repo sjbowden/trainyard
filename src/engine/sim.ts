@@ -7,6 +7,8 @@ export interface TrainState {
   id: number;
   color: Color;
   cell: number;
+  /** The side it entered its current cell by (for a new train, the side opposite its exit). */
+  entry: Side;
   nextSide: Side;
   segment: Segment | null;
   alive: boolean;
@@ -118,7 +120,7 @@ class RunImpl implements Run {
   }
 
   private newTrain(color: Color, cell: number, side: Side): TrainState {
-    return { id: this.nextId++, color, cell, nextSide: side, segment: null, alive: true };
+    return { id: this.nextId++, color, cell, entry: opposite(side), nextSide: side, segment: null, alive: true };
   }
 
   private prune() {
@@ -238,7 +240,8 @@ class RunImpl implements Run {
         continue;
       }
       t.cell = next;
-      if (!this.enter(t, this.board.cells[next]!, opposite(t.nextSide))) this.crash(t, ev);
+      t.entry = opposite(t.nextSide);
+      if (!this.enter(t, this.board.cells[next]!, t.entry)) this.crash(t, ev);
     }
     this.prune();
   }

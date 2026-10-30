@@ -169,3 +169,15 @@ describe('run lifecycle', () => {
   });
 });
 
+test('trains record the side they entered their cell by', () => {
+  const run = createRun(decodeBoard('hh002Oja3Giaa00_003QQQ00'));
+  run.halfStep(); // spawned on the outlet, heading right: entered "from" the left
+  expect(run.trains[0]).toMatchObject({ cell: 22, entry: L, nextSide: R });
+  run.halfStep(); // moved into 23 through its left side
+  expect(run.trains[0]).toMatchObject({ cell: 23, entry: L, nextSide: R });
+  const corner = createRun(board({ '0,3': outlet(R, red), '1,3': track(TL), ...dummyGoal }));
+  corner.halfStep();
+  corner.halfStep();
+  expect(corner.trains[0]).toMatchObject({ cell: at(1, 3), entry: L, nextSide: T });
+});
+
