@@ -50,7 +50,8 @@ export function mix(a: Color, b: Color): Color {
   return 6;
 }
 
-function segmentFor(a: Side, b: Side): Segment {
+/** The segment joining two sides, or Empty. */
+export function segmentFor(a: Side, b: Side): Segment {
   for (let s = 1; s <= 6; s++) {
     const sides = segmentSides(s as Segment)!;
     if ((sides[0] === a && sides[1] === b) || (sides[0] === b && sides[1] === a)) return s as Segment;
@@ -66,6 +67,13 @@ function hasSide(s: Segment, side: Side): boolean {
 function otherSide(s: Segment, side: Side): Side {
   const [a, b] = segmentSides(s)!;
   return a === side ? b : a;
+}
+
+/** A switch is a track cell whose two segments share a side. */
+export function isSwitchable(piece: Piece): boolean {
+  if (piece.kind !== 'track' || piece.primary === 0 || piece.secondary === 0) return false;
+  const [a, b] = segmentSides(piece.primary)!;
+  return hasSide(piece.secondary, a) || hasSide(piece.secondary, b);
 }
 
 function isCross(a: Segment | null, b: Segment | null): boolean {
@@ -237,10 +245,8 @@ class RunImpl implements Run {
 
   /** Flips a switch whose two segments share a side. Returns true if it flipped. */
   private toggle(piece: Extract<Piece, { kind: 'track' }>): boolean {
+    if (!isSwitchable(piece)) return false;
     const { primary, secondary } = piece;
-    if (primary === 0 || secondary === 0) return false;
-    const [a, b] = segmentSides(primary)!;
-    if (!hasSide(secondary, a) && !hasSide(secondary, b)) return false;
     piece.primary = secondary;
     piece.secondary = primary;
     return true;
