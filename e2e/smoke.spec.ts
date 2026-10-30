@@ -17,6 +17,20 @@ async function dragAcrossRow(page: Page, row: number, fromCol: number, toCol: nu
   await page.mouse.up();
 }
 
+function storedSolution(page: Page, key: string): Promise<string | undefined> {
+  return page.evaluate(
+    (k) =>
+      new Promise<string | undefined>((resolve) => {
+        const open = indexedDB.open('trainyard');
+        open.onsuccess = () => {
+          const req = open.result.transaction('kv').objectStore('kv').get('progress/v1');
+          req.onsuccess = () => resolve(req.result?.levels?.[k]?.solution);
+        };
+      }),
+    key,
+  );
+}
+
 test.skip(!apk, 'needs an APK in the repo root');
 
 test('load the APK, solve Red Line, and keep it offline', async ({ page, context }) => {
@@ -38,6 +52,12 @@ test('load the APK, solve Red Line, and keep it offline', async ({ page, context
 
   await page.getByText('Back to city').click();
   await expect(page.getByText('1 / 6 ★')).toBeVisible();
+
+  // an edit made just before leaving is saved, not lost
+  await page.getByText('Red Line').click();
+  await page.getByRole('button', { name: 'Clear' }).click();
+  await page.getByRole('button', { name: 'Back' }).click();
+  await expect.poll(() => storedSolution(page, 'trainyard/redLine')).toBe('');
 
   await page.evaluate(() => navigator.serviceWorker.ready);
   await context.setOffline(true);

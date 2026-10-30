@@ -9,7 +9,8 @@ let ctx: AudioContext | null = null;
 export function unlockAudio(): void {
   try {
     ctx ??= new AudioContext();
-    if (ctx.state === 'suspended') void ctx.resume();
+    // iOS uses 'suspended' before the first tap and 'interrupted' after a call or backgrounding
+    if (ctx.state !== 'running') void ctx.resume();
   } catch {
     ctx = null;
   }

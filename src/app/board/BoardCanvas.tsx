@@ -5,6 +5,8 @@ import type { Theme } from '../theme/theme.ts';
 import { trainPose } from './animation.ts';
 import { cellAt, fitBoard, type Layout } from './geometry.ts';
 import type { PuzzleController } from './player.ts';
+import { StrokeTracker } from './strokes.ts';
+import { unlockAudio } from '../theme/sound.ts';
 import { renderBoard, type DrawnEffect } from './render.ts';
 
 export interface BoardCanvasProps {
@@ -25,7 +27,8 @@ export function BoardCanvas({ controller, theme, mode, speed, effects, onEdit }:
   const props = useRef({ controller, theme, mode, speed, onEdit });
   props.current = { controller, theme, mode, speed, onEdit };
   const layout = useRef<Layout | null>(null);
-  const drag = useRef<{ cells: number[]; moved: boolean; preview: Board | null } | null>(null);
+  const strokes = useRef(new StrokeTracker());
+  const preview = useRef<Board | null>(null);
   const dirty = useRef(true);
 
   useEffect(() => {
@@ -58,7 +61,7 @@ export function BoardCanvas({ controller, theme, mode, speed, effects, onEdit }:
       if (l && (dirty.current || c.running || effects.current.length)) {
         dirty.current = false;
         const p = c.playing;
-        const board = p ? p.run.board : (drag.current?.preview ?? c.board);
+        const board = p ? p.run.board : (preview.current ?? c.board);
         const trains = p
           ? p.run.trains.filter((t) => t.alive).map((t) => ({ color: t.color, ...trainPose(t.cell, t.entry, t.nextSide, p.progress, l) }))
           : [];
@@ -87,35 +90,39 @@ export function BoardCanvas({ controller, theme, mode, speed, effects, onEdit }:
     return cellAt(l, e.clientX - r.left, e.clientY - r.top);
   };
 
-  const preview = (cells: number[]) => {
+  const previewOf = (cells: readonly number[]) => {
     const { controller: c, mode: m } = props.current;
-    return m === 'draw' ? drawPath(c.board, cells) : eraseCells(c.board, cells);
+    return m === 'draw' ? drawPath(c.board, [...cells]) : eraseCells(c.board, [...cells]);
   };
 
   const onPointerDown = (e: PointerEvent) => {
-    if (props.current.controller.running) return;
+    if (props.current.controller.running || strokes.current.active) return;
     const cell = cellFromEvent(e);
     if (cell === null) return;
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    drag.current = { cells: [cell], moved: false, preview: null };
+    strokes.current.down(e.pointerId, cell);
   };
 
   const onPointerMove = (e: PointerEvent) => {
-    const d = drag.current;
-    if (!d) return;
     const cell = cellFromEvent(e);
-    if (cell === null || cell === d.cells[d.cells.length - 1]) return;
-    d.cells.push(cell);
-    d.moved = true;
-    d.preview = preview(d.cells);
+    if (cell === null || !strokes.current.move(e.pointerId, cell)) return;
+    preview.current = previewOf(strokes.current.current);
     dirty.current = true;
     props.current.theme.playSound(props.current.mode === 'draw' ? 'draw' : 'erase');
   };
 
-  const onPointerUp = () => {
-    const d = drag.current;
-    drag.current = null;
+  // iOS discards a stroke it takes over (Control Center, a notification).
+  const onPointerCancel = (e: PointerEvent) => {
+    strokes.current.cancel(e.pointerId);
+    preview.current = null;
+    dirty.current = true;
+  };
+
+  const onPointerUp = (e: PointerEvent) => {
+    unlockAudio(); // WebKit counts the end of a touch, not its start, as a user gesture
+    const d = strokes.current.up(e.pointerId);
     if (!d) return;
+    preview.current = null;
     const { controller: c, mode: m, theme: th } = props.current;
     if (!d.moved) {
       if (m === 'erase') c.erase(d.cells);
@@ -133,7 +140,7 @@ export function BoardCanvas({ controller, theme, mode, speed, effects, onEdit }:
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
+      onPointerCancel={onPointerCancel}
     />
   );
 }

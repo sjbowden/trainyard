@@ -15,7 +15,7 @@ function sideBetween(b: Board, from: number, to: number): Side | null {
   return null;
 }
 
-/** Fills in the cells a fast swipe skipped, moving horizontally first, and drops repeats. */
+/** Fills in the cells a fast swipe skipped, in a staircase along the line (horizontal wins ties), and drops repeats. */
 function walk(b: Board, cells: number[]): number[] {
   const out: number[] = [];
   for (const cell of cells) {
@@ -24,13 +24,15 @@ function walk(b: Board, cells: number[]): number[] {
       out.push(cell);
       continue;
     }
-    let last: number = prev;
-    while (last !== cell) {
-      const lc = last % b.cols;
-      const cc = cell % b.cols;
-      const next: number = lc !== cc ? last + Math.sign(cc - lc) : last + Math.sign(Math.floor(cell / b.cols) - Math.floor(last / b.cols)) * b.cols;
-      out.push(next);
-      last = next;
+    const [c0, r0, c1, r1] = [prev % b.cols, Math.floor(prev / b.cols), cell % b.cols, Math.floor(cell / b.cols)];
+    let [c, r] = [c0, r0];
+    while (c !== c1 || r !== r1) {
+      // step along whichever axis lags further behind the straight line from start to end
+      const dc = Math.abs(c1 - c0) ? Math.abs(c - c0) / Math.abs(c1 - c0) : 1;
+      const dr = Math.abs(r1 - r0) ? Math.abs(r - r0) / Math.abs(r1 - r0) : 1;
+      if (c !== c1 && dc <= dr) c += Math.sign(c1 - c);
+      else r += Math.sign(r1 - r);
+      out.push(r * b.cols + c);
     }
   }
   return out;
@@ -76,6 +78,10 @@ export function clearTrack(board: Board): Board {
   return { ...board, cells: board.cells.map((c) => (c.kind === 'track' ? { kind: 'empty' } : c)) };
 }
 
+function sameCells(a: Board, b: Board): boolean {
+  return a.cells.length === b.cells.length && a.cells.every((c, i) => JSON.stringify(c) === JSON.stringify(b.cells[i]));
+}
+
 /** Undo/redo over whole boards. */
 export class History {
   private past: Board[] = [];
@@ -93,7 +99,7 @@ export class History {
   }
 
   push(b: Board): void {
-    if (b === this.now) return;
+    if (b === this.now || sameCells(b, this.now)) return;
     this.past.push(this.now);
     this.future = [];
     this.now = b;

@@ -4,10 +4,11 @@ import { buildRoute } from '../router.ts';
 
 export const COLLECTION_NAMES: Record<Collection['id'], string> = { trainyard: 'Trainyard', express: 'Trainyard Express' };
 
-export function HomeScreen({ collections, progress }: { collections: Collection[] | null; progress: Progress }) {
+export function HomeScreen({ collections, progress, notice }: { collections: Collection[] | null; progress: Progress; notice?: string }) {
   return (
     <main class="screen">
       <h1>Trainyard</h1>
+      {notice && <p class="notice">{notice}</p>}
       {collections ? (
         <>
           <nav class="list">

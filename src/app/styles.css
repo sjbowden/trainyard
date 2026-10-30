@@ -114,3 +114,4 @@ h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: 
 .tutorial .box { white-space: pre-line; line-height: 1.45; margin: 8px 0; }
 .tutorial .row { justify-content: space-between; align-items: center; margin-top: 16px; }
 .tutorial .count { color: var(--muted); }
+.notice { background: var(--panel); border: 1px solid #ffd23f; border-radius: 12px; padding: 10px 14px; line-height: 1.4; }

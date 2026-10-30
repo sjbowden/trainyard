@@ -38,10 +38,22 @@ test("Red Line's solution finishes won", () => {
 });
 
 test('runs stop at the cap', () => {
+  // a run that is still making progress when it reaches the cap
+  const p = new Player(decodeBoard(RED_LINE + '_003QQQ00'), () => {}, 3);
+  for (let i = 0; i < 20 && !p.finished; i++) p.advance(0.5, 1);
+  expect(p.finished).toBe('stopped');
+  expect(p.run.halfSteps).toBe(3);
+});
+
+test('the default cap is generous', () => {
+  expect(MAX_HALF_STEPS).toBe(4000);
+});
+
+test('a looping run stops long before the cap', () => {
   const p = new Player(loop(), () => {});
   for (let i = 0; i < 200 && !p.finished; i++) p.advance(100, 1);
   expect(p.finished).toBe('stopped');
-  expect(p.run.halfSteps).toBe(MAX_HALF_STEPS);
+  expect(p.run.halfSteps).toBeLessThan(40);
 });
 
 test('edits are locked while running', () => {

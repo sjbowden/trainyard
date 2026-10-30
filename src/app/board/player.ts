@@ -16,8 +16,11 @@ export class Player {
   readonly run: Run;
   // Starts a full half-step in, so the first half-step happens at once, as in the original.
   private clock = HALF_STEP_SECONDS;
+  /** Run states seen after each move. The rules are deterministic, so a repeat means a loop. */
+  private seen = new Set<string>();
+  private looping = false;
 
-  constructor(board: Board, private onEvents: (ev: HalfStepEvents) => void) {
+  constructor(board: Board, private onEvents: (ev: HalfStepEvents) => void, private maxHalfSteps = MAX_HALF_STEPS) {
     this.run = createRun(board);
   }
 
@@ -26,6 +29,7 @@ export class Player {
     while (this.clock >= HALF_STEP_SECONDS && !this.finished) {
       this.clock -= HALF_STEP_SECONDS;
       this.onEvents(this.run.halfStep());
+      if (this.run.halfSteps % 2 === 0 && !this.run.ended) this.checkLoop();
     }
     if (this.finished) this.clock = 0;
   }
@@ -37,7 +41,15 @@ export class Player {
 
   get finished(): Finish | null {
     if (this.run.ended) return this.run.outcome === 'running' ? null : (this.run.outcome as Finish);
-    return this.run.halfSteps >= MAX_HALF_STEPS ? 'stopped' : null;
+    if (this.looping || this.run.halfSteps >= this.maxHalfSteps) return this.run.outcome === 'crashed' ? 'crashed' : 'stopped';
+    return null;
+  }
+
+  private checkLoop(): void {
+    const trains = this.run.trains.map((t) => `${t.cell},${t.entry},${t.nextSide},${t.color},${t.segment}`).join(';');
+    const key = `${trains}|${JSON.stringify(this.run.board.cells)}`;
+    if (this.seen.has(key)) this.looping = true;
+    else this.seen.add(key);
   }
 }
 

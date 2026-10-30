@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import type { Collection, Level } from '../data/apk.ts';
-import { emptyProgress, levelKey, recordAttempt, type Progress } from './progress.ts';
+import { nextLevel } from './levels.ts';
+import { emptyProgress, isWorldUnlocked, levelKey, recordAttempt, type Progress } from './progress.ts';
 import { buildRoute, parseRoute, type Route } from './router.ts';
 import { CityScreen } from './screens/CityScreen.tsx';
 import { CollectionScreen } from './screens/CollectionScreen.tsx';
@@ -49,12 +50,6 @@ const go = (r: Route) => {
   location.hash = buildRoute(r);
 };
 
-/** The level after this one in its city, or the first of the next city. */
-function nextLevel(c: Collection, level: Level): Level | undefined {
-  const order = c.worlds.flatMap((w) => c.levels.filter((l) => l.worldSlug === w.slug).sort((a, b) => a.ordinal - b.ordinal));
-  return order[order.indexOf(level) + 1];
-}
-
 /** Dev only: ?dev=<slug> opens that original puzzle from local/collections.json. */
 function DevPuzzle({ slug }: { slug: string }) {
   const [level, setLevel] = useState<Level | null>(null);
@@ -72,6 +67,7 @@ export function App() {
   const [route, setRoute] = useState<Route>(() => parseRoute(location.hash));
   const [collections, setCollections] = useState<Collection[] | null | undefined>(undefined);
   const [progress, setProgress] = useState<Progress>(emptyProgress);
+  const [notice, setNotice] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const onHash = () => setRoute(parseRoute(location.hash));
@@ -100,8 +96,9 @@ export function App() {
     case 'load':
       return (
         <LoadApkScreen
-          onLoaded={(c) => {
+          onLoaded={(c, saved) => {
             setCollections(c);
+            setNotice(saved ? undefined : "This phone wouldn't save the puzzles, so you'll need to load the APK again next time.");
             go({ name: 'home' });
           }}
         />
@@ -110,13 +107,13 @@ export function App() {
       if (collection) return <CollectionScreen collection={collection} progress={progress} />;
       break;
     case 'city':
-      if (collection) return <City key={route.world} collection={collection} world={route.world} progress={progress} />;
+      if (collection && isWorldUnlocked(collection, route.world, progress)) return <City key={route.world} collection={collection} world={route.world} progress={progress} />;
       break;
     case 'puzzle': {
       const level = collection?.levels.find((l) => l.slug === route.slug);
-      if (collection && level) {
+      if (collection && level && isWorldUnlocked(collection, level.worldSlug, progress)) {
         const key = levelKey(collection.id, level.slug);
-        const next = nextLevel(collection, level);
+        const next = nextLevel(collection, level.slug, progress);
         return (
           <PuzzleScreen
             key={key}
@@ -133,5 +130,5 @@ export function App() {
       break;
     }
   }
-  return <HomeScreen collections={collections} progress={progress} />;
+  return <HomeScreen collections={collections} progress={progress} notice={notice} />;
 }

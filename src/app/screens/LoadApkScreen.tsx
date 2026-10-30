@@ -4,7 +4,7 @@ import type { Collection } from '../../data/apk.ts';
 import { buildRoute } from '../router.ts';
 import { importApk } from '../store.ts';
 
-export function LoadApkScreen({ onLoaded }: { onLoaded: (c: Collection[]) => void }) {
+export function LoadApkScreen({ onLoaded }: { onLoaded: (c: Collection[], saved: boolean) => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,7 +14,8 @@ export function LoadApkScreen({ onLoaded }: { onLoaded: (c: Collection[]) => voi
     setBusy(true);
     setError(null);
     try {
-      onLoaded(await importApk(file, wasmUrl));
+      const { collections, saved } = await importApk(file, wasmUrl);
+      onLoaded(collections, saved);
     } catch (err) {
       setError((err as Error).message);
     } finally {

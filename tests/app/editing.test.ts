@@ -98,6 +98,6 @@ test('history undo and redo', () => {
   expect(h.canRedo).toBe(true);
   expect(h.redo()).toBe(b);
   h.undo();
-  h.push(clearTrack(a));
+  h.push(drawPath(a, path([1, 4], [2, 4], [3, 4])));
   expect(h.canRedo).toBe(false);
 });

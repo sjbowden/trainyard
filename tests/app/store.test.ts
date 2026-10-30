@@ -14,7 +14,8 @@ afterEach(() => vi.restoreAllMocks());
 describe.skipIf(!apk)('with an APK', () => {
   test('importApk saves collections that loadCollections returns', async () => {
     const imported = await importApk(new Blob([readFileSync(apk!)]), wasmUrl);
-    expect(imported.map((c) => c.levels.length)).toEqual([165, 68]);
+    expect(imported.saved).toBe(true);
+    expect(imported.collections.map((c) => c.levels.length)).toEqual([165, 68]);
     const loaded = await loadCollections();
     expect(loaded?.[0]?.levels[0]?.slug).toBe('redLine');
   });
@@ -23,6 +24,15 @@ describe.skipIf(!apk)('with an APK', () => {
     await importApk(new Blob([readFileSync(apk!)]), wasmUrl);
     await expect(importApk(new Blob(['not an apk']), wasmUrl)).rejects.toThrow("That file isn't a Trainyard APK.");
     expect((await loadCollections())?.length).toBe(2);
+  });
+
+  test('importApk still returns the puzzles when the phone will not save them', async () => {
+    vi.spyOn(indexedDB, 'open').mockImplementation(() => {
+      throw new Error('denied');
+    });
+    const imported = await importApk(new Blob([readFileSync(apk!)]), wasmUrl);
+    expect(imported.saved).toBe(false);
+    expect(imported.collections).toHaveLength(2);
   });
 });
 

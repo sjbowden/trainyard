@@ -5,6 +5,7 @@ import type { Board } from '../../engine/types.ts';
 import { speedFromSlider } from '../board/animation.ts';
 import { BoardCanvas } from '../board/BoardCanvas.tsx';
 import { PuzzleController, type Finish } from '../board/player.ts';
+import { DebouncedSave } from '../saver.ts';
 import type { DrawnEffect } from '../board/render.ts';
 import { defaultTheme } from '../theme/default.ts';
 import { unlockAudio } from '../theme/sound.ts';
@@ -26,7 +27,7 @@ export interface PuzzleScreenProps {
 const MESSAGES: Record<Exclude<Finish, 'won'>, string> = {
   crashed: 'Crashed!',
   stalled: 'The trains stopped before every goal was filled.',
-  stopped: 'Stopped: the trains never finished.',
+  stopped: 'Stopped: the trains would never finish.',
 };
 
 function initialBoard(code: string, solution: string): Board {
@@ -47,7 +48,6 @@ export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult
   const [slider, setSlider] = useState(0.5);
   const [finish, setFinish] = useState<Finish | null>(null);
   const effects = useRef<(DrawnEffect & { born: number })[]>([]);
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const results = useRef(onResult);
   results.current = onResult;
 
@@ -75,12 +75,24 @@ export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult
     return c;
   }, [puzzleCode]);
 
-  useEffect(() => () => clearTimeout(saveTimer.current), []);
+  const saver = useMemo(() => new DebouncedSave<string>((solution) => results.current(solution, false), 500), [puzzleCode]);
+
+  // Save a pending drawing at once when leaving the puzzle or when iOS backgrounds the app.
+  useEffect(() => {
+    const flush = () => saver.flush();
+    const onVisibility = () => document.visibilityState === 'hidden' && flush();
+    addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      removeEventListener('pagehide', flush);
+      document.removeEventListener('visibilitychange', onVisibility);
+      flush();
+    };
+  }, [saver]);
 
   const edited = () => {
     refresh();
-    clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => results.current(controller.solution, false), 500);
+    saver.schedule(controller.solution);
   };
 
   const startStop = () => {
