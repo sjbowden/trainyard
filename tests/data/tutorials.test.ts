@@ -38,3 +38,22 @@ test('rewrites lines about controls this app does differently', () => {
   ]);
 });
 
+
+test('reads the hand strokes and taps in each step', () => {
+  const xml = `<tutorial><step>
+    <yard_reset full="hh002OjC3GiaC00"/>
+    <create_box>Draw</create_box>
+    <hand_enterTo cr="1,3" speed="2"/>
+    <hand_fingerDown/>
+    <hand_moveTo cr="3,3"/>
+    <hand_moveTo cr="3,4"/>
+    <hand_fingerUp/>
+    <hand_moveTo cr="5,5"/>
+    <hand_fingerDoubleTap/>
+    <hand_leave/>
+  </step></tutorial>`;
+  expect(parseTutorial(xml)[0]!.actions).toEqual([
+    { kind: 'stroke', cells: [[1, 3], [3, 3], [3, 4]] },
+    { kind: 'tap', cell: [5, 5] },
+  ]);
+});

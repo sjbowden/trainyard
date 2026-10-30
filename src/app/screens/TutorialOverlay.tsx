@@ -1,32 +1,12 @@
 import { useMemo, useState } from 'preact/hooks';
 import type { Tutorial } from '../../data/apk.ts';
-import { parseTutorial } from '../../data/tutorials.ts';
-import { decodeBoard } from '../../engine/codec.ts';
-import type { Board } from '../../engine/types.ts';
 import { BoardPreview } from '../board/BoardPreview.tsx';
 import type { Theme } from '../theme/theme.ts';
-
-interface Page { title: string; boxes: string[]; board: Board | null }
+import { tutorialPages } from '../tutorialPages.ts';
 
 /** Steps through a city's tutorials: each step's text over its board. */
 export function TutorialOverlay({ tutorials, theme, onClose }: { tutorials: Tutorial[]; theme: Theme; onClose: () => void }) {
-  const pages = useMemo(() => {
-    const out: Page[] = [];
-    for (const t of tutorials) {
-      let board: Board | null = null;
-      for (const step of parseTutorial(t.xml)) {
-        if (step.board) {
-          try {
-            board = decodeBoard(step.board);
-          } catch {
-            board = null;
-          }
-        }
-        if (step.boxes.length) out.push({ title: t.name, boxes: step.boxes, board });
-      }
-    }
-    return out;
-  }, [tutorials]);
+  const pages = useMemo(() => tutorialPages(tutorials), [tutorials]);
   const [i, setI] = useState(0);
   const page = pages[i];
   if (!page) return null;
