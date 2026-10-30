@@ -26,3 +26,15 @@ test.skipIf(!existsSync('local/collections.json'))('parses the original welcome 
   expect(steps[0]!.boxes[0]).toBe('Welcome to TRAINYARD!');
   expect(steps[1]!.board).toBe('hh002OjC3GiaC00');
 });
+
+test('rewrites lines about controls this app does differently', () => {
+  const xml = `<tutorial><step>
+    <create_box>Don't forget about ERASE[br]and UNDO. You can even[br]SHAKE to erase all tracks!</create_box>
+    <create_box>You can also switch tracks[br]with a simple DOUBLE TAP</create_box>
+  </step></tutorial>`;
+  expect(parseTutorial(xml)[0]!.boxes).toEqual([
+    "Don't forget about ERASE\nand UNDO. You can even\ntap CLEAR to erase all tracks!",
+    'You can also switch tracks\nwith a simple TAP',
+  ]);
+});
+
