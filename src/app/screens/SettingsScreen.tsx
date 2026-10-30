@@ -25,6 +25,7 @@ export function SettingsScreen() {
       <p class="footer">
         <a href={buildRoute({ name: 'load' })}>Load a different APK</a>
       </p>
+      <p class="version">Version {__BUILD__}</p>
     </main>
   );
 }

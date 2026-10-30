@@ -22,11 +22,12 @@ const devPuzzles: Plugin = {
 
 export default defineConfig({
   base: '/trainyard/',
+  define: { __BUILD__: JSON.stringify(new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC') },
   plugins: [
     preact(),
     devPuzzles,
     VitePWA({
-      // A new version waits until the app is fully closed, so an update never reloads mid-puzzle.
+      // The app decides when to switch versions (src/app/updates.ts), never mid-puzzle.
       registerType: 'prompt',
       includeAssets: ['apple-touch-icon.png'],
       manifest: {

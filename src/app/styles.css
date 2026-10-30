@@ -123,4 +123,5 @@ h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: 
 .setting { gap: 16px; padding: 12px 16px; }
 .setting .hint { display: block; color: var(--muted); font-size: 14px; margin-top: 4px; }
 .setting input { width: 28px; height: 28px; accent-color: var(--accent); flex: none; }
+.version { color: var(--muted); text-align: center; font-size: 13px; }
 .notice { background: var(--panel); border: 1px solid #ffd23f; border-radius: 12px; padding: 10px 14px; line-height: 1.4; }
