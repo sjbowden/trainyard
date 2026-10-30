@@ -69,8 +69,10 @@ function City({ collection, world, progress }: { collection: Collection; world: 
   );
 }
 
-const go = (r: Route) => {
-  location.hash = buildRoute(r);
+/** Navigates; `replace` swaps the current history entry instead of adding one. */
+const go = (r: Route, replace = false) => {
+  if (replace) location.replace(buildRoute(r));
+  else location.hash = buildRoute(r);
 };
 
 /** Dev only: ?dev=<slug> opens that original puzzle from local/collections.json. */
@@ -147,7 +149,8 @@ export function App() {
             level={level}
             progress={progress}
             onResult={(solution, solved) => record(key, solution, solved)}
-            onNext={next ? () => go({ name: 'puzzle', collection: collection.id, slug: next.slug }) : undefined}
+            // replace, so the header's Back skips past every puzzle played in a row
+            onNext={next ? () => go({ name: 'puzzle', collection: collection.id, slug: next.slug }, true) : undefined}
           />
         );
       }

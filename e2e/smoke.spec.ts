@@ -116,3 +116,30 @@ test('the speed setting carries from puzzle to puzzle', async ({ page }) => {
   await expect(page.locator('input[type=range]')).toHaveValue('0.9');
 });
 
+test('after a solve, Back to puzzle returns to it, and the header goes home', async ({ page }) => {
+  await page.goto('./');
+  await page.getByText('Load APK').click();
+  await page.locator('input[type=file]').setInputFiles(apk!);
+  await expect(page.getByText('Trainyard Express')).toBeVisible({ timeout: 20_000 });
+  await page.getByRole('link', { name: /^Play Red Line/ }).click();
+  await page.getByRole('button', { name: 'Close' }).click();
+  await page.waitForTimeout(300);
+  await dragAcrossRow(page, 3, 1, 5);
+  await page.getByRole('button', { name: 'Start' }).click();
+  await page.getByRole('button', { name: 'Next puzzle' }).click();
+  await expect(page.getByRole('heading', { name: 'Grorange lines' })).toBeVisible();
+
+  // solve nothing here; go back to Red Line through the list and solve again
+  await page.getByRole('button', { name: 'Back' }).click();
+  await expect(page.getByRole('link', { name: /^Continue Grorange lines/ })).toBeVisible(); // home, not Red Line
+
+  await page.getByRole('link', { name: 'Choose a puzzle' }).first().click();
+  await page.getByText('Abbotsford').click();
+  await page.getByText('Red Line').click();
+  await page.getByRole('button', { name: 'Start' }).click();
+  await page.getByRole('button', { name: 'Back to puzzle' }).click();
+  await expect(page.getByRole('heading', { name: 'Red Line' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Start' })).toBeVisible();
+  await expect(page.getByText('Solved!')).toHaveCount(0);
+});
+

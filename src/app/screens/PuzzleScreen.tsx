@@ -141,7 +141,7 @@ export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult
               <h2>Solved!</h2>
               <p class="stars big">{'★'.repeat(Math.min(stars, 5))}{stars > 5 ? ` ${stars}` : ''}</p>
               <div class="row">
-                <button onClick={onBack}>Back</button>
+                <button onClick={startStop}>Back to puzzle</button>
                 {onNext && <button class="primary" onClick={onNext}>Next puzzle</button>}
               </div>
             </div>
