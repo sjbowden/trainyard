@@ -11,6 +11,12 @@ export class DebouncedSave<T> {
     this.timer = setTimeout(() => this.flush(), this.ms);
   }
 
+  /** Drops the pending value without saving it (e.g. the thing being saved is being deleted). */
+  cancel(): void {
+    clearTimeout(this.timer);
+    this.pending = null;
+  }
+
   flush(): void {
     clearTimeout(this.timer);
     const p = this.pending;

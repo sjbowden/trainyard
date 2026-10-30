@@ -1,5 +1,6 @@
 import { decodeBoard } from '../engine/codec.ts';
 import { simulate } from '../engine/sim.ts';
+import { MAX_HALF_STEPS } from './board/player.ts';
 import type { Board, Color, Piece } from '../engine/types.ts';
 
 /** The puzzle editor's rules. All functions are pure. */
@@ -43,7 +44,8 @@ export function problems(b: Board): string[] {
 export function proofHolds(code: string, proof: string | null): boolean {
   if (!proof) return false;
   try {
-    return simulate(decodeBoard(`${code}_${proof}`)).outcome === 'won';
+    // the same limit as play, so a puzzle solved in Test always unlocks Share
+    return simulate(decodeBoard(`${code}_${proof}`), MAX_HALF_STEPS).outcome === 'won';
   } catch {
     return false;
   }

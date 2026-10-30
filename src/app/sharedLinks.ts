@@ -1,9 +1,12 @@
 import type { Collection } from '../data/apk.ts';
+import { decodeBoard, encodeBoard } from '../engine/codec.ts';
 import { decodeShare, LinkError, type SharedPuzzle } from './share.ts';
 
 /** Reads a puzzle from pasted text: a full share link (possibly with words around it) or a bare payload. */
 export function parsePastedLink(text: string): SharedPuzzle {
-  const fromUrl = /#\/s\/(\S+)/.exec(text)?.[1];
+  // stop at the payload's last character, so trailing punctuation or brackets are left out
+  // a damaged link (no well-formed payload after #/s/) is still decoded, to say it's damaged
+  const fromUrl = /#\/s\/(\d+\.[A-Za-z0-9_-]+\.[0-9a-f]{8})/.exec(text)?.[1] ?? /#\/s\/(\S+)/.exec(text)?.[1];
   const bare = /^\s*(\d+\.[A-Za-z0-9_-]+\.[0-9a-f]{8})\s*$/.exec(text)?.[1];
   const payload = fromUrl ?? bare;
   if (!payload) throw new LinkError("That isn't a puzzle link.");
@@ -12,7 +15,10 @@ export function parsePastedLink(text: string): SharedPuzzle {
 
 /** Original puzzles are never accepted from links (they arrive only from the player's APK). */
 export function checkNotOriginal(p: SharedPuzzle, collections: Collection[] | null): void {
-  if (collections?.some((c) => c.levels.some((l) => l.code === p.code))) throw new LinkError("That's one of the original puzzles.");
+  // compare re-encoded codes, so the same puzzle spelled differently is still caught
+  const canonical = (code: string) => encodeBoard(decodeBoard(code), { solution: false });
+  const code = canonical(p.code);
+  if (collections?.some((c) => c.levels.some((l) => canonical(l.code) === code))) throw new LinkError("That's one of the original puzzles.");
 }
 
 /** True when running as the installed home-screen app rather than in Safari. */

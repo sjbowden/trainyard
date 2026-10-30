@@ -52,7 +52,9 @@ test('make a puzzle, solve it to unlock Share, and lose Share by changing it', a
   await tapCell(page, 1, 3);
   await expect(page.getByRole('dialog', { name: 'Outlet' })).toBeVisible();
   await page.screenshot({ path: 'test-results/piece-sheet.png' });
+  await page.getByRole('button', { name: 'Right' }).click(); // already selected: nothing changes
   await page.getByRole('button', { name: 'Done' }).click();
+  await expect(page.getByRole('button', { name: 'Share' })).toBeEnabled();
 
   // move the goal: Share locks again
   await page.getByRole('button', { name: 'Erase' }).click();
@@ -128,3 +130,50 @@ test('in the installed app, opening a link adds the puzzle and opens it', async 
   await app.getByRole('button', { name: 'Back', exact: true }).click();
   await expect(app.locator('a[href^="#/play/s-"]')).toHaveCount(1);
 });
+
+function storedKeys(page: Page, key: string): Promise<string[]> {
+  return page.evaluate(
+    (k) =>
+      new Promise<string[]>((resolve) => {
+        const open = indexedDB.open('trainyard');
+        open.onsuccess = () => {
+          const req = open.result.transaction('kv').objectStore('kv').get(k);
+          req.onsuccess = () => {
+            const v = req.result;
+            resolve(Array.isArray(v) ? v.map((p: { name: string }) => p.name) : Object.keys(v?.levels ?? {}));
+          };
+        };
+      }),
+    key,
+  );
+}
+
+test('a deleted puzzle stays deleted, with its progress', async ({ page }) => {
+  page.on('dialog', (d) => void d.accept());
+  await makePuzzle(page);
+  await page.getByRole('button', { name: 'Test' }).click();
+  await page.waitForTimeout(200);
+  await drag(page, 3, 1, 4); // leave some track drawn: saved as progress
+  await page.waitForTimeout(700);
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+
+  // edit, then delete straight away (the edit's save is still pending)
+  await page.getByRole('button', { name: 'Rock' }).click();
+  await tapCell(page, 3, 0);
+  await page.getByRole('button', { name: 'Delete puzzle' }).click();
+  await expect(page.getByRole('button', { name: 'New puzzle' })).toBeVisible();
+  await page.waitForTimeout(800);
+  expect(await storedKeys(page, 'custom/v1')).toEqual([]);
+
+  // another puzzle's save must not bring the deleted one's progress back
+  await makePuzzle(page);
+  await page.getByRole('button', { name: 'Test' }).click();
+  await page.waitForTimeout(200);
+  await drag(page, 3, 1, 4);
+  await page.waitForTimeout(800);
+  expect((await storedKeys(page, 'progress/v1')).length).toBe(1);
+  await page.reload();
+  await page.goto('./#/mine');
+  await expect(page.locator('a[href^="#/edit/"]')).toHaveCount(1);
+});
+

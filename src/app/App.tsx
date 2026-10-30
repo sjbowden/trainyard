@@ -12,7 +12,7 @@ import { checkNotOriginal, parsePastedLink } from './sharedLinks.ts';
 import { loadSettings } from './settings.ts';
 import { SettingsScreen } from './screens/SettingsScreen.tsx';
 import { markTutorialSeen, tutorialSeen } from './tutorialsSeen.ts';
-import { emptyProgress, isWorldUnlocked, levelKey, recordAttempt, type Progress } from './progress.ts';
+import { emptyProgress, isWorldUnlocked, levelKey, recordAttempt, withoutLevel, type Progress } from './progress.ts';
 import { buildRoute, parseRoute, puzzleBackRoute, type Route } from './router.ts';
 import { CityScreen } from './screens/CityScreen.tsx';
 import { CollectionScreen } from './screens/CollectionScreen.tsx';
@@ -185,12 +185,17 @@ export function App() {
             void saveCustomPuzzle(p);
           }}
           onTest={() => go({ name: 'play', id: puzzle.id })}
-          onDelete={() =>
+          onDelete={() => {
+            // drop its progress from memory too, or the next save would write it back
+            const next = withoutLevel(latest.current, customKey(puzzle.id));
+            latest.current = next;
+            setProgress(next);
+            setCustom((list) => list.filter((x) => x.id !== puzzle.id));
             void deleteCustomPuzzle(puzzle.id).then(() => {
               refreshCustom();
               go({ name: 'mine' });
-            })
-          }
+            });
+          }}
         />
       );
     }

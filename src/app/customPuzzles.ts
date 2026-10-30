@@ -33,9 +33,12 @@ export function saveCustomPuzzle(p: CustomPuzzle): Promise<void> {
 export const sharedId = (code: string) => `s-${encodeShare({ name: '', code }).slice(-8)}`;
 
 export async function addShared(s: SharedPuzzle): Promise<CustomPuzzle> {
-  const id = sharedId(s.code);
-  const existing = (await listCustomPuzzles()).find((p) => p.id === id);
-  if (existing) return existing;
+  const list = await listCustomPuzzles();
+  const same = list.find((p) => p.source === 'shared' && p.code === s.code);
+  if (same) return same;
+  // a different puzzle with the same short id (very unlikely) gets its own id
+  const base = sharedId(s.code);
+  const id = list.some((p) => p.id === base) ? `${base}-${Date.now().toString(36)}` : base;
   const p: CustomPuzzle = { id, source: 'shared', name: s.name, code: s.code, proof: null, created: Date.now() };
   await saveCustomPuzzle(p);
   return p;

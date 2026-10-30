@@ -66,9 +66,21 @@ export function EditorScreen({ puzzle, onSave, onTest, onDelete }: EditorScreenP
   const latest = useRef(puzzle);
   latest.current = { ...puzzle, name: name.trim() || 'Untitled', code, proof };
   const saver = useMemo(() => new DebouncedSave<CustomPuzzle>(onSave, 400), [puzzle.id]);
-  useEffect(() => () => saver.flush(), [saver]);
+  // save a pending edit when leaving, or when iOS backgrounds the app
+  useEffect(() => {
+    const flush = () => saver.flush();
+    const onVisibility = () => document.visibilityState === 'hidden' && flush();
+    addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      removeEventListener('pagehide', flush);
+      document.removeEventListener('visibilitychange', onVisibility);
+      flush();
+    };
+  }, [saver]);
 
   const change = (next: Board) => {
+    if (encodeBoard(next, { solution: false }) === code) return; // e.g. re-tapping the current choice
     setBoard(next);
     setProof(null); // any change to the pieces needs a new solve before sharing
     saver.schedule({ ...latest.current, code: encodeBoard(next, { solution: false }), proof: null });
@@ -81,7 +93,7 @@ export function EditorScreen({ puzzle, onSave, onTest, onDelete }: EditorScreenP
     if (piece.kind !== 'rock') setEditing(cell);
   };
 
-  const canShare = proofHolds(code, proof);
+  const canShare = useMemo(() => proofHolds(code, proof), [code, proof]);
   const issues = problems(board);
 
   const share = async () => {
@@ -140,7 +152,11 @@ export function EditorScreen({ puzzle, onSave, onTest, onDelete }: EditorScreenP
         <button class="go" disabled={!canShare} onClick={() => void share()}>Share</button>
         <button
           class="danger"
-          onClick={() => confirm(`Delete “${latest.current.name}”?`) && onDelete()}
+          onClick={() => {
+            if (!confirm(`Delete “${latest.current.name}”?`)) return;
+            saver.cancel(); // a pending save would bring the puzzle back
+            onDelete();
+          }}
           aria-label="Delete puzzle"
         >
           🗑

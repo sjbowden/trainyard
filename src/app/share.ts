@@ -64,10 +64,12 @@ export function encodeShare(p: SharedPuzzle): string {
 }
 
 export function decodeShare(payload: string): SharedPuzzle {
+  // the version comes first, so a future format of any shape gets the right message
+  const version = /^(\d+)\./.exec(payload.trim())?.[1];
+  if (version && version !== VERSION) throw new LinkError('This puzzle link needs a newer version of the app.');
   const m = /^(\d+)\.([A-Za-z0-9_-]+)\.([0-9a-f]{8})$/.exec(payload.trim());
   if (!m) throw new LinkError(DAMAGED);
-  const [, version, data, sum] = m;
-  if (version !== VERSION) throw new LinkError('This puzzle link needs a newer version of the app.');
+  const [, , data, sum] = m;
   if (checksum(`${version}.${data}`) !== sum) throw new LinkError(DAMAGED);
   let parsed: unknown;
   try {

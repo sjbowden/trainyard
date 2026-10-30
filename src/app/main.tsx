@@ -1,13 +1,12 @@
 import { render } from 'preact';
 import { registerSW } from 'virtual:pwa-register';
 import { App } from './App.tsx';
-import { parseRoute } from './router.ts';
 import './styles.css';
-import { Updater } from './updates.ts';
+import { isSafeToUpdate, Updater } from './updates.ts';
 
 const updater = new Updater(
   () => void updateSW(true), // activates the new version and reloads
-  () => parseRoute(location.hash).name !== 'puzzle',
+  () => isSafeToUpdate(location.hash),
 );
 const updateSW = registerSW({
   immediate: true,

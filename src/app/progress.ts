@@ -29,6 +29,13 @@ export function isWorldUnlocked(c: Collection, worldSlug: string, p: Progress): 
   return world !== undefined && starsEarned(c, p) >= world.starsToUnlock;
 }
 
+/** Progress without one level (used when a custom puzzle is deleted). */
+export function withoutLevel(p: Progress, key: string): Progress {
+  const levels = { ...p.levels };
+  delete levels[key];
+  return { levels };
+}
+
 /** Saves the latest solution; a level stays solved once it has been solved. */
 export function recordAttempt(p: Progress, key: string, solution: string, solved: boolean): Progress {
   const was = p.levels[key]?.solved ?? false;
