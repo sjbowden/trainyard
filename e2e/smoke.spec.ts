@@ -85,3 +85,20 @@ test('with the Solved! card turned off, a win opens the next puzzle', async ({ p
   await expect(page.getByRole('heading', { name: 'Grorange lines' })).toBeVisible({ timeout: 15_000 });
   await expect(page.getByText('Solved!')).toHaveCount(0);
 });
+
+test('after a crash, a tap anywhere goes back to editing', async ({ page }) => {
+  await page.goto('./');
+  await page.getByText('Load APK').click();
+  await page.locator('input[type=file]').setInputFiles(apk!);
+  await expect(page.getByText('Trainyard Express')).toBeVisible({ timeout: 20_000 });
+  await page.getByRole('link', { name: /^Play Red Line/ }).click();
+  await page.getByRole('button', { name: 'Close' }).click();
+  await page.waitForTimeout(300);
+  await dragAcrossRow(page, 3, 1, 4); // stops one cell short of the goal: the train runs off the track
+  await page.getByRole('button', { name: 'Start' }).click();
+  await expect(page.getByText('Tap anywhere to keep editing')).toBeVisible({ timeout: 15_000 });
+  await page.mouse.click(30, 300);
+  await expect(page.getByRole('button', { name: 'Start' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Undo' })).toBeEnabled(); // the drawing is still there
+});
+

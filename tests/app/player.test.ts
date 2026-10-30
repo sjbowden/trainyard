@@ -2,7 +2,7 @@ import { expect, test } from 'vitest';
 import { MAX_HALF_STEPS, Player, PuzzleController } from '../../src/app/board/player.ts';
 import { decodeBoard } from '../../src/engine/codec.ts';
 import { SEGMENT, SIDE } from '../../src/engine/types.ts';
-import { at, board, dummyGoal, outlet, track } from '../engine/helpers.ts';
+import { at, board, dummyGoal, goal, outlet, track } from '../engine/helpers.ts';
 
 const RED_LINE = 'hh002Oja3Giaa00';
 const { R } = SIDE;
@@ -86,4 +86,20 @@ test('the controller reports a win once', () => {
   c.start();
   for (let i = 0; i < 40; i++) c.advance(0.5, 1);
   expect(results).toEqual(['won']);
+});
+
+test('a crash ends the run at once and freezes it there', () => {
+  const results: string[] = [];
+  // the blue train runs off the board at once; the red one would keep going for several steps
+  const c = new PuzzleController(board({ '0,3': outlet(R, 0), '1,3': track(LR), '2,3': track(LR), '3,3': track(LR), '4,3': goal([SIDE.L], 0, 2), '6,0': outlet(R, 2) }), (f) => results.push(f));
+  c.start();
+  c.advance(0, 1); // A: both trains leave their outlets
+  c.advance(0.5, 1); // B: blue crashes
+  expect(results).toEqual(['crashed']);
+  expect(c.playing!.run.ended).toBe(false);
+  const steps = c.playing!.run.halfSteps;
+  c.advance(5, 1);
+  expect(c.playing!.run.halfSteps).toBe(steps);
+  c.stop();
+  expect(c.running).toBe(false);
 });

@@ -47,9 +47,11 @@ export class Player {
     return (this.run.halfSteps % 2) * 0.5 + Math.min(this.clock, HALF_STEP_SECONDS) / (2 * HALF_STEP_SECONDS);
   }
 
+  /** A crash ends play at once (the run is frozen on it), unlike the original, which ran on. */
   get finished(): Finish | null {
+    if (this.run.outcome === 'crashed') return 'crashed';
     if (this.run.ended) return this.run.outcome === 'running' ? null : (this.run.outcome as Finish);
-    if (this.looping || this.run.halfSteps >= this.maxHalfSteps) return this.run.outcome === 'crashed' ? 'crashed' : 'stopped';
+    if (this.looping || this.run.halfSteps >= this.maxHalfSteps) return 'stopped';
     return null;
   }
 

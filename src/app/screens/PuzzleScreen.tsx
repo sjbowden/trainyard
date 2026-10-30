@@ -146,7 +146,6 @@ export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult
             </div>
           </div>
         )}
-        {finish && finish !== 'won' && <div class="toast">{MESSAGES[finish]}</div>}
       </div>
       <div class="tools">
         <button class={mode === 'draw' ? 'on' : ''} disabled={controller.running} onClick={() => setMode(mode === 'draw' ? 'erase' : 'draw')}>
@@ -161,6 +160,15 @@ export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult
         <span>Speed</span>
         <input type="range" min="0.1" max="1" step="0.01" value={slider} onInput={(e) => setSlider(Number((e.target as HTMLInputElement).value))} />
       </label>
+      {finish && finish !== 'won' && (
+        // the run is frozen on the failure; a tap anywhere goes back to editing
+        <button class="tap-to-edit" onClick={startStop} aria-label="Back to editing">
+          <span class="toast">
+            {MESSAGES[finish]}
+            <small>Tap anywhere to keep editing</small>
+          </span>
+        </button>
+      )}
     </main>
   );
 }
