@@ -72,14 +72,15 @@ export async function readApk(bytes: Uint8Array, sqlConfig?: SqlJsConfig): Promi
 }
 
 /** The original's board art and sounds, for the Original theme. Sounds are keyed by file name without `.ogg`. */
-export interface ThemeAssets { atlas: Uint8Array; sounds: Record<string, Uint8Array> }
+export interface ThemeAssets { atlas: Uint8Array<ArrayBuffer>; sounds: Record<string, Uint8Array<ArrayBuffer>> }
 
 const ATLAS = 'assets/FullAtlasHD.png';
 const SOUND = /^assets\/audio\/(\w+)\.ogg$/;
 
 /** Null when the atlas is missing, or the file isn't a zip. */
 export function readThemeAssets(bytes: Uint8Array): ThemeAssets | null {
-  let files: Record<string, Uint8Array>;
+  // fflate unzips into fresh ArrayBuffers, never shared ones
+  let files: Record<string, Uint8Array<ArrayBuffer>>;
   try {
     files = unzipSync(bytes, { filter: (f) => f.name === ATLAS || SOUND.test(f.name) });
   } catch {
@@ -87,7 +88,7 @@ export function readThemeAssets(bytes: Uint8Array): ThemeAssets | null {
   }
   const atlas = files[ATLAS];
   if (!atlas) return null;
-  const sounds: Record<string, Uint8Array> = {};
+  const sounds: Record<string, Uint8Array<ArrayBuffer>> = {};
   for (const [name, data] of Object.entries(files)) {
     const m = SOUND.exec(name);
     if (m) sounds[m[1]!] = data;

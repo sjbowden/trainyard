@@ -47,7 +47,7 @@ const DIGITS = ['111101101101111', '010110010010111', '111001111100111', '111001
 const set = (x: number, y: number, rgb: number[]) => {
   if (x < 0 || y < 0 || x >= W || y >= H) return;
   const i = (y * W + x) * 4;
-  [data[i], data[i + 1], data[i + 2], data[i + 3]] = [...rgb, 255];
+  data.set([...rgb, 255], i);
 };
 for (const r of regions) {
   const color = [255, 0, 255];
