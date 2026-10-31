@@ -523,5 +523,19 @@
   "segments": 11,
   "nodes": 36337,
   "ms": 1102
+ },
+ "threePeas": {
+  "stars": 4,
+  "status": "solved",
+  "segments": 15,
+  "nodes": 670418,
+  "ms": 9127
+ },
+ "akeeTree": {
+  "stars": 5,
+  "status": "solved",
+  "segments": 12,
+  "nodes": 30565,
+  "ms": 316
  }
 }
