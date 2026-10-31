@@ -1,5 +1,5 @@
 import { createStore, get, set, type UseStore } from 'idb-keyval';
-import { readApk, type Collection } from '../data/apk.ts';
+import { readApk, readThemeAssets, type Collection } from '../data/apk.ts';
 import { emptyProgress, type Progress } from './progress.ts';
 
 /**
@@ -9,6 +9,10 @@ import { emptyProgress, type Progress } from './progress.ts';
 
 const COLLECTIONS = 'collections/v1';
 const PROGRESS = 'progress/v1';
+const THEME = 'theme/original/v1';
+
+/** The Original theme's art and sounds, as kept on the device. */
+export interface StoredThemeAssets { atlas: Blob; sounds: Record<string, Blob> }
 
 // One connection, reopened after a failure so a passing storage error isn't remembered.
 let cached: UseStore | null = null;
@@ -32,21 +36,50 @@ function withTimeout<T>(p: Promise<T>): Promise<T> {
   });
 }
 
-/** Reads an APK and saves its puzzles. `saved` is false if the phone wouldn't store them. */
-export async function importApk(file: Blob, wasmUrl: string): Promise<{ collections: Collection[]; saved: boolean }> {
+/**
+ * Reads an APK and saves its puzzles, then the original's art and sounds. `saved` is false if the
+ * phone wouldn't store the puzzles, `themeSaved` if it wouldn't store the art (the puzzles still count).
+ */
+export async function importApk(file: Blob, wasmUrl: string): Promise<{ collections: Collection[]; saved: boolean; themeSaved: boolean }> {
   let collections: Collection[];
+  const bytes = new Uint8Array(await file.arrayBuffer());
   try {
-    collections = await readApk(new Uint8Array(await file.arrayBuffer()), { locateFile: () => wasmUrl });
+    collections = await readApk(bytes, { locateFile: () => wasmUrl });
   } catch (err) {
     if ((err as Error).message === 'Not a Trainyard APK') throw new Error("That file isn't a Trainyard APK.");
     throw new Error("Couldn't read the APK. Check your connection and try again.");
   }
   try {
     await withTimeout(set(COLLECTIONS, collections, store()));
-    return { collections, saved: true };
   } catch {
     forget();
-    return { collections, saved: false };
+    return { collections, saved: false, themeSaved: false };
+  }
+  return { collections, saved: true, themeSaved: await saveThemeAssets(bytes) };
+}
+
+async function saveThemeAssets(bytes: Uint8Array): Promise<boolean> {
+  try {
+    const assets = readThemeAssets(bytes);
+    if (!assets) return false;
+    const stored: StoredThemeAssets = {
+      atlas: new Blob([assets.atlas], { type: 'image/png' }),
+      sounds: Object.fromEntries(Object.entries(assets.sounds).map(([k, v]) => [k, new Blob([v], { type: 'audio/ogg' })])),
+    };
+    await withTimeout(set(THEME, stored, store()));
+    return true;
+  } catch {
+    forget();
+    return false;
+  }
+}
+
+export async function loadThemeAssets(): Promise<StoredThemeAssets | null> {
+  try {
+    return (await withTimeout(get<StoredThemeAssets>(THEME, store()))) ?? null;
+  } catch {
+    forget();
+    return null;
   }
 }
 

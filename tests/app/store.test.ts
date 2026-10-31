@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { clear, createStore } from 'idb-keyval';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { importApk, loadCollections, loadProgress, saveProgress } from '../../src/app/store.ts';
+import { importApk, loadCollections, loadProgress, loadThemeAssets, saveProgress } from '../../src/app/store.ts';
 
 const wasmUrl = createRequire(import.meta.url).resolve('sql.js/dist/sql-wasm.wasm');
 const apk = readdirSync('.').find((f) => f.endsWith('.apk'));
@@ -33,7 +33,16 @@ describe.skipIf(!apk)('with an APK', () => {
     });
     const imported = await importApk(new Blob([readFileSync(apk!)]), wasmUrl);
     expect(imported.saved).toBe(false);
+    expect(imported.themeSaved).toBe(false);
     expect(imported.collections).toHaveLength(2);
+  });
+
+  test('importApk keeps the original art and sounds', async () => {
+    const imported = await importApk(new Blob([readFileSync(apk!)]), wasmUrl);
+    expect(imported.themeSaved).toBe(true);
+    const assets = await loadThemeAssets();
+    expect(assets?.atlas.type).toBe('image/png');
+    expect(assets?.sounds.Game_Crash?.type).toBe('audio/ogg');
   });
 });
 
@@ -47,6 +56,10 @@ test('loadCollections returns null when storage throws', async () => {
   });
   expect(await loadCollections()).toBeNull();
   expect(await loadProgress()).toEqual({ levels: {} });
+});
+
+test('loadThemeAssets returns null when nothing is stored', async () => {
+  expect(await loadThemeAssets()).toBeNull();
 });
 
 test('progress round-trips', async () => {

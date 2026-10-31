@@ -1,7 +1,8 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import { decodeBoard } from '../../src/engine/codec.ts';
-import { readApk, type Collection } from '../../src/data/apk.ts';
+import { zipSync } from 'fflate';
+import { readApk, readThemeAssets, type Collection } from '../../src/data/apk.ts';
 
 const apks = readdirSync('.').filter((f) => f.endsWith('.apk')).sort();
 
@@ -43,4 +44,16 @@ describe.skipIf(apks.length === 0)('readApk', async () => {
   test('rejects a file that is not a Trainyard APK', async () => {
     await expect(readApk(new Uint8Array([1, 2, 3]))).rejects.toThrow();
   });
+});
+
+describe.skipIf(apks.length === 0)('readThemeAssets', () => {
+  test('keeps the atlas and the sounds', () => {
+    const assets = readThemeAssets(readFileSync(apks[0]!))!;
+    expect([...assets.atlas.subarray(0, 4)]).toEqual([0x89, 0x50, 0x4e, 0x47]);
+    expect(Object.keys(assets.sounds)).toEqual(expect.arrayContaining(['Game_Crash', 'Game_Train_7']));
+  });
+});
+
+test('readThemeAssets returns null without the atlas', () => {
+  expect(readThemeAssets(zipSync({ 'assets/audio/Game_Crash.ogg': new Uint8Array([1]) }))).toBeNull();
 });
