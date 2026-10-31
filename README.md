@@ -22,6 +22,10 @@ Open **My puzzles** on the home screen and tap **New puzzle**. Tap a cell to pla
 
 A link opens in Safari, where the puzzle can be played straight away. **Add to my app** copies the link. In the installed app, go to **My puzzles** and tap **Paste puzzle link**. The whole puzzle is in the link; nothing is uploaded anywhere.
 
+## Board style
+
+**Settings → Board style** switches between the default look and **Original**, the original game's art and sounds. They come from your APK when you load it, and are kept on the phone like the puzzles. If you loaded the APK before this option existed, load it once more. Any sound the phone can't play falls back to the default one.
+
 ## Development
 
 - Design: `docs/superpowers/specs/2026-10-29-trainyard-design.md`
