@@ -159,3 +159,5 @@ button.danger { border-color: var(--danger); color: var(--danger); }
 .swatch.on { border-color: #ffffff; }
 .sheet .bar button { font-size: 17px; }
 .add-banner { margin-bottom: 8px; }
+.tile-row { display: flex; gap: 8px; } .tile-row .tile { flex: 1; }
+.difficulty { flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; text-align: left; min-height: 64px; width: 100%; }

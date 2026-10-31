@@ -7,7 +7,8 @@ import type { CustomPuzzle } from '../customPuzzles.ts';
 import { placePiece, problems, proofHolds, updatePiece, type Tool } from '../editor.ts';
 import { buildRoute } from '../router.ts';
 import { DebouncedSave } from '../saver.ts';
-import { shareUrl } from '../share.ts';
+import { sharePuzzle } from '../sharing.ts';
+import { solveInWorker } from '../solverClient.ts';
 import { defaultTheme } from '../theme/default.ts';
 import { PieceSheet } from './PieceSheet.tsx';
 
@@ -96,22 +97,26 @@ export function EditorScreen({ puzzle, onSave, onTest, onDelete }: EditorScreenP
   const canShare = useMemo(() => proofHolds(code, proof), [code, proof]);
   const issues = problems(board);
 
-  const share = async () => {
-    const url = shareUrl({ name: latest.current.name, code });
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: `Trainyard: ${latest.current.name}`, url });
-        return;
+  const share = async () => setMessage(await sharePuzzle(latest.current.name, code));
+
+  // Ask the solver: a solution it finds proves the puzzle, just like solving it yourself
+  const [asking, setAsking] = useState<{ cancel(): void } | null>(null);
+  useEffect(() => () => asking?.cancel(), [asking]);
+  const ask = () => {
+    saver.flush();
+    const job = solveInWorker(code);
+    setAsking(job);
+    setMessage('The solver is working on it…');
+    void job.result.then((r) => {
+      setAsking(null);
+      if (r.status === 'solved') {
+        setProof(r.solution);
+        onSave({ ...latest.current, proof: r.solution });
+        setMessage('The solver found a solution.');
+      } else {
+        setMessage("The solver couldn't find a solution in time. Solve it yourself to share it.");
       }
-    } catch (err) {
-      if ((err as Error).name === 'AbortError') return;
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      setMessage('Link copied.');
-    } catch {
-      setMessage(url);
-    }
+    });
   };
 
   const test = () => {
@@ -150,6 +155,7 @@ export function EditorScreen({ puzzle, onSave, onTest, onDelete }: EditorScreenP
       <div class="tools">
         <button class="primary go" disabled={issues.length > 0} onClick={test}>Test</button>
         <button class="go" disabled={!canShare} onClick={() => void share()}>Share</button>
+        <button disabled={issues.length > 0 || canShare || asking !== null} onClick={ask} aria-label="Ask the solver">🤖</button>
         <button
           class="danger"
           onClick={() => {

@@ -39,6 +39,10 @@ export function HomeScreen({ collections, progress, notice }: { collections: Col
           <a class="button primary" href={buildRoute({ name: 'load' })}>Load APK</a>
         </section>
       )}
+      <a class="tile spaced" href={buildRoute({ name: 'new' })}>
+        <span class="name">New puzzle for me</span>
+        <span class="muted">Easy to very hard</span>
+      </a>
       <a class="tile spaced" href={buildRoute({ name: 'mine' })}>
         <span class="name">My puzzles</span>
         <span class="muted">Make and share</span>

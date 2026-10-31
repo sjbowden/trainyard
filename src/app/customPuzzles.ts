@@ -6,13 +6,15 @@ import { forgetProgress, readStored, updateStored } from './store.ts';
 export interface CustomPuzzle {
   /** 'm-<random>' for mine; 's-<checksum of the link>' for shared, so the same link isn't added twice. */
   id: string;
-  source: 'mine' | 'shared';
+  source: 'mine' | 'shared' | 'generated';
   name: string;
   /** A puzzle-only code. */
   code: string;
   /** For mine: a solution half that solves this exact code, or null until the author solves it. */
   proof: string | null;
   created: number;
+  /** A note shown above the puzzle, e.g. that a generated puzzle may be easier than asked. */
+  note?: string;
 }
 
 const KEY = 'custom/v1';

@@ -2,9 +2,10 @@ import type { CustomPuzzle } from '../customPuzzles.ts';
 import { proofHolds } from '../editor.ts';
 import { buildRoute } from '../router.ts';
 
-export function MyPuzzlesScreen({ puzzles, onNew, onPaste, message }: { puzzles: CustomPuzzle[]; onNew: () => void; onPaste: () => void; message?: string }) {
+export function MyPuzzlesScreen({ puzzles, onNew, onPaste, onShare, message }: { puzzles: CustomPuzzle[]; onNew: () => void; onPaste: () => void; onShare?: (p: CustomPuzzle) => void; message?: string }) {
   const mine = puzzles.filter((p) => p.source === 'mine');
   const shared = puzzles.filter((p) => p.source === 'shared');
+  const generated = puzzles.filter((p) => p.source === 'generated');
   return (
     <main class="screen">
       <header class="bar">
@@ -21,6 +22,23 @@ export function MyPuzzlesScreen({ puzzles, onNew, onPaste, message }: { puzzles:
             </a>
           ))}
         </nav>
+      )}
+      {generated.length > 0 && (
+        <>
+          <h3>Generated</h3>
+          <nav class="list">
+            {generated.map((p) => (
+              <div class="tile-row" key={p.id}>
+                <a class="tile" href={buildRoute({ name: 'play', id: p.id })}>
+                  <span class="name">{p.name}</span>
+                </a>
+                {onShare && proofHolds(p.code, p.proof) && (
+                  <button onClick={() => onShare(p)} aria-label={`Share ${p.name}`}>Share</button>
+                )}
+              </div>
+            ))}
+          </nav>
+        </>
       )}
       <h3>Shared with me</h3>
       {shared.length > 0 ? (

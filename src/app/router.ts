@@ -9,6 +9,7 @@ export type Route =
   | { name: 'load' }
   | { name: 'settings' }
   | { name: 'mine' }
+  | { name: 'new' }
   | { name: 'edit'; id: string }
   | { name: 'play'; id: string }
   | { name: 'shared'; payload: string }
@@ -29,6 +30,7 @@ export function parseRoute(hash: string): Route {
   if (first === 'load') return { name: 'load' };
   if (first === 'settings') return { name: 'settings' };
   if (first === 'mine') return { name: 'mine' };
+  if (first === 'new') return { name: 'new' };
   if (first === 'edit' && c) return { name: 'edit', id: c };
   if (first === 'play' && c) return { name: 'play', id: c };
   if (first === 's' && c) return { name: 'shared', payload: c };
@@ -47,6 +49,8 @@ export function buildRoute(r: Route): string {
       return '#/settings';
     case 'mine':
       return '#/mine';
+    case 'new':
+      return '#/new';
     case 'edit':
       return `#/edit/${encodeURIComponent(r.id)}`;
     case 'play':

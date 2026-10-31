@@ -6,6 +6,8 @@ import { emptyBoard } from './editor.ts';
 import { firstOfCity, nextLevel } from './levels.ts';
 import { EditorScreen } from './screens/EditorScreen.tsx';
 import { MyPuzzlesScreen } from './screens/MyPuzzlesScreen.tsx';
+import { DIFFICULTY_NAMES, GenerateScreen } from './screens/GenerateScreen.tsx';
+import { sharePuzzle } from './sharing.ts';
 import { LinkProblem, SharedScreen } from './screens/SharedScreen.tsx';
 import { decodeShare, type SharedPuzzle } from './share.ts';
 import { checkNotOriginal, parsePastedLink } from './sharedLinks.ts';
@@ -140,6 +142,7 @@ export function App() {
             go({ name: 'edit', id: p.id });
           }}
           message={pasteMessage}
+          onShare={(p) => void sharePuzzle(p.name, p.code).then((m) => m && setPasteMessage(m))}
           onPaste={async () => {
             try {
               const shared = parsePastedLink(await navigator.clipboard.readText());
@@ -173,6 +176,25 @@ export function App() {
         />
       );
     }
+    case 'new':
+      return (
+        <GenerateScreen
+          onReady={(g) => {
+            const p: CustomPuzzle = {
+              id: `g-${g.difficulty}-${g.seed}`,
+              source: 'generated',
+              name: `${DIFFICULTY_NAMES[g.difficulty]} #${g.seed % 10000}`,
+              code: g.code,
+              proof: g.proof,
+              created: Date.now(),
+              ...(g.easierThanAsked ? { note: 'This one may be a little easier than you asked.' } : {}),
+            };
+            setCustom((list) => [p, ...list.filter((x) => x.id !== p.id)]);
+            void saveCustomPuzzle(p);
+            location.replace(buildRoute({ name: 'play', id: p.id }));
+          }}
+        />
+      );
     case 'edit': {
       const puzzle = custom.find((p) => p.id === route.id && p.source === 'mine');
       if (!puzzle) break;
@@ -219,7 +241,9 @@ export function App() {
             }
           }}
           onBack={() => go(puzzle.source === 'mine' ? { name: 'edit', id: puzzle.id } : { name: 'mine' })}
-        />
+        >
+          {puzzle.note && <p class="notice">{puzzle.note}</p>}
+        </PuzzleScreen>
       );
     }
     case 'load':

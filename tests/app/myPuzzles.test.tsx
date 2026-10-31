@@ -34,3 +34,22 @@ test('lists my puzzles and shared ones, marking only proven puzzles as ready to 
   expect(screen.getByRole('button', { name: 'New puzzle' })).toBeTruthy();
   expect(screen.getByRole('button', { name: 'Paste puzzle link' })).toBeTruthy();
 });
+
+test('the new-puzzle route', () => {
+  expect(parseRoute('#/new')).toEqual({ name: 'new' });
+  expect(buildRoute({ name: 'new' })).toBe('#/new');
+});
+
+test('generated puzzles have their own section, open to play, and can be shared', () => {
+  render(
+    <MyPuzzlesScreen
+      puzzles={[p({ id: 'g-1', source: 'generated', name: 'Hard #4821', proof: '003QQQ00' })]}
+      onNew={() => {}}
+      onPaste={() => {}}
+      onShare={() => {}}
+    />,
+  );
+  expect(screen.getByText('Generated')).toBeTruthy();
+  expect(screen.getByText('Hard #4821').closest('a')?.getAttribute('href')).toBe('#/play/g-1');
+  expect(screen.getByRole('button', { name: 'Share Hard #4821' })).toBeTruthy();
+});

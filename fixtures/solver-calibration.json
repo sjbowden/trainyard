@@ -537,5 +537,124 @@
   "segments": 12,
   "nodes": 30565,
   "ms": 316
+ },
+ "hookshot": {
+  "stars": 6,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 17150
+ },
+ "pickYourPartner": {
+  "stars": 7,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 21084
+ },
+ "primer": {
+  "stars": 8,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 24905
+ },
+ "reunited": {
+  "stars": 9,
+  "status": "solved",
+  "segments": 10,
+  "nodes": 2674,
+  "ms": 28
+ },
+ "starStuck": {
+  "stars": 10,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 16067
+ },
+ "warmUp": {
+  "stars": 4,
+  "status": "solved",
+  "segments": 8,
+  "nodes": 343,
+  "ms": 4
+ },
+ "theNumerator": {
+  "stars": 5,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 13403
+ },
+ "droneVsProbe": {
+  "stars": 6,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 13729
+ },
+ "ochosRios": {
+  "stars": 7,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 16370
+ },
+ "portCredit": {
+  "stars": 8,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 15931
+ },
+ "turtle": {
+  "stars": 9,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 16915
+ },
+ "factories": {
+  "stars": 10,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 24843
+ },
+ "tor": {
+  "stars": 10,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 10624
+ },
+ "christmasEve": {
+  "stars": 6,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 11150
+ },
+ "gaius": {
+  "stars": 6,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 44944
+ },
+ "candlesticks": {
+  "stars": 7,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 9258
+ },
+ "horhey": {
+  "stars": 8,
+  "status": "solved",
+  "segments": 11,
+  "nodes": 26683,
+  "ms": 474
  }
 }
