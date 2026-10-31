@@ -42,7 +42,7 @@ Time moves in half-steps that alternate between *center* and *edge*. It starts w
    - A goal takes it if the goal still needs that color, crossing off one instance. Otherwise the train is destroyed and the run has **crashed**.
 2. Two trains in the same piece on the same segment, or crossing on a `+`, both become the mix of their colors.
 3. In cell order, each outlet with trains left sends its next one, and each splitter releases its queued pair.
-4. If every goal has received everything it needs, the run is over. It is **won** if nothing has crashed. Trains still in outlets or on the track don't matter.
+4. If every goal has received everything it needs and no trains remain, on the track or waiting in an outlet or splitter, the run is over. It is **won** if nothing has crashed. While trains remain it carries on, so a leftover train ends up crashing, often into a full goal. (The original game checks the same thing: its `onWinWithTrainsRemaining:` solves the puzzle only when the count is zero.)
 
 **Edge half-step**
 

@@ -2,14 +2,16 @@
 
 `npm run calibrate:solver` runs the solver (`src/solver/solve.ts`) on all 233 original puzzles with a budget of 1,000,000 layouts each. The results, per puzzle (slug, stars, status, segments, nodes, time; no puzzle codes), are in `fixtures/solver-calibration.json`. The run took about 40 minutes on a desktop.
 
+These numbers were redone on 2026-10-30 after a rules fix: a puzzle is solved only once no trains remain. The first run counted 20 more originals as solved, because the solver found "solutions" that left a train behind. The puzzles still unsolved at the first run's budget were not rerun, since the stricter rule can only make them harder.
+
 | Original stars | Puzzles | Solved | Median segments (quartiles) | Median nodes (quartiles) |
 |---|---|---|---|---|
-| 1–3★ | 66 | 55 (83%) | 11 (7–14) | 2,365 (121–27,396) |
-| 4–8★ | 86 | 25 (29%) | 14 (12–15) | 30,565 (11,707–280,453) |
-| 9–15★ | 72 | 9 (12%) | 14 (10–16) | 22,377 (2,674–566,976) |
+| 1–3★ | 66 | 54 (82%) | 11 (7–15) | 2,126 (106–27,534) |
+| 4–8★ | 86 | 14 (16%) | 14 (13–15) | 51,704 (14,733–373,721) |
+| 9–15★ | 72 | 1 (1%) | 14 | 684,197 |
 | 16★+ | 9 | 0 | — | — |
 
-**Quality:** where it finds a solution, the solver's track is about as short as the best trainyard.ca player's. The best player used fewer segments on only 3 of the 89 puzzles it solved. It is best-first, so solutions are short but not proven shortest.
+**Quality:** where it finds a solution, the solver's track is about as short as the best trainyard.ca player's. The best player used fewer segments on only 5 of the 69 puzzles it solved. It is best-first, so solutions are short but not proven shortest.
 
 **Reach:** most originals of 4★ and up are beyond a million-layout search. Those puzzles demand precise timing, merges and switch sequences that the search has to stumble on.
 

@@ -1,94 +1,10 @@
 {
- "redLine": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 3,
-  "nodes": 10,
-  "ms": 2
- },
- "grorangeLines": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 5,
-  "nodes": 40,
-  "ms": 1
- },
- "yorpleLines": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 12,
-  "nodes": 22226,
-  "ms": 268
- },
- "magicalTrains": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 10,
-  "nodes": 3607,
-  "ms": 47
- },
- "theRedCorner": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 7,
-  "nodes": 106,
-  "ms": 1
- },
- "purpablu": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 16,
-  "nodes": 60869,
-  "ms": 711
- },
- "aRockInTheWay": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 7,
-  "nodes": 70,
-  "ms": 1
- },
- "greenWally": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 9,
-  "nodes": 95,
-  "ms": 1
- },
- "yellowSnake": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 23,
-  "nodes": 121,
-  "ms": 3
- },
- "uTurn": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 26,
-  "nodes": 37001,
-  "ms": 552
- },
- "journey": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 11,
-  "nodes": 112,
-  "ms": 1
- },
  "rainbow": {
   "stars": 1,
   "status": "unknown",
   "segments": null,
   "nodes": 1000001,
   "ms": 8787
- },
- "innieOutie": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 13,
-  "nodes": 5338,
-  "ms": 82
  },
  "aroundTheBack": {
   "stars": 2,
@@ -97,166 +13,12 @@
   "nodes": 1000001,
   "ms": 9874
  },
- "multiColor": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 8,
-  "nodes": 1987,
-  "ms": 12
- },
- "squiggle": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 8,
-  "nodes": 385,
-  "ms": 2
- },
- "twoTwo": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 5,
-  "nodes": 16,
-  "ms": 0
- },
- "crossover": {
-  "stars": 2,
-  "status": "solved",
-  "segments": 12,
-  "nodes": 41624,
-  "ms": 381
- },
- "mellowYellow": {
-  "stars": 2,
-  "status": "solved",
-  "segments": 7,
-  "nodes": 739,
-  "ms": 8
- },
- "deliveringOranges": {
-  "stars": 2,
-  "status": "solved",
-  "segments": 7,
-  "nodes": 232,
-  "ms": 6
- },
  "purpleParcels": {
   "stars": 2,
   "status": "unknown",
   "segments": null,
   "nodes": 1000001,
   "ms": 11412
- },
- "prellow": {
-  "stars": 2,
-  "status": "solved",
-  "segments": 7,
-  "nodes": 547,
-  "ms": 3
- },
- "aroundTheBend": {
-  "stars": 2,
-  "status": "solved",
-  "segments": 19,
-  "nodes": 610312,
-  "ms": 26909
- },
- "preenies": {
-  "stars": 2,
-  "status": "solved",
-  "segments": 24,
-  "nodes": 17054,
-  "ms": 360
- },
- "tooMany": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 17,
-  "nodes": 7939,
-  "ms": 137
- },
- "yield": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 8,
-  "nodes": 526,
-  "ms": 3
- },
- "blueBoys": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 5,
-  "nodes": 67,
-  "ms": 0
- },
- "timingTest": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 13,
-  "nodes": 2365,
-  "ms": 19
- },
- "grimaceTown": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 12,
-  "nodes": 187891,
-  "ms": 2587
- },
- "lemonLatency": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 5,
-  "nodes": 154,
-  "ms": 1
- },
- "threeReds": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 13,
-  "nodes": 11362,
-  "ms": 91
- },
- "colourTheory": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 6,
-  "nodes": 100,
-  "ms": 1
- },
- "secondary": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 15,
-  "nodes": 4325,
-  "ms": 39
- },
- "nurple": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 9,
-  "nodes": 11745,
-  "ms": 82
- },
- "microMix": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 10,
-  "nodes": 970,
-  "ms": 6
- },
- "theFirst": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 10,
-  "nodes": 27396,
-  "ms": 219
- },
- "waitOutside": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 25,
-  "nodes": 10879,
-  "ms": 171
  },
  "nineMensMorris": {
   "stars": 3,
@@ -265,33 +27,12 @@
   "nodes": 1000001,
   "ms": 10964
  },
- "eeeTee": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 18,
-  "nodes": 70126,
-  "ms": 655
- },
- "relish": {
-  "stars": 4,
-  "status": "solved",
-  "segments": 8,
-  "nodes": 406,
-  "ms": 2
- },
  "mirrorSquad": {
   "stars": 3,
   "status": "unknown",
   "segments": null,
   "nodes": 1000001,
   "ms": 13454
- },
- "cuteLoop": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 24,
-  "nodes": 148573,
-  "ms": 3533
  },
  "hourglass": {
   "stars": 4,
@@ -300,40 +41,12 @@
   "nodes": 1000001,
   "ms": 10161
  },
- "gauss": {
-  "stars": 4,
-  "status": "solved",
-  "segments": 10,
-  "nodes": 1576,
-  "ms": 10
- },
- "thirdWheel": {
-  "stars": 4,
-  "status": "solved",
-  "segments": 12,
-  "nodes": 11707,
-  "ms": 88
- },
  "turtles": {
   "stars": 4,
   "status": "unknown",
   "segments": null,
   "nodes": 1000001,
   "ms": 15174
- },
- "royals": {
-  "stars": 4,
-  "status": "solved",
-  "segments": 12,
-  "nodes": 1171,
-  "ms": 10
- },
- "spiced": {
-  "stars": 4,
-  "status": "solved",
-  "segments": 15,
-  "nodes": 129580,
-  "ms": 1370
  },
  "handlebars": {
   "stars": 4,
@@ -377,20 +90,6 @@
   "nodes": 1000001,
   "ms": 13988
  },
- "aspire": {
-  "stars": 7,
-  "status": "solved",
-  "segments": 13,
-  "nodes": 7110,
-  "ms": 237
- },
- "totemPole": {
-  "stars": 5,
-  "status": "solved",
-  "segments": 14,
-  "nodes": 17605,
-  "ms": 129
- },
  "western": {
   "stars": 6,
   "status": "unknown",
@@ -425,20 +124,6 @@
   "segments": null,
   "nodes": 1000001,
   "ms": 11785
- },
- "redPear": {
-  "stars": 2,
-  "status": "solved",
-  "segments": 12,
-  "nodes": 432338,
-  "ms": 6164
- },
- "paintTheTown": {
-  "stars": 4,
-  "status": "solved",
-  "segments": 14,
-  "nodes": 13377,
-  "ms": 183
  },
  "lopsided": {
   "stars": 5,
@@ -517,27 +202,6 @@
   "nodes": 1000001,
   "ms": 13311
  },
- "moreIsMerrier": {
-  "stars": 4,
-  "status": "solved",
-  "segments": 11,
-  "nodes": 36337,
-  "ms": 1102
- },
- "threePeas": {
-  "stars": 4,
-  "status": "solved",
-  "segments": 15,
-  "nodes": 670418,
-  "ms": 9127
- },
- "akeeTree": {
-  "stars": 5,
-  "status": "solved",
-  "segments": 12,
-  "nodes": 30565,
-  "ms": 316
- },
  "hookshot": {
   "stars": 6,
   "status": "unknown",
@@ -559,26 +223,12 @@
   "nodes": 1000001,
   "ms": 24905
  },
- "reunited": {
-  "stars": 9,
-  "status": "solved",
-  "segments": 10,
-  "nodes": 2674,
-  "ms": 28
- },
  "starStuck": {
   "stars": 10,
   "status": "unknown",
   "segments": null,
   "nodes": 1000001,
   "ms": 16067
- },
- "warmUp": {
-  "stars": 4,
-  "status": "solved",
-  "segments": 8,
-  "nodes": 343,
-  "ms": 4
  },
  "theNumerator": {
   "stars": 5,
@@ -650,20 +300,6 @@
   "nodes": 1000001,
   "ms": 9258
  },
- "horhey": {
-  "stars": 8,
-  "status": "solved",
-  "segments": 11,
-  "nodes": 26683,
-  "ms": 474
- },
- "argentan": {
-  "stars": 8,
-  "status": "solved",
-  "segments": 15,
-  "nodes": 544702,
-  "ms": 6345
- },
  "wagonWheels": {
   "stars": 8,
   "status": "unknown",
@@ -692,13 +328,6 @@
   "nodes": 1000001,
   "ms": 20410
  },
- "alleyway": {
-  "stars": 6,
-  "status": "solved",
-  "segments": 15,
-  "nodes": 82686,
-  "ms": 882
- },
  "recyclingGarbage": {
   "stars": 8,
   "status": "unknown",
@@ -712,13 +341,6 @@
   "segments": null,
   "nodes": 1000001,
   "ms": 12514
- },
- "jagd": {
-  "stars": 9,
-  "status": "solved",
-  "segments": 17,
-  "nodes": 22377,
-  "ms": 181
  },
  "clownCar": {
   "stars": 10,
@@ -762,20 +384,6 @@
   "nodes": 1000001,
   "ms": 82317
  },
- "hazard": {
-  "stars": 8,
-  "status": "solved",
-  "segments": 18,
-  "nodes": 32363,
-  "ms": 306
- },
- "asymmetric": {
-  "stars": 11,
-  "status": "solved",
-  "segments": 16,
-  "nodes": 602224,
-  "ms": 6980
- },
  "squelchen": {
   "stars": 11,
   "status": "unknown",
@@ -789,13 +397,6 @@
   "segments": null,
   "nodes": 1000001,
   "ms": 14568
- },
- "aBarrelRoll": {
-  "stars": 12,
-  "status": "solved",
-  "segments": 16,
-  "nodes": 566976,
-  "ms": 7380
  },
  "lornePark": {
   "stars": 12,
@@ -944,33 +545,12 @@
   "nodes": 1000001,
   "ms": 10307
  },
- "backToBasics": {
-  "stars": 6,
-  "status": "solved",
-  "segments": 19,
-  "nodes": 715781,
-  "ms": 11075
- },
  "theConstant": {
   "stars": 8,
   "status": "unknown",
   "segments": null,
   "nodes": 1000001,
   "ms": 14585
- },
- "willow": {
-  "stars": 9,
-  "status": "solved",
-  "segments": 5,
-  "nodes": 16,
-  "ms": 0
- },
- "squier": {
-  "stars": 12,
-  "status": "solved",
-  "segments": 17,
-  "nodes": 264400,
-  "ms": 6002
  },
  "oakwoodAve": {
   "stars": 12,
@@ -1006,13 +586,6 @@
   "segments": null,
   "nodes": 1000001,
   "ms": 12246
- },
- "volcano": {
-  "stars": 12,
-  "status": "solved",
-  "segments": 11,
-  "nodes": 3310,
-  "ms": 23
  },
  "threeBelow": {
   "stars": 13,
@@ -1154,68 +727,12 @@
   "nodes": 1000001,
   "ms": 11278
  },
- "greenLine": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 3,
-  "nodes": 10,
-  "ms": 0
- },
- "theThree": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 11,
-  "nodes": 21745,
-  "ms": 187
- },
- "pureMagic": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 10,
-  "nodes": 3583,
-  "ms": 36
- },
- "twoLiner": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 6,
-  "nodes": 196,
-  "ms": 10
- },
- "theLittleOne": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 6,
-  "nodes": 80,
-  "ms": 2
- },
- "aHardPlace": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 7,
-  "nodes": 67,
-  "ms": 1
- },
  "youDid": {
   "stars": 1,
   "status": "unknown",
   "segments": null,
   "nodes": 1000001,
   "ms": 13360
- },
- "traveller": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 11,
-  "nodes": 106,
-  "ms": 1
- },
- "inTheMiddle": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 13,
-  "nodes": 27012,
-  "ms": 365
  },
  "foray": {
   "stars": 2,
@@ -1224,82 +741,12 @@
   "nodes": 1000001,
   "ms": 11734
  },
- "noTouching": {
-  "stars": 2,
-  "status": "solved",
-  "segments": 12,
-  "nodes": 47188,
-  "ms": 511
- },
- "twoForTwo": {
-  "stars": 1,
-  "status": "solved",
-  "segments": 15,
-  "nodes": 1319,
-  "ms": 83
- },
- "bluesy": {
-  "stars": 2,
-  "status": "solved",
-  "segments": 12,
-  "nodes": 43401,
-  "ms": 1005
- },
- "lantern": {
-  "stars": 2,
-  "status": "solved",
-  "segments": 7,
-  "nodes": 205,
-  "ms": 6
- },
- "boomBah": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 12,
-  "nodes": 60155,
-  "ms": 578
- },
  "redGreen": {
   "stars": 3,
   "status": "unknown",
   "segments": null,
   "nodes": 1000001,
   "ms": 14114
- },
- "yellowTriangle": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 8,
-  "nodes": 187,
-  "ms": 2
- },
- "purpeller": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 9,
-  "nodes": 3574,
-  "ms": 32
- },
- "reflection": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 14,
-  "nodes": 72205,
-  "ms": 723
- },
- "combinellow": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 16,
-  "nodes": 130958,
-  "ms": 1256
- },
- "colourize": {
-  "stars": 3,
-  "status": "solved",
-  "segments": 15,
-  "nodes": 778,
-  "ms": 10
  },
  "weightedTop": {
   "stars": 3,
@@ -1322,26 +769,12 @@
   "nodes": 1000001,
   "ms": 10830
  },
- "autumn": {
-  "stars": 4,
-  "status": "solved",
-  "segments": 12,
-  "nodes": 12613,
-  "ms": 93
- },
  "unscathed": {
   "stars": 4,
   "status": "unknown",
   "segments": null,
   "nodes": 1000001,
   "ms": 12378
- },
- "challenger": {
-  "stars": 5,
-  "status": "solved",
-  "segments": 14,
-  "nodes": 725582,
-  "ms": 9368
  },
  "pleaseWait": {
   "stars": 5,
@@ -1356,27 +789,6 @@
   "segments": null,
   "nodes": 1000001,
   "ms": 14591
- },
- "golem": {
-  "stars": 5,
-  "status": "solved",
-  "segments": 15,
-  "nodes": 289714,
-  "ms": 3372
- },
- "sunburst": {
-  "stars": 5,
-  "status": "solved",
-  "segments": 6,
-  "nodes": 509,
-  "ms": 2
- },
- "peaShooter": {
-  "stars": 6,
-  "status": "solved",
-  "segments": 14,
-  "nodes": 16195,
-  "ms": 133
  },
  "scarab": {
   "stars": 6,
@@ -1434,26 +846,12 @@
   "nodes": 1000001,
   "ms": 12287
  },
- "teamwork": {
-  "stars": 8,
-  "status": "solved",
-  "segments": 17,
-  "nodes": 231097,
-  "ms": 2735
- },
  "returnPolicing": {
   "stars": 8,
   "status": "unknown",
   "segments": null,
   "nodes": 1000001,
   "ms": 14530
- },
- "formatic": {
-  "stars": 8,
-  "status": "solved",
-  "segments": 13,
-  "nodes": 776855,
-  "ms": 11869
  },
  "rainbowArrow": {
   "stars": 9,
@@ -1482,13 +880,6 @@
   "segments": null,
   "nodes": 1000001,
   "ms": 10470
- },
- "balsam": {
-  "stars": 9,
-  "status": "solved",
-  "segments": 10,
-  "nodes": 1855,
-  "ms": 65
  },
  "boomerang": {
   "stars": 9,
@@ -1539,13 +930,6 @@
   "nodes": 1000001,
   "ms": 18905
  },
- "impact": {
-  "stars": 9,
-  "status": "solved",
-  "segments": 14,
-  "nodes": 758931,
-  "ms": 11569
- },
  "reciprocate": {
   "stars": 10,
   "status": "unknown",
@@ -1566,13 +950,6 @@
   "segments": null,
   "nodes": 1000001,
   "ms": 14752
- },
- "snowracer": {
-  "stars": 5,
-  "status": "solved",
-  "segments": 29,
-  "nodes": 280453,
-  "ms": 6565
  },
  "rightOfPassage": {
   "stars": 9,
@@ -1629,5 +1006,628 @@
   "segments": null,
   "nodes": 1000001,
   "ms": 13940
+ },
+ "redLine": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 3,
+  "nodes": 10,
+  "ms": 2
+ },
+ "grorangeLines": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 5,
+  "nodes": 40,
+  "ms": 1
+ },
+ "yorpleLines": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 12,
+  "nodes": 14706,
+  "ms": 187
+ },
+ "magicalTrains": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 10,
+  "nodes": 2126,
+  "ms": 22
+ },
+ "theRedCorner": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 7,
+  "nodes": 106,
+  "ms": 1
+ },
+ "purpablu": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 16,
+  "nodes": 85528,
+  "ms": 1095
+ },
+ "aRockInTheWay": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 7,
+  "nodes": 69,
+  "ms": 1
+ },
+ "greenWally": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 9,
+  "nodes": 79,
+  "ms": 2
+ },
+ "yellowSnake": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 23,
+  "nodes": 93,
+  "ms": 2
+ },
+ "uTurn": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 26,
+  "nodes": 18122,
+  "ms": 258
+ },
+ "journey": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 11,
+  "nodes": 102,
+  "ms": 1
+ },
+ "innieOutie": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 13,
+  "nodes": 7958,
+  "ms": 143
+ },
+ "multiColor": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 8,
+  "nodes": 1987,
+  "ms": 11
+ },
+ "squiggle": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 8,
+  "nodes": 351,
+  "ms": 2
+ },
+ "twoTwo": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 5,
+  "nodes": 16,
+  "ms": 0
+ },
+ "crossover": {
+  "stars": 2,
+  "status": "solved",
+  "segments": 12,
+  "nodes": 50668,
+  "ms": 460
+ },
+ "mellowYellow": {
+  "stars": 2,
+  "status": "solved",
+  "segments": 7,
+  "nodes": 704,
+  "ms": 9
+ },
+ "deliveringOranges": {
+  "stars": 2,
+  "status": "solved",
+  "segments": 7,
+  "nodes": 229,
+  "ms": 5
+ },
+ "prellow": {
+  "stars": 2,
+  "status": "solved",
+  "segments": 7,
+  "nodes": 528,
+  "ms": 4
+ },
+ "aroundTheBend": {
+  "stars": 2,
+  "status": "solved",
+  "segments": 19,
+  "nodes": 531528,
+  "ms": 28095
+ },
+ "preenies": {
+  "stars": 2,
+  "status": "solved",
+  "segments": 24,
+  "nodes": 27534,
+  "ms": 543
+ },
+ "tooMany": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 17,
+  "nodes": 5066,
+  "ms": 91
+ },
+ "yield": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 8,
+  "nodes": 520,
+  "ms": 5
+ },
+ "blueBoys": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 5,
+  "nodes": 67,
+  "ms": 0
+ },
+ "timingTest": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 14,
+  "nodes": 9348,
+  "ms": 103
+ },
+ "grimaceTown": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 12,
+  "nodes": 183768,
+  "ms": 2495
+ },
+ "lemonLatency": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 15,
+  "nodes": 6777,
+  "ms": 55
+ },
+ "threeReds": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 15,
+  "nodes": 28604,
+  "ms": 240
+ },
+ "colourTheory": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 6,
+  "nodes": 100,
+  "ms": 1
+ },
+ "secondary": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 15,
+  "nodes": 5162,
+  "ms": 53
+ },
+ "nurple": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 9,
+  "nodes": 12278,
+  "ms": 89
+ },
+ "microMix": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 10,
+  "nodes": 627,
+  "ms": 4
+ },
+ "theFirst": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 10,
+  "nodes": 33298,
+  "ms": 271
+ },
+ "waitOutside": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 25,
+  "nodes": 11011,
+  "ms": 180
+ },
+ "eeeTee": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 18,
+  "nodes": 70273,
+  "ms": 730
+ },
+ "relish": {
+  "stars": 4,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 12531
+ },
+ "cuteLoop": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 25,
+  "nodes": 994195,
+  "ms": 23439
+ },
+ "gauss": {
+  "stars": 4,
+  "status": "solved",
+  "segments": 13,
+  "nodes": 17948,
+  "ms": 176
+ },
+ "thirdWheel": {
+  "stars": 4,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 13578
+ },
+ "royals": {
+  "stars": 4,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 67558
+ },
+ "spiced": {
+  "stars": 4,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 13759
+ },
+ "aspire": {
+  "stars": 7,
+  "status": "solved",
+  "segments": 18,
+  "nodes": 584637,
+  "ms": 19174
+ },
+ "totemPole": {
+  "stars": 5,
+  "status": "solved",
+  "segments": 14,
+  "nodes": 12996,
+  "ms": 92
+ },
+ "redPear": {
+  "stars": 2,
+  "status": "solved",
+  "segments": 12,
+  "nodes": 426471,
+  "ms": 6013
+ },
+ "paintTheTown": {
+  "stars": 4,
+  "status": "solved",
+  "segments": 14,
+  "nodes": 12815,
+  "ms": 205
+ },
+ "moreIsMerrier": {
+  "stars": 4,
+  "status": "solved",
+  "segments": 11,
+  "nodes": 51704,
+  "ms": 950
+ },
+ "threePeas": {
+  "stars": 4,
+  "status": "solved",
+  "segments": 15,
+  "nodes": 498804,
+  "ms": 7333
+ },
+ "akeeTree": {
+  "stars": 5,
+  "status": "solved",
+  "segments": 12,
+  "nodes": 18566,
+  "ms": 214
+ },
+ "reunited": {
+  "stars": 9,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 17613
+ },
+ "warmUp": {
+  "stars": 4,
+  "status": "solved",
+  "segments": 8,
+  "nodes": 343,
+  "ms": 3
+ },
+ "horhey": {
+  "stars": 8,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 21027
+ },
+ "argentan": {
+  "stars": 8,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 12734
+ },
+ "alleyway": {
+  "stars": 6,
+  "status": "solved",
+  "segments": 15,
+  "nodes": 59183,
+  "ms": 839
+ },
+ "jagd": {
+  "stars": 9,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 60622
+ },
+ "hazard": {
+  "stars": 8,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 17928
+ },
+ "asymmetric": {
+  "stars": 11,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 14822
+ },
+ "aBarrelRoll": {
+  "stars": 12,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 15036
+ },
+ "backToBasics": {
+  "stars": 6,
+  "status": "solved",
+  "segments": 19,
+  "nodes": 505024,
+  "ms": 9495
+ },
+ "willow": {
+  "stars": 9,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 96702
+ },
+ "squier": {
+  "stars": 12,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 35373
+ },
+ "volcano": {
+  "stars": 12,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 12789
+ },
+ "greenLine": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 3,
+  "nodes": 10,
+  "ms": 0
+ },
+ "theThree": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 11,
+  "nodes": 21739,
+  "ms": 255
+ },
+ "pureMagic": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 10,
+  "nodes": 2982,
+  "ms": 31
+ },
+ "twoLiner": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 6,
+  "nodes": 192,
+  "ms": 1
+ },
+ "theLittleOne": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 6,
+  "nodes": 80,
+  "ms": 2
+ },
+ "aHardPlace": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 7,
+  "nodes": 67,
+  "ms": 1
+ },
+ "traveller": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 11,
+  "nodes": 97,
+  "ms": 1
+ },
+ "inTheMiddle": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 13,
+  "nodes": 26008,
+  "ms": 462
+ },
+ "noTouching": {
+  "stars": 2,
+  "status": "solved",
+  "segments": 12,
+  "nodes": 43996,
+  "ms": 557
+ },
+ "twoForTwo": {
+  "stars": 1,
+  "status": "solved",
+  "segments": 15,
+  "nodes": 1236,
+  "ms": 107
+ },
+ "bluesy": {
+  "stars": 2,
+  "status": "solved",
+  "segments": 12,
+  "nodes": 40634,
+  "ms": 1231
+ },
+ "lantern": {
+  "stars": 2,
+  "status": "solved",
+  "segments": 7,
+  "nodes": 198,
+  "ms": 5
+ },
+ "boomBah": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 12,
+  "nodes": 61202,
+  "ms": 758
+ },
+ "yellowTriangle": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 11,
+  "nodes": 774,
+  "ms": 10
+ },
+ "purpeller": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 17,
+  "nodes": 212370,
+  "ms": 7797
+ },
+ "reflection": {
+  "stars": 3,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 14100
+ },
+ "combinellow": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 17,
+  "nodes": 82718,
+  "ms": 782
+ },
+ "colourize": {
+  "stars": 3,
+  "status": "solved",
+  "segments": 15,
+  "nodes": 481,
+  "ms": 5
+ },
+ "autumn": {
+  "stars": 4,
+  "status": "solved",
+  "segments": 15,
+  "nodes": 373721,
+  "ms": 4628
+ },
+ "challenger": {
+  "stars": 5,
+  "status": "solved",
+  "segments": 14,
+  "nodes": 693088,
+  "ms": 9405
+ },
+ "golem": {
+  "stars": 5,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 14833
+ },
+ "sunburst": {
+  "stars": 5,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 15411
+ },
+ "peaShooter": {
+  "stars": 6,
+  "status": "solved",
+  "segments": 14,
+  "nodes": 14733,
+  "ms": 145
+ },
+ "teamwork": {
+  "stars": 8,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 15855
+ },
+ "formatic": {
+  "stars": 8,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 17573
+ },
+ "balsam": {
+  "stars": 9,
+  "status": "unknown",
+  "segments": null,
+  "nodes": 1000001,
+  "ms": 33126
+ },
+ "impact": {
+  "stars": 9,
+  "status": "solved",
+  "segments": 14,
+  "nodes": 684197,
+  "ms": 10673
+ },
+ "snowracer": {
+  "stars": 5,
+  "status": "solved",
+  "segments": 29,
+  "nodes": 265530,
+  "ms": 7544
  }
 }

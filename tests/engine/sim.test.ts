@@ -86,9 +86,15 @@ describe('simulate', () => {
     expect(simulate(board({ '0,3': outlet(R, red, red, blue), '1,3': goal([L], red, blue) })).outcome).toBe('crashed');
   });
 
-  test('wins with trains still in an outlet', () => {
-    // three trains, so the outlet still holds one when the first is delivered
-    expect(simulate(board({ '0,3': outlet(R, red, red, red), '1,3': goal([L], red) })).outcome).toBe('won');
+  test("doesn't win with trains still in an outlet", () => {
+    // the original solves only when the goals are full and no trains remain; the extra trains crash into the full goal
+    expect(simulate(board({ '0,3': outlet(R, red, red, red), '1,3': goal([L], red) })).outcome).toBe('crashed');
+  });
+
+  test("doesn't win with a train still on the track", () => {
+    // Relish: the goals filled while another train was traveling; it runs on and crashes off the end of its track
+    const b = board({ '0,3': outlet(R, red), '1,3': goal([L], red), '0,5': outlet(R, blue), '1,5': track(LR), '2,5': track(LR), '3,5': track(LR) });
+    expect(simulate(b).outcome).toBe('crashed');
   });
 
   describe('leaving the board crashes', () => {

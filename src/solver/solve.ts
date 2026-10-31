@@ -63,6 +63,8 @@ function play(puzzle: Board, layout: Layout): Outcome {
   while (!run.ended && run.halfSteps < MAX_HALF_STEPS) {
     const ev = run.halfStep();
     if (run.outcome === 'won') return { kind: 'won' };
+    // full goals with trains still about can't win: no goal will take a leftover train
+    if (run.board.cells.every((c) => c.kind !== 'goal' || c.colors.length === 0)) return { kind: 'dead' };
     if (ev.phase === 'B') {
       for (const t of run.trains) {
         const path = paths.get(t.id) ?? [];

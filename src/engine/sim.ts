@@ -215,7 +215,9 @@ class RunImpl implements Run {
       }
     });
 
-    if (!this.over && this.board.cells.every((c) => c.kind !== 'goal' || c.colors.length === 0)) {
+    // as in the original, full goals solve the puzzle only once no trains remain, on the track or waiting
+    const pending = this.board.cells.some((c) => c.kind === 'outlet' && c.colors.length > 0) || this.queued.size > 0;
+    if (!this.over && this.trains.length === 0 && !pending && this.board.cells.every((c) => c.kind !== 'goal' || c.colors.length === 0)) {
       this.over = true;
       this.outcome = this.crashed ? 'crashed' : 'won';
     }
