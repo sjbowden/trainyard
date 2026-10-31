@@ -14,7 +14,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "e2e": "playwright test",
-    "calibrate:solver": "tsx scripts/calibrate-solver.ts"
+    "calibrate:solver": "tsx scripts/calibrate-solver.ts",
+    "scrape:library": "tsx scripts/scrape-library.ts"
   },
   "type": "module",
   "devDependencies": {
