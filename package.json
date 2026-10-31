@@ -15,7 +15,8 @@
     "preview": "vite preview",
     "e2e": "playwright test",
     "calibrate:solver": "tsx scripts/calibrate-solver.ts",
-    "scrape:library": "tsx scripts/scrape-library.ts"
+    "scrape:library": "tsx scripts/scrape-library.ts",
+    "atlas:sheet": "tsx scripts/atlas-sheet.ts"
   },
   "type": "module",
   "devDependencies": {
@@ -24,9 +25,11 @@
     "@preact/preset-vite": "^2.10.6",
     "@testing-library/preact": "^3.2.6",
     "@types/node": "^26.6.6",
+    "@types/pngjs": "^6.0.5",
     "@types/sql.js": "^1.4.11",
     "fake-indexeddb": "^6.2.7",
     "happy-dom": "^21.0.4",
+    "pngjs": "^7.0.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.5",
