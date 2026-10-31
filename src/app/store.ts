@@ -1,6 +1,7 @@
 import { createStore, get, set, type UseStore } from 'idb-keyval';
 import { readApk, type Collection } from '../data/apk.ts';
 import { emptyProgress, type Progress } from './progress.ts';
+import { withSolvesCleared } from './recheck.ts';
 
 /**
  * Everything kept on the device: the puzzles read from the player's APK, and their progress.
@@ -125,4 +126,9 @@ export function forgetProgress(levelKey: string): Promise<void> {
     delete levels[levelKey];
     return { levels };
   });
+}
+
+/** Marks levels unsolved, keeping their tracks (the one write that can undo a solve). */
+export function clearSolves(keys: string[]): Promise<void> {
+  return updateStored<Progress>(PROGRESS, (old) => withSolvesCleared(old ?? emptyProgress(), keys));
 }

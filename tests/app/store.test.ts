@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { clear, createStore } from 'idb-keyval';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { importApk, loadCollections, loadProgress, saveProgress } from '../../src/app/store.ts';
+import { clearSolves, importApk, loadCollections, loadProgress, saveProgress } from '../../src/app/store.ts';
 
 const wasmUrl = createRequire(import.meta.url).resolve('sql.js/dist/sql-wasm.wasm');
 const apk = readdirSync('.').find((f) => f.endsWith('.apk'));
@@ -53,4 +53,10 @@ test('progress round-trips', async () => {
   const p = { levels: { 'trainyard/redLine': { solved: true, solution: '003QQQ00' } } };
   await saveProgress(p);
   expect(await loadProgress()).toEqual(p);
+});
+
+test('clearSolves undoes a solve, which saveProgress never does, and keeps the track', async () => {
+  await saveProgress({ levels: { 'trainyard/relish': { solved: true, solution: 'abc' }, 'trainyard/redLine': { solved: true, solution: 'def' } } });
+  await clearSolves(['trainyard/relish']);
+  expect((await loadProgress()).levels).toEqual({ 'trainyard/relish': { solved: false, solution: 'abc' }, 'trainyard/redLine': { solved: true, solution: 'def' } });
 });
