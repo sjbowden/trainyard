@@ -16,6 +16,11 @@ export function unlockAudio(): void {
   }
 }
 
+/** The shared audio context, or null until a tap has unlocked audio. */
+export function audioContext(): AudioContext | null {
+  return ctx;
+}
+
 function tone(freq: number, duration: number, type: OscillatorType = 'sine', gain = 0.08, slideTo?: number): void {
   if (!ctx) return;
   const t = ctx.currentTime;
