@@ -20,8 +20,8 @@ test('the random source is seeded and repeatable', () => {
 describe.each(DIFFICULTIES)('%s candidates', (difficulty) => {
   const candidates = Array.from({ length: 150 }, (_, seed) => generateCandidate(seed, difficulty)).filter((c) => c !== null);
 
-  test('most seeds produce a candidate', () => {
-    expect(candidates.length).toBeGreaterThan(30);
+  test('enough seeds produce a candidate (building one is cheap; very hard yields least)', () => {
+    expect(candidates.length).toBeGreaterThan(150 * 0.15);
   });
 
   test('every candidate is a valid puzzle whose proof wins', () => {

@@ -40,9 +40,21 @@ export function problems(b: Board): string[] {
   return out;
 }
 
-/** True if the proof (a solution half) still solves this exact puzzle. */
+const proofCache = new Map<string, boolean>();
+
+/** True if the proof (a solution half) still solves this exact puzzle. Results are cached. */
 export function proofHolds(code: string, proof: string | null): boolean {
   if (!proof) return false;
+  const key = `${code}_${proof}`;
+  const cached = proofCache.get(key);
+  if (cached !== undefined) return cached;
+  const holds = replayProof(code, proof);
+  if (proofCache.size > 500) proofCache.clear();
+  proofCache.set(key, holds);
+  return holds;
+}
+
+function replayProof(code: string, proof: string): boolean {
   try {
     // the same limit as play, so a puzzle solved in Test always unlocks Share
     return simulate(decodeBoard(`${code}_${proof}`), MAX_HALF_STEPS).outcome === 'won';

@@ -104,11 +104,13 @@ export function EditorScreen({ puzzle, onSave, onTest, onDelete }: EditorScreenP
   useEffect(() => () => asking?.cancel(), [asking]);
   const ask = () => {
     saver.flush();
-    const job = solveInWorker(code);
+    const asked = code;
+    const job = solveInWorker(asked);
     setAsking(job);
     setMessage('The solver is working on it…');
-    void job.result.then((r) => {
+    job.result.then((r) => {
       setAsking(null);
+      if (latest.current.code !== asked) return setMessage('The puzzle changed while the solver worked. Ask again.');
       if (r.status === 'solved') {
         setProof(r.solution);
         onSave({ ...latest.current, proof: r.solution });
@@ -116,6 +118,9 @@ export function EditorScreen({ puzzle, onSave, onTest, onDelete }: EditorScreenP
       } else {
         setMessage("The solver couldn't find a solution in time. Solve it yourself to share it.");
       }
+    }, () => {
+      setAsking(null);
+      setMessage("The solver couldn't finish. Solve it yourself to share it.");
     });
   };
 

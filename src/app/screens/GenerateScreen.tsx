@@ -16,18 +16,27 @@ const HINTS: Record<Difficulty, string> = {
 export function GenerateScreen({ onReady }: { onReady: (g: Generated) => void }) {
   const [busy, setBusy] = useState<Difficulty | null>(null);
   const [tried, setTried] = useState(0);
+  const [failed, setFailed] = useState(false);
   const job = useRef<{ cancel(): void } | null>(null);
   useEffect(() => () => job.current?.cancel(), []); // leaving cancels the work
 
   const start = (d: Difficulty) => {
     setBusy(d);
     setTried(0);
+    setFailed(false);
     const j = generateInWorker(d, setTried);
     job.current = j;
-    void j.result.then((g) => {
-      job.current = null;
-      onReady(g);
-    });
+    j.result.then(
+      (g) => {
+        job.current = null;
+        onReady(g);
+      },
+      () => {
+        job.current = null;
+        setBusy(null);
+        setFailed(true);
+      },
+    );
   };
   const cancel = () => {
     job.current?.cancel();
@@ -48,6 +57,7 @@ export function GenerateScreen({ onReady }: { onReady: (g: Generated) => void })
         </section>
       ) : (
         <nav class="list">
+          {failed && <p class="notice">Something went wrong building that puzzle. Try again.</p>}
           {(Object.keys(DIFFICULTY_NAMES) as Difficulty[]).map((d) => (
             <button class="tile difficulty" onClick={() => start(d)} key={d}>
               <span class="name">{DIFFICULTY_NAMES[d]}</span>

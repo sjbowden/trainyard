@@ -1,5 +1,5 @@
-import { encodeBoard, splitCode } from '../engine/codec.ts';
-import { createRun, segmentFor } from '../engine/sim.ts';
+import { decodeBoard, encodeBoard, splitCode } from '../engine/codec.ts';
+import { createRun, segmentFor, simulate } from '../engine/sim.ts';
 import type { Board, Color, Piece, Segment, Side } from '../engine/types.ts';
 import { BANDS, grade, type Difficulty } from './difficulty.ts';
 import { solve } from './solve.ts';
@@ -29,6 +29,9 @@ const RECIPES: Record<Difficulty, Recipe> = {
   hard: { outlets: [2, 3], trains: [1, 3], colors: [0, 1, 2, 3, 4, 5], route: [3, 9], painter: 0.25, splitter: 0.3, merge: 0.4, fork: 0.5, rocks: [2, 5] },
   veryHard: { outlets: [3, 4], trains: [2, 4], colors: [0, 1, 2, 3, 4, 5], route: [4, 10], painter: 0.3, splitter: 0.35, merge: 0.5, fork: 0.6, rocks: [3, 6] },
 };
+
+/** Separates each difficulty's random stream for the same seed. */
+const DIFFICULTY_STREAM: Record<Difficulty, number> = { easy: 1, medium: 2, hard: 3, veryHard: 4 };
 
 const COLS = 7;
 const ROWS = 7;
@@ -125,7 +128,7 @@ const withoutTrack = (cells: Piece[]): Piece[] => cells.map((p) => (p.kind === '
 
 /** One construction attempt. Returns null if the seed leads nowhere useful. */
 export function generateCandidate(seed: number, difficulty: Difficulty): { code: string; proof: string } | null {
-  const rnd = mulberry32(seed * 2654435761 + difficulty.length);
+  const rnd = mulberry32(seed * 2654435761 + DIFFICULTY_STREAM[difficulty]);
   const recipe = RECIPES[difficulty];
   const b = new Builder(rnd, recipe);
 
@@ -143,7 +146,7 @@ export function generateCandidate(seed: number, difficulty: Difficulty): { code:
   if (recipe.fork && rnd() < recipe.fork) b.fork();
 
   // run the trains with goals that accept anything, recording what each goal receives
-  const accepting = b.cells.map((p): Piece => (p.kind === 'goal' ? { ...p, colors: Array.from({ length: 54 }, (_, k) => (k % 6) as Color) } : p));
+  const accepting = b.cells.map((p): Piece => (p.kind === 'goal' ? { ...p, colors: Array.from({ length: 63 }, (_, k) => (k % 7) as Color) } : p)); // any color, brown included
   const run = createRun({ cols: COLS, rows: ROWS, cells: accepting });
   const received = new Map<number, Color[]>();
   while (!run.ended && run.halfSteps < 600) {
@@ -173,6 +176,8 @@ export function generateCandidate(seed: number, difficulty: Difficulty): { code:
 
   const proof = splitCode(encodeBoard({ cols: COLS, rows: ROWS, cells: b.cells }, { puzzle: false })).solution;
   const code = encodeBoard({ cols: COLS, rows: ROWS, cells: withoutTrack(b.cells) }, { solution: false });
+  // the encoded puzzle and proof must still win, exactly as they'll be stored and played
+  if (simulate(decodeBoard(`${code}_${proof}`), 4000).outcome !== 'won') return null;
   return { code, proof };
 }
 
@@ -185,6 +190,8 @@ export interface Generated {
   nodes: number | null;
   /** True when time ran out and this is the closest candidate found, below the level asked for. */
   easierThanAsked: boolean;
+  /** A note for the player when the puzzle isn't exactly the level asked for. */
+  note?: string;
 }
 
 const RANK: Record<Difficulty | 'tooEasy', number> = { tooEasy: 0, easy: 1, medium: 2, hard: 3, veryHard: 4 };
@@ -201,17 +208,18 @@ export function generate(difficulty: Difficulty, opts: { seed?: number; deadline
     const c = generateCandidate(seed, difficulty);
     if (c && performance.now() > opts.deadline && !best && !fallback) {
       // out of time with nothing graded: take this one ungraded (it is solvable by construction)
-      return { ...c, difficulty, seed, segments: null, nodes: null, easierThanAsked: true };
+      return { ...c, difficulty, seed, segments: null, nodes: null, easierThanAsked: false, note: "Time ran out, so this one's difficulty wasn't measured." };
     }
     if (c) {
       const r = solve(c.code, { maxNodes: band.maxNodes, deadline: opts.deadline });
-      const deadlineHit = r.status === 'unknown' && r.reason === 'deadline';
-      if (!deadlineHit) {
+      // 'exhausted' would mean the solver missed a solvable puzzle; don't present that as very hard
+      const unusable = r.status === 'unknown' && (r.reason === 'deadline' || r.reason === 'exhausted');
+      if (!unusable) {
         const g = grade(r);
         const fits = g === difficulty && (r.status === 'solved' || band.acceptUnknown);
         const found: Generated = { ...c, difficulty, seed, segments: r.status === 'solved' ? r.segments : null, nodes: r.nodes, easierThanAsked: false };
         if (fits) return found;
-        fallback ??= found;
+        fallback ??= { ...found, note: 'This one may be a little harder than you asked.' };
         // keep the closest candidate that isn't above the level asked for
         const rank = RANK[g];
         if (rank <= RANK[difficulty] && (!best || rank > best.rank)) best = { ...found, rank };
@@ -220,7 +228,7 @@ export function generate(difficulty: Difficulty, opts: { seed?: number; deadline
     if (performance.now() > opts.deadline) {
       if (best) {
         const { rank: _rank, ...g } = best;
-        return { ...g, easierThanAsked: true };
+        return { ...g, easierThanAsked: true, note: 'This one may be a little easier than you asked.' };
       }
       if (fallback) return fallback;
     }

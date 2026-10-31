@@ -187,7 +187,7 @@ export function App() {
               code: g.code,
               proof: g.proof,
               created: Date.now(),
-              ...(g.easierThanAsked ? { note: 'This one may be a little easier than you asked.' } : {}),
+              ...(g.note ? { note: g.note } : {}),
             };
             setCustom((list) => [p, ...list.filter((x) => x.id !== p.id)]);
             void saveCustomPuzzle(p);

@@ -4,8 +4,9 @@ import type { Board, Piece, Segment, Side } from '../engine/types.ts';
 
 /**
  * Finds track that solves a puzzle by playing it: simulate, and wherever a train is about to
- * crash for want of track, branch on what to lay there. Iterative deepening on the number of
- * segments means the first solution found uses the fewest. See the Stage 4 plan.
+ * crash for want of track, branch on what to lay there. The search is best-first (segments so
+ * far plus the waiting train's distance to a goal), so solutions are short but not proven
+ * shortest. Switches are tried where a train reaches the wrong goal. See the Stage 4 plan.
  */
 
 export interface SolveOptions {
@@ -101,7 +102,10 @@ function goalDistance(b: Board, goals: number[], cell: number | null): number {
 
 /** The ways to lay track for a train entering `cell` through `entry`. */
 function choices(b: Board, layout: Layout, goals: number[], cell: number, entry: Side): [number, [Segment, Segment]][] {
-  const exits = ([0, 1, 2, 3] as Side[]).filter((s) => s !== entry).sort((x, y) => goalDistance(b, goals, neighbor(b, cell, x)) - goalDistance(b, goals, neighbor(b, cell, y)));
+  // exits off the board can't work; the rest go nearest-to-a-goal first
+  const exits = ([0, 1, 2, 3] as Side[])
+    .filter((s) => s !== entry && neighbor(b, cell, s) !== null)
+    .sort((x, y) => goalDistance(b, goals, neighbor(b, cell, x)) - goalDistance(b, goals, neighbor(b, cell, y)));
   const segs = exits.map((x) => segmentFor(entry, x));
   const existing = layout.get(cell);
   // a second segment goes in as the passive one or on top
@@ -124,17 +128,6 @@ function forks(layout: Layout, path: [number, Side, Side][]): [number, [Segment,
     }
   }
   return out;
-}
-
-/** A lower bound on segments: each outlet's trains must at least reach the nearest goal. */
-function lowerBound(b: Board, goals: number[]): number {
-  let bound = 1;
-  b.cells.forEach((p, cell) => {
-    if (p.kind !== 'outlet') return;
-    const first = neighbor(b, cell, p.side);
-    if (first !== null) bound = Math.max(bound, goalDistance(b, goals, first));
-  });
-  return bound;
 }
 
 /**
