@@ -69,7 +69,7 @@ test('home says Play on a fresh start', () => {
 
 test('the settings screen turns the Solved! card off', async () => {
   const { SettingsScreen } = await import('../../src/app/screens/SettingsScreen.tsx');
-  render(<SettingsScreen />);
+  render(<SettingsScreen hasOriginal={false} onTheme={() => {}} />);
   const toggle = screen.getByRole('switch') as HTMLInputElement;
   expect(toggle.checked).toBe(true);
   toggle.click();

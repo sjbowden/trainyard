@@ -169,3 +169,27 @@ test('Erase is a toggle that lights up while erasing', async ({ page }) => {
   await page.getByRole('button', { name: 'Start' }).click();
   await expect(page.getByText('Tap anywhere to keep editing')).toBeVisible({ timeout: 15_000 });
 });
+
+test('the Original board style plays Red Line with no errors', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+  page.on('pageerror', (e) => errors.push(String(e)));
+  await page.goto('./');
+  await page.getByText('Load APK').click();
+  await page.locator('input[type=file]').setInputFiles(apk!);
+  await expect(page.getByText('Trainyard Express')).toBeVisible({ timeout: 20_000 });
+  await page.getByRole('link', { name: 'Settings' }).click();
+  await page.getByRole('radio', { name: 'Original' }).check();
+  await page.reload();
+  await expect(page.getByRole('radio', { name: 'Original' })).toBeChecked(); // kept, and its art is stored
+  await page.getByRole('link', { name: 'Back' }).click();
+
+  await page.getByRole('link', { name: /^Play Red Line/ }).click();
+  await page.getByRole('button', { name: 'Close' }).click();
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: 'test-results/original-red-line.png' });
+  await dragAcrossRow(page, 3, 1, 5);
+  await page.getByRole('button', { name: 'Start' }).click();
+  await expect(page.getByText('Solved!')).toBeVisible({ timeout: 15_000 });
+  expect(errors).toEqual([]);
+});

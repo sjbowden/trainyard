@@ -51,6 +51,9 @@ export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult
   const [slider, setSlider] = useState(() => loadSettings().speed);
   const [finish, setFinish] = useState<Finish | null>(null);
   const effects = useRef<(DrawnEffect & { born: number })[]>([]);
+  // sounds use the latest theme, which may finish loading after the puzzle opens
+  const sounds = useRef(theme);
+  sounds.current = theme;
   const results = useRef(onResult);
   results.current = onResult;
   const next = useRef({ onNext, showSolvedCard });
@@ -65,6 +68,7 @@ export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult
       for (const cell of ev.painted) effects.current.push({ kind: 'paint', cell, born, t: 0 });
       for (const cell of ev.splits) effects.current.push({ kind: 'split', cell, born, t: 0 });
       for (const cell of ev.delivered) effects.current.push({ kind: 'deliver', cell, born, t: 0 });
+      const theme = sounds.current;
       if (ev.crashes.length) theme.playSound('crash');
       if (ev.painted.length) theme.playSound('paint');
       if (ev.splits.length) theme.playSound('split');
@@ -75,7 +79,7 @@ export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult
     const onFinish = (f: Finish) => {
       setFinish(f);
       if (f === 'won') {
-        theme.playSound('win');
+        sounds.current.playSound('win');
         results.current(c.solution, true);
         const { onNext: go, showSolvedCard: card } = next.current;
         if (!card && go) advanceTimer.current = setTimeout(go, 1200); // a moment to see the win

@@ -9,7 +9,7 @@ import { buildRoute } from '../router.ts';
 import { DebouncedSave } from '../saver.ts';
 import { sharePuzzle } from '../sharing.ts';
 import { solveInWorker } from '../solverClient.ts';
-import { defaultTheme } from '../theme/default.ts';
+import type { Theme } from '../theme/theme.ts';
 import { PieceSheet } from './PieceSheet.tsx';
 
 const TOOLS: { tool: Tool; label: string }[] = [
@@ -22,7 +22,7 @@ const TOOLS: { tool: Tool; label: string }[] = [
 ];
 
 /** A board you tap to place or pick pieces. */
-function EditorBoard({ board, onTap }: { board: Board; onTap: (cell: number) => void }) {
+function EditorBoard({ board, theme, onTap }: { board: Board; theme: Theme; onTap: (cell: number) => void }) {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const canvas = ref.current!;
@@ -34,13 +34,13 @@ function EditorBoard({ board, onTap }: { board: Board; onTap: (cell: number) => 
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      renderBoard(ctx, defaultTheme, fitBoard(width, height, board.cols, board.rows, 0), board, []);
+      renderBoard(ctx, theme, fitBoard(width, height, board.cols, board.rows, 0), board, []);
     };
     draw();
     const observer = new ResizeObserver(draw);
     observer.observe(canvas);
     return () => observer.disconnect();
-  }, [board]);
+  }, [board, theme]);
   const tap = (e: PointerEvent) => {
     const r = ref.current!.getBoundingClientRect();
     const cell = cellAt(fitBoard(r.width, r.height, board.cols, board.rows, 0), e.clientX - r.left, e.clientY - r.top);
@@ -54,9 +54,10 @@ export interface EditorScreenProps {
   onSave: (p: CustomPuzzle) => void;
   onTest: () => void;
   onDelete: () => void;
+  theme: Theme;
 }
 
-export function EditorScreen({ puzzle, onSave, onTest, onDelete }: EditorScreenProps) {
+export function EditorScreen({ puzzle, onSave, onTest, onDelete, theme }: EditorScreenProps) {
   const [board, setBoard] = useState<Board>(() => decodeBoard(puzzle.code));
   const [name, setName] = useState(puzzle.name);
   const [proof, setProof] = useState(puzzle.proof);
@@ -147,7 +148,7 @@ export function EditorScreen({ puzzle, onSave, onTest, onDelete }: EditorScreenP
         />
       </header>
       <div class="board-wrap">
-        <EditorBoard board={board} onTap={tap} />
+        <EditorBoard board={board} theme={theme} onTap={tap} />
       </div>
       <div class="tools wrap-tools">
         {TOOLS.map((t) => (

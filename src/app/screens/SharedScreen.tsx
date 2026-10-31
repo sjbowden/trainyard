@@ -5,6 +5,7 @@ import { buildRoute } from '../router.ts';
 import { shareUrl, type SharedPuzzle } from '../share.ts';
 import { isInstalledApp } from '../sharedLinks.ts';
 import { PuzzleScreen } from './PuzzleScreen.tsx';
+import type { Theme } from '../theme/theme.ts';
 
 /** A link that couldn't be read. */
 export function LinkProblem({ message }: { message: string }) {
@@ -22,6 +23,7 @@ export interface SharedScreenProps {
   progress: Progress;
   onResult: (key: string, solution: string, solved: boolean) => void;
   onAdded: (p: CustomPuzzle) => void;
+  theme?: Theme;
 }
 
 /**
@@ -29,7 +31,7 @@ export interface SharedScreenProps {
  * is playable here, with a button that copies the link for pasting into the app (iOS doesn't let
  * the app read the clipboard by itself).
  */
-export function SharedScreen({ puzzle, progress, onResult, onAdded }: SharedScreenProps) {
+export function SharedScreen({ puzzle, progress, onResult, onAdded, theme }: SharedScreenProps) {
   const installed = isInstalledApp();
   const [copied, setCopied] = useState<string | null>(null);
   useEffect(() => {
@@ -55,6 +57,7 @@ export function SharedScreen({ puzzle, progress, onResult, onAdded }: SharedScre
       savedSolution={progress.levels[key]?.solution ?? ''}
       onResult={(solution, solved) => onResult(key, solution, solved)}
       onBack={() => (location.hash = buildRoute({ name: 'home' }))}
+      theme={theme}
     >
       <div class="add-banner">
         <button class="wide" onClick={() => void copy()}>Add to my app</button>

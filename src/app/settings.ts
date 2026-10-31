@@ -5,10 +5,12 @@ export interface Settings {
   showSolvedCard: boolean;
   /** The speed slider's position (0.1–1), kept from puzzle to puzzle. */
   speed: number;
+  /** The board style. Original needs the art kept from the APK; without it the default shows. */
+  theme: 'default' | 'original';
 }
 
 const KEY = 'trainyard.settings';
-const DEFAULTS: Settings = { showSolvedCard: true, speed: 0.5 };
+const DEFAULTS: Settings = { showSolvedCard: true, speed: 0.5, theme: 'default' };
 
 export function loadSettings(): Settings {
   try {

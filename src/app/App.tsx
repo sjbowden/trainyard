@@ -23,10 +23,12 @@ import { LoadApkScreen } from './screens/LoadApkScreen.tsx';
 import { PuzzleScreen } from './screens/PuzzleScreen.tsx';
 import { TutorialOverlay } from './screens/TutorialOverlay.tsx';
 import { defaultTheme } from './theme/default.ts';
+import { hasOriginalTheme, loadOriginalTheme } from './theme/original/index.ts';
+import type { Theme } from './theme/theme.ts';
 import { loadCollections, loadProgress, saveProgress } from './store.ts';
 
 /** A puzzle, with its city's tutorial the first time the city's first puzzle is opened. */
-function Puzzle({ collection, level, progress, onResult, onNext }: { collection: Collection; level: Level; progress: Progress; onResult: (solution: string, solved: boolean) => void; onNext?: () => void }) {
+function Puzzle({ collection, level, progress, theme, onResult, onNext }: { collection: Collection; level: Level; progress: Progress; theme: Theme; onResult: (solution: string, solved: boolean) => void; onNext?: () => void }) {
   const id = `${collection.id}/${level.worldSlug}`;
   const tutorials = collection.tutorials.filter((t) => t.worldSlug === level.worldSlug).sort((a, b) => a.ordinal - b.ordinal);
   const [tutorial, setTutorial] = useState(() => tutorials.length > 0 && firstOfCity(collection, level.slug) && !tutorialSeen(id));
@@ -42,11 +44,12 @@ function Puzzle({ collection, level, progress, onResult, onNext }: { collection:
         onResult={onResult}
         onBack={() => go(puzzleBackRoute(lastList, collection.id, level.worldSlug))}
         onNext={onNext}
+        theme={theme}
       />
       {tutorial && (
         <TutorialOverlay
           tutorials={tutorials}
-          theme={defaultTheme}
+          theme={theme}
           onClose={() => {
             markTutorialSeen(id);
             setTutorial(false);
@@ -60,7 +63,7 @@ function Puzzle({ collection, level, progress, onResult, onNext }: { collection:
 /** The last list screen shown (home, a collection or a city), which decides where a puzzle's Back goes. */
 let lastList: Route | null = null;
 
-function City({ collection, world, progress }: { collection: Collection; world: string; progress: Progress }) {
+function City({ collection, world, progress, theme }: { collection: Collection; world: string; progress: Progress; theme: Theme }) {
   const id = `${collection.id}/${world}`;
   const tutorials = collection.tutorials.filter((t) => t.worldSlug === world).sort((a, b) => a.ordinal - b.ordinal);
   const [open, setOpen] = useState(() => tutorials.length > 0 && !tutorialSeen(id));
@@ -71,7 +74,7 @@ function City({ collection, world, progress }: { collection: Collection; world: 
   return (
     <>
       <CityScreen collection={collection} world={world} progress={progress} onTutorial={tutorials.length ? () => setOpen(true) : undefined} />
-      {open && <TutorialOverlay tutorials={tutorials} theme={defaultTheme} onClose={close} />}
+      {open && <TutorialOverlay tutorials={tutorials} theme={theme} onClose={close} />}
     </>
   );
 }
@@ -103,10 +106,21 @@ export function App() {
   const [custom, setCustom] = useState<CustomPuzzle[]>([]);
   const [pasteMessage, setPasteMessage] = useState<string | undefined>(undefined);
   const refreshCustom = () => void listCustomPuzzles().then(setCustom);
+  const [theme, setTheme] = useState<Theme>(defaultTheme);
+  const [hasOriginal, setHasOriginal] = useState(false);
+  /** Shows the chosen board style; Original falls back to the default when its art isn't stored. */
+  const themeAsk = useRef(0);
+  const applyTheme = (id: 'default' | 'original') => {
+    const ask = ++themeAsk.current; // a slow load mustn't override a later choice
+    void hasOriginalTheme().then(setHasOriginal);
+    if (id === 'default') return setTheme(defaultTheme);
+    void loadOriginalTheme().then((t) => ask === themeAsk.current && setTheme(t ?? defaultTheme));
+  };
 
   useEffect(() => {
     const onHash = () => setRoute(parseRoute(location.hash));
     addEventListener('hashchange', onHash);
+    applyTheme(loadSettings().theme);
     void Promise.all([loadCollections(), loadProgress(), listCustomPuzzles()]).then(([c, p, mine]) => {
       setCollections(c);
       setProgress(p);
@@ -130,7 +144,7 @@ export function App() {
 
   switch (route.name) {
     case 'settings':
-      return <SettingsScreen />;
+      return <SettingsScreen hasOriginal={hasOriginal} onTheme={applyTheme} />;
     case 'mine':
       return (
         <MyPuzzlesScreen
@@ -169,6 +183,7 @@ export function App() {
           puzzle={shared}
           progress={progress}
           onResult={record}
+          theme={theme}
           onAdded={(p) => {
             setCustom((list) => [p, ...list.filter((x) => x.id !== p.id)]);
             location.replace(buildRoute({ name: 'play', id: p.id }));
@@ -202,6 +217,7 @@ export function App() {
         <EditorScreen
           key={puzzle.id}
           puzzle={puzzle}
+          theme={theme}
           onSave={(p) => {
             setCustom((list) => list.map((x) => (x.id === p.id ? p : x)));
             void saveCustomPuzzle(p);
@@ -241,6 +257,7 @@ export function App() {
             }
           }}
           onBack={() => go(puzzle.source === 'mine' ? { name: 'edit', id: puzzle.id } : { name: 'mine' })}
+          theme={theme}
         >
           {puzzle.note && <p class="notice">{puzzle.note}</p>}
         </PuzzleScreen>
@@ -251,6 +268,7 @@ export function App() {
         <LoadApkScreen
           onLoaded={(c, saved) => {
             setCollections(c);
+            applyTheme(loadSettings().theme);
             setNotice(saved ? undefined : "This phone wouldn't save the puzzles, so you'll need to load the APK again next time.");
             go({ name: 'home' });
           }}
@@ -260,7 +278,7 @@ export function App() {
       if (collection) return <CollectionScreen collection={collection} progress={progress} />;
       break;
     case 'city':
-      if (collection && isWorldUnlocked(collection, route.world, progress)) return <City key={route.world} collection={collection} world={route.world} progress={progress} />;
+      if (collection && isWorldUnlocked(collection, route.world, progress)) return <City key={route.world} collection={collection} world={route.world} progress={progress} theme={theme} />;
       break;
     case 'puzzle': {
       const level = collection?.levels.find((l) => l.slug === route.slug);
@@ -273,6 +291,7 @@ export function App() {
             collection={collection}
             level={level}
             progress={progress}
+            theme={theme}
             onResult={(solution, solved) => record(key, solution, solved)}
             onNext={next ? () => go({ name: 'puzzle', collection: collection.id, slug: next.slug }) : undefined}
           />
