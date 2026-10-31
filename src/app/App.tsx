@@ -23,7 +23,7 @@ import { LoadApkScreen } from './screens/LoadApkScreen.tsx';
 import { PuzzleScreen } from './screens/PuzzleScreen.tsx';
 import { TutorialOverlay } from './screens/TutorialOverlay.tsx';
 import { defaultTheme } from './theme/default.ts';
-import { resolveTheme } from './theme/original/index.ts';
+import { forgetOriginalTheme, resolveTheme } from './theme/original/index.ts';
 import type { Theme } from './theme/theme.ts';
 import { loadCollections, loadProgress, saveProgress } from './store.ts';
 
@@ -108,7 +108,7 @@ export function App() {
   const refreshCustom = () => void listCustomPuzzles().then(setCustom);
   const [theme, setTheme] = useState<Theme>(defaultTheme);
   const [hasOriginal, setHasOriginal] = useState(false);
-  /** Shows the chosen board style; Original falls back to the default when its art isn't stored. */
+  /** Shows the chosen board style; Original falls back to the default when its art is missing or unreadable. */
   const themeAsk = useRef(0);
   const applyTheme = (id: 'default' | 'original') => {
     const ask = ++themeAsk.current; // a slow load mustn't override a later choice
@@ -270,6 +270,7 @@ export function App() {
         <LoadApkScreen
           onLoaded={(c, saved) => {
             setCollections(c);
+            forgetOriginalTheme(); // the new APK may bring new art
             applyTheme(loadSettings().theme);
             setNotice(saved ? undefined : "This phone wouldn't save the puzzles, so you'll need to load the APK again next time.");
             go({ name: 'home' });

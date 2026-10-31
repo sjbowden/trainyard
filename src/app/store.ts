@@ -47,7 +47,7 @@ export async function importApk(file: Blob, wasmUrl: string): Promise<{ collecti
     bytes = new Uint8Array(await file.arrayBuffer());
     collections = await readApk(bytes, { locateFile: () => wasmUrl });
   } catch (err) {
-    if ((err as Error).message === 'Not a Trainyard APK') throw new Error("That file isn't a Trainyard APK.");
+    if (err instanceof Error && err.message === 'Not a Trainyard APK') throw new Error("That file isn't a Trainyard APK.");
     throw new Error("Couldn't read the APK. Check your connection and try again.");
   }
   try {
