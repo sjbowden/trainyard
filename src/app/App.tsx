@@ -23,8 +23,7 @@ import { LoadApkScreen } from './screens/LoadApkScreen.tsx';
 import { PuzzleScreen } from './screens/PuzzleScreen.tsx';
 import { TutorialOverlay } from './screens/TutorialOverlay.tsx';
 import { defaultTheme } from './theme/default.ts';
-import { clearSolves, loadCollections, loadProgress, saveProgress } from './store.ts';
-import { solvesToClear, withSolvesCleared } from './recheck.ts';
+import { loadCollections, loadProgress, saveProgress } from './store.ts';
 
 /** A puzzle, with its city's tutorial the first time the city's first puzzle is opened. */
 function Puzzle({ collection, level, progress, onResult, onNext }: { collection: Collection; level: Level; progress: Progress; onResult: (solution: string, solved: boolean) => void; onNext?: () => void }) {
@@ -109,13 +108,6 @@ export function App() {
     const onHash = () => setRoute(parseRoute(location.hash));
     addEventListener('hashchange', onHash);
     void Promise.all([loadCollections(), loadProgress(), listCustomPuzzles()]).then(([c, p, mine]) => {
-      // solves from before the fix that a puzzle needs every train delivered
-      const codes = new Map<string, string>([...(c ?? []).flatMap((col) => col.levels.map((l): [string, string] => [levelKey(col.id, l.slug), l.code])), ...mine.map((m): [string, string] => [customKey(m.id), m.code])]);
-      const stale = solvesToClear(p, (key) => codes.get(key));
-      if (stale.length) {
-        p = withSolvesCleared(p, stale);
-        void clearSolves(stale);
-      }
       setCollections(c);
       setProgress(p);
       setCustom(mine);

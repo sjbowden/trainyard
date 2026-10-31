@@ -52,6 +52,11 @@ export function mix(a: Color, b: Color): Color {
   return 6;
 }
 
+/** True when every goal has received everything it needs. */
+export function goalsFilled(board: Board): boolean {
+  return board.cells.every((c) => c.kind !== 'goal' || c.colors.length === 0);
+}
+
 /** The segment joining two sides, or Empty. */
 export function segmentFor(a: Side, b: Side): Segment {
   for (let s = 1; s <= 6; s++) {
@@ -215,9 +220,9 @@ class RunImpl implements Run {
       }
     });
 
-    // as in the original, full goals solve the puzzle only once no trains remain, on the track or waiting
-    const pending = this.board.cells.some((c) => c.kind === 'outlet' && c.colors.length > 0) || this.queued.size > 0;
-    if (!this.over && this.trains.length === 0 && !pending && this.board.cells.every((c) => c.kind !== 'goal' || c.colors.length === 0)) {
+    // as in the original, full goals solve the puzzle only once no trains remain. Every outlet with
+    // trains and every splitter queue has just released into this.trains, so none are waiting either.
+    if (!this.over && this.trains.length === 0 && goalsFilled(this.board)) {
       this.over = true;
       this.outcome = this.crashed ? 'crashed' : 'won';
     }

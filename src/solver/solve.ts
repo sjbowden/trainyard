@@ -1,5 +1,5 @@
 import { decodeBoard, encodeBoard, splitCode } from '../engine/codec.ts';
-import { createRun, segmentFor, simulate, type TrainState } from '../engine/sim.ts';
+import { createRun, goalsFilled, segmentFor, simulate, type TrainState } from '../engine/sim.ts';
 import type { Board, Piece, Segment, Side } from '../engine/types.ts';
 
 /**
@@ -64,7 +64,7 @@ function play(puzzle: Board, layout: Layout): Outcome {
     const ev = run.halfStep();
     if (run.outcome === 'won') return { kind: 'won' };
     // full goals with trains still about can't win: no goal will take a leftover train
-    if (run.board.cells.every((c) => c.kind !== 'goal' || c.colors.length === 0)) return { kind: 'dead' };
+    if (goalsFilled(run.board)) return { kind: 'dead' };
     if (ev.phase === 'B') {
       for (const t of run.trains) {
         const path = paths.get(t.id) ?? [];
