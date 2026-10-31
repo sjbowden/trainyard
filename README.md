@@ -12,9 +12,13 @@ This repository contains only original code. The original game's puzzles, art an
 
 It works offline after the first visit.
 
+## Fresh puzzles
+
+Tap **New puzzle for me** and pick Easy, Medium, Hard or Very hard. The app builds a puzzle backwards from a working answer, so every one can be solved, and a solver grades it against levels calibrated on the original puzzles (`docs/solver-calibration.md`). Generated puzzles are kept under **Generated** in My puzzles and can be shared.
+
 ## Making and sharing puzzles
 
-Open **My puzzles** on the home screen and tap **New puzzle**. Tap a cell to place the selected piece, and tap a placed piece to set its sides and trains. **Test** plays the puzzle. Once you've solved it, **Share** sends a link. Changing a piece means solving it again before sharing.
+Open **My puzzles** on the home screen and tap **New puzzle**. Tap a cell to place the selected piece, and tap a placed piece to set its sides and trains. **Test** plays the puzzle. Once you've solved it, or the solver (🤖) has, **Share** sends a link. Changing a piece means solving it again before sharing.
 
 A link opens in Safari, where the puzzle can be played straight away. **Add to my app** copies the link. In the installed app, go to **My puzzles** and tap **Paste puzzle link**. The whole puzzle is in the link; nothing is uploaded anywhere.
 

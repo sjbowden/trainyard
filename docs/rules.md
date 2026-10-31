@@ -67,3 +67,7 @@ A run with no trains left, nothing waiting to leave an outlet or splitter, and u
 ## Where we differ from the original viewer
 
 The viewer has no edge check. A train leaving the left or right edge reappears on the adjacent row, and one leaving the top or bottom edge is fed back into its own cell. Both are viewer bugs. Here leaving the board always crashes.
+
+## Solver
+
+`src/solver/solve.ts` finds track for a puzzle using these rules (via `src/engine`); see `docs/solver-calibration.md` for how it does on the originals.
