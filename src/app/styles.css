@@ -67,7 +67,7 @@ h2 { font-size: 20px; margin: 0; }
 .board { display: block; width: 100%; height: 100%; touch-action: none; }
 
 .tools { display: flex; gap: 8px; margin-top: 12px; }
-.tools button.on { border-color: var(--accent); }
+.tools button.on { border-color: var(--accent); background: #1d3f33; }
 .tools .go { flex: 1; font-size: 18px; }
 
 .speed { display: flex; align-items: center; gap: 12px; margin-top: 12px; color: var(--muted); }

@@ -149,3 +149,23 @@ test('after a solve, Back to puzzle returns to it, and the header goes home', as
   await expect(page.getByText('1 / 6 ★')).toBeVisible();
 });
 
+
+test('Erase is a toggle that lights up while erasing', async ({ page }) => {
+  await page.goto('./');
+  await page.getByText('Load APK').click();
+  await page.locator('input[type=file]').setInputFiles(apk!);
+  await expect(page.getByText('Trainyard Express')).toBeVisible({ timeout: 20_000 });
+  await page.getByRole('link', { name: /^Play Red Line/ }).click();
+  await page.getByRole('button', { name: 'Close' }).click();
+  await page.waitForTimeout(300);
+  await dragAcrossRow(page, 3, 1, 5); // the full track
+  const erase = page.getByRole('button', { name: 'Erase' });
+  await expect(erase).toHaveAttribute('aria-pressed', 'false');
+  await erase.click();
+  await expect(erase).toHaveAttribute('aria-pressed', 'true');
+  await dragAcrossRow(page, 3, 3, 4); // rubs out two cells of track
+  await erase.click();
+  await expect(erase).toHaveAttribute('aria-pressed', 'false');
+  await page.getByRole('button', { name: 'Start' }).click();
+  await expect(page.getByText('Tap anywhere to keep editing')).toBeVisible({ timeout: 15_000 });
+});

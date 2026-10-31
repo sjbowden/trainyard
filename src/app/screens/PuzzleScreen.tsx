@@ -156,8 +156,8 @@ export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult
         )}
       </div>
       <div class="tools">
-        <button class={mode === 'draw' ? 'on' : ''} disabled={controller.running} onClick={() => setMode(mode === 'draw' ? 'erase' : 'draw')}>
-          {mode === 'draw' ? 'Draw' : 'Erase'}
+        <button class={mode === 'erase' ? 'on' : ''} aria-pressed={mode === 'erase'} disabled={controller.running} onClick={() => setMode(mode === 'draw' ? 'erase' : 'draw')}>
+          Erase
         </button>
         <button disabled={!controller.canUndo} onClick={act(() => controller.undo())} aria-label="Undo">↶</button>
         <button disabled={!controller.canRedo} onClick={act(() => controller.redo())} aria-label="Redo">↷</button>
