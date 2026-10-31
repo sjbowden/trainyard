@@ -67,3 +67,8 @@ test('progress round-trips', async () => {
   await saveProgress(p);
   expect(await loadProgress()).toEqual(p);
 });
+
+test('a file that cannot be read gives the friendly message', async () => {
+  const unreadable = { arrayBuffer: () => Promise.reject(new DOMException('not downloaded', 'NotReadableError')) } as unknown as Blob;
+  await expect(importApk(unreadable, wasmUrl)).rejects.toThrow("Couldn't read the APK. Check your connection and try again.");
+});

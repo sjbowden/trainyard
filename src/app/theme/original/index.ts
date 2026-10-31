@@ -17,7 +17,7 @@ export async function loadOriginalTheme(): Promise<Theme | null> {
     try {
       // decoded buffers play in any audio context, so decode without waiting for a tap
       const offline = new OfflineAudioContext(1, 1, 44100);
-      void decodeSounds(assets.sounds, (b) => offline.decodeAudioData(b)).then((decoded) => Object.assign(buffers, decoded));
+      void decodeSounds(assets.sounds, (b) => offline.decodeAudioData(b), buffers);
     } catch {
       // no Web Audio: every sound stays synthesized
     }
@@ -27,7 +27,12 @@ export async function loadOriginalTheme(): Promise<Theme | null> {
   }
 }
 
-/** Whether the Original theme's art is stored, so Settings can offer it. */
-export async function hasOriginalTheme(): Promise<boolean> {
-  return (await loadThemeAssets()) !== null;
+/**
+ * The theme to show for a choice (null means the default), and whether Settings can offer Original.
+ * Choosing Original tries to load it, so art that is stored but unreadable counts as missing.
+ */
+export async function resolveTheme(id: 'default' | 'original'): Promise<{ theme: Theme | null; available: boolean }> {
+  if (id === 'default') return { theme: null, available: (await loadThemeAssets()) !== null };
+  const theme = await loadOriginalTheme();
+  return { theme, available: theme !== null };
 }

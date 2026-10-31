@@ -17,9 +17,11 @@ export const SOUND_FILES: Record<Exclude<SoundKind, 'deliver'>, string> = {
 /** Each train color has its own delivery chime. */
 export const deliverFile = (color: Color): string => `Game_Train_${color + 1}`;
 
-/** Decodes what it can; a file the browser can't decode is left out, and its sound falls back. */
-export async function decodeSounds(blobs: Record<string, Blob>, decode: (b: ArrayBuffer) => Promise<AudioBuffer>): Promise<Record<string, AudioBuffer>> {
-  const out: Record<string, AudioBuffer> = {};
+/**
+ * Decodes what it can into `out`, each sound as soon as it is ready; a file the browser can't decode
+ * is left out, and its sound falls back.
+ */
+export async function decodeSounds(blobs: Record<string, Blob>, decode: (b: ArrayBuffer) => Promise<AudioBuffer>, out: Record<string, AudioBuffer> = {}): Promise<Record<string, AudioBuffer>> {
   await Promise.all(
     Object.entries(blobs).map(async ([name, blob]) => {
       try {

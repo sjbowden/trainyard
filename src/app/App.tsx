@@ -23,7 +23,7 @@ import { LoadApkScreen } from './screens/LoadApkScreen.tsx';
 import { PuzzleScreen } from './screens/PuzzleScreen.tsx';
 import { TutorialOverlay } from './screens/TutorialOverlay.tsx';
 import { defaultTheme } from './theme/default.ts';
-import { hasOriginalTheme, loadOriginalTheme } from './theme/original/index.ts';
+import { resolveTheme } from './theme/original/index.ts';
 import type { Theme } from './theme/theme.ts';
 import { loadCollections, loadProgress, saveProgress } from './store.ts';
 
@@ -112,9 +112,11 @@ export function App() {
   const themeAsk = useRef(0);
   const applyTheme = (id: 'default' | 'original') => {
     const ask = ++themeAsk.current; // a slow load mustn't override a later choice
-    void hasOriginalTheme().then(setHasOriginal);
-    if (id === 'default') return setTheme(defaultTheme);
-    void loadOriginalTheme().then((t) => ask === themeAsk.current && setTheme(t ?? defaultTheme));
+    void resolveTheme(id).then(({ theme: t, available }) => {
+      if (ask !== themeAsk.current) return;
+      setTheme(t ?? defaultTheme);
+      setHasOriginal(available);
+    });
   };
 
   useEffect(() => {

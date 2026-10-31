@@ -42,8 +42,9 @@ function withTimeout<T>(p: Promise<T>): Promise<T> {
  */
 export async function importApk(file: Blob, wasmUrl: string): Promise<{ collections: Collection[]; saved: boolean; themeSaved: boolean }> {
   let collections: Collection[];
-  const bytes = new Uint8Array(await file.arrayBuffer());
+  let bytes: Uint8Array;
   try {
+    bytes = new Uint8Array(await file.arrayBuffer());
     collections = await readApk(bytes, { locateFile: () => wasmUrl });
   } catch (err) {
     if ((err as Error).message === 'Not a Trainyard APK') throw new Error("That file isn't a Trainyard APK.");

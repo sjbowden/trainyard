@@ -34,3 +34,11 @@ test('a decoded sound plays instead of the synthesized one, silently until audio
   expect(() => originalPlayer({ Game_Crash: {} as AudioBuffer })('crash')).not.toThrow();
   expect(synth).not.toHaveBeenCalled();
 });
+
+test('each sound is ready as soon as it decodes, even while another never finishes', async () => {
+  const buffer = {} as AudioBuffer;
+  const decode = (b: ArrayBuffer) => (b.byteLength === 1 ? new Promise<AudioBuffer>(() => {}) : Promise.resolve(buffer));
+  const into: Record<string, AudioBuffer> = {};
+  void decodeSounds({ Game_Crash: new Blob([new Uint8Array(2)]), Game_Paint: new Blob([new Uint8Array(1)]) }, decode, into);
+  await vi.waitFor(() => expect(into).toEqual({ Game_Crash: buffer }));
+});
