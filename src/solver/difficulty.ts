@@ -12,12 +12,18 @@ export interface Band {
   acceptUnknown: boolean;
 }
 
-// Starting values from the Stage 4 plan; replaced by calibration against the originals (docs/solver-calibration.md).
+// Calibrated on the originals (docs/solver-calibration.md, 1M-node budget):
+//   1–3★: 83% solved, median 11 segments / 2.4k nodes (quartiles 7–14 segments, 121–27k nodes)
+//   4–8★: 29% solved, median 14 segments / 31k nodes; 9★+: mostly beyond the solver
 export const BANDS: Record<Difficulty, Band> = {
-  easy: { minSegments: 6, minNodes: 0, maxNodes: 20_000, acceptUnknown: false },
-  medium: { minSegments: 10, minNodes: 2_000, maxNodes: 60_000, acceptUnknown: false },
-  hard: { minSegments: 14, minNodes: 20_000, maxNodes: 150_000, acceptUnknown: false },
-  veryHard: { minSegments: 18, minNodes: 200_000, maxNodes: 300_000, acceptUnknown: true },
+  // like a typical 1–3★ original
+  easy: { minSegments: 6, minNodes: 0, maxNodes: 30_000, acceptUnknown: false },
+  // like the harder half of 1–3★
+  medium: { minSegments: 11, minNodes: 2_500, maxNodes: 60_000, acceptUnknown: false },
+  // like the 4–8★ originals the solver can crack
+  hard: { minSegments: 13, minNodes: 25_000, maxNodes: 150_000, acceptUnknown: false },
+  // beyond the solver's phone budget, like most 4★+ originals (solvable by construction)
+  veryHard: { minSegments: 14, minNodes: 250_000, maxNodes: 300_000, acceptUnknown: true },
 };
 
 const ORDER: Difficulty[] = ['veryHard', 'hard', 'medium', 'easy'];
