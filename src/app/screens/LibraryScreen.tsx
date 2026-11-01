@@ -8,14 +8,17 @@ import { importLibrary } from '../store.ts';
 export function LibraryScreen({ library, progress, onLoaded, notice }: { library: LibraryPuzzle[] | null; progress: Progress; onLoaded: (puzzles: LibraryPuzzle[], saved: boolean) => void; notice?: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState<string | null>(null);
 
   const onFile = async (e: Event) => {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
     setBusy(true);
     setError(null);
+    setLoaded(null);
     try {
-      const { puzzles, saved } = await importLibrary(file);
+      const { puzzles, saved, dropped } = await importLibrary(file);
+      if (dropped) setLoaded(`Loaded ${puzzles.length} puzzles (${dropped} couldn't be read).`);
       onLoaded(puzzles, saved);
     } catch (err) {
       setError((err as Error).message);
@@ -56,6 +59,7 @@ export function LibraryScreen({ library, progress, onLoaded, notice }: { library
           {picker('Choose library file', true)}
         </section>
       )}
+      {loaded && <p class="notice">{loaded}</p>}
       {error && <p class="error">{error}</p>}
     </main>
   );

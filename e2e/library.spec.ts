@@ -54,3 +54,17 @@ test('an old link to a puzzle that is not loaded shows the library screen', asyn
   await page.goto('./#/library/w-1/999');
   await expect(page.getByText('Choose library file')).toBeVisible();
 });
+
+test('with the Solved! card turned off, a library win opens the next puzzle', async ({ page }, info) => {
+  const file = info.outputPath('library.json');
+  writeFileSync(file, JSON.stringify({ format: 'trainyard-library', version: 1, puzzles }));
+  await page.goto('./#/library');
+  await page.evaluate(() => localStorage.setItem('trainyard.settings', JSON.stringify({ showSolvedCard: false })));
+  await page.locator('input[type=file]').setInputFiles(file);
+  await page.getByRole('link', { name: /6–10 wrenches/ }).click();
+  await page.getByRole('link', { name: /Straight Shot/ }).click();
+  await page.waitForTimeout(200);
+  await drag(page, 3, 0, 6);
+  await page.getByRole('button', { name: 'Start' }).click();
+  await expect(page.getByRole('heading', { name: 'Second Line' })).toBeVisible({ timeout: 15_000 });
+});

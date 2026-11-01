@@ -84,5 +84,6 @@ export function parseLibrary(text: string): { puzzles: LibraryPuzzle[]; dropped:
   const f = file as { format?: unknown; version?: unknown; puzzles?: unknown } | null;
   if (f?.format !== FORMAT || f.version !== VERSION || !Array.isArray(f.puzzles)) throw new LibraryError();
   const puzzles = f.puzzles.map(check).filter((p): p is LibraryPuzzle => p !== null);
+  if (!puzzles.length) throw new LibraryError(); // nothing usable: keep whatever library is loaded
   return { puzzles, dropped: f.puzzles.length - puzzles.length };
 }

@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import type { LibraryPuzzle } from '../../data/library.ts';
 import { groupLabel, groupPuzzles, groupSlug, libraryKey, type LibraryGroup, type LibrarySort } from '../library.ts';
 import type { Progress } from '../progress.ts';
@@ -10,9 +10,12 @@ const SORTS: { id: LibrarySort; label: string }[] = [
   { id: 'solves', label: 'Most solved' },
 ];
 
-export function LibraryListScreen({ library, group, progress, sort, onSort }: { library: LibraryPuzzle[]; group: LibraryGroup; progress: Progress; sort: LibrarySort; onSort: (s: LibrarySort) => void }) {
-  const [shown, setShown] = useState(PAGE);
+/** `focusId` is the puzzle just played: the list opens far enough down to show it, scrolled to it. */
+export function LibraryListScreen({ library, group, progress, sort, onSort, focusId }: { library: LibraryPuzzle[]; group: LibraryGroup; progress: Progress; sort: LibrarySort; onSort: (s: LibrarySort) => void; focusId?: string }) {
   const list = groupPuzzles(library, group, sort);
+  const [shown, setShown] = useState(() => Math.max(PAGE, Math.ceil((list.findIndex((p) => p.id === focusId) + 1) / PAGE) * PAGE));
+  const focused = useRef<HTMLAnchorElement>(null);
+  useEffect(() => focused.current?.scrollIntoView({ block: 'center' }), []);
   const slug = groupSlug(group);
   return (
     <main class="screen">
@@ -29,7 +32,7 @@ export function LibraryListScreen({ library, group, progress, sort, onSort }: { 
       )}
       <nav class="list spaced">
         {list.slice(0, shown).map((p) => (
-          <a class="tile library-row" href={buildRoute({ name: 'libraryPuzzle', group: slug, id: p.id })} key={p.id}>
+          <a class="tile library-row" ref={p.id === focusId ? focused : undefined} href={buildRoute({ name: 'libraryPuzzle', group: slug, id: p.id })} key={p.id}>
             <span>
               <span class="name">{p.name}</span>
               <span class="muted by">by {p.creator}</span>

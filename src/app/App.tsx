@@ -66,6 +66,8 @@ function Puzzle({ collection, level, progress, theme, onResult, onNext }: { coll
 
 /** The last list screen shown (home, a collection or a city), which decides where a puzzle's Back goes. */
 let lastList: Route | null = null;
+/** The library puzzle played last, so its list reopens at it. */
+let lastLibraryId: string | undefined;
 
 function City({ collection, world, progress, theme }: { collection: Collection; world: string; progress: Progress; theme: Theme }) {
   const id = `${collection.id}/${world}`;
@@ -296,6 +298,7 @@ export function App() {
           group={group}
           progress={progress}
           sort={librarySort}
+          focusId={lastLibraryId}
           onSort={(s) => {
             saveSettings({ ...loadSettings(), librarySort: s });
             setLibrarySort(s);
@@ -309,6 +312,7 @@ export function App() {
       if (!library || !group || !puzzle) return libraryHome(); // an old link, or no library loaded
       const key = libraryKey(puzzle.id);
       const next = nextInGroup(library, group, librarySort, puzzle.id);
+      lastLibraryId = puzzle.id;
       return (
         <PuzzleScreen
           key={key}
@@ -319,6 +323,7 @@ export function App() {
           onResult={(solution, solved) => record(key, solution, solved)}
           onBack={() => go({ name: 'libraryList', group: route.group })}
           onNext={next ? () => go({ name: 'libraryPuzzle', group: route.group, id: next.id }) : undefined}
+          showSolvedCard={loadSettings().showSolvedCard}
           theme={theme}
         >
           <p class="muted credit">

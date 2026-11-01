@@ -111,3 +111,10 @@ describe('the library', () => {
     expect(await loadLibrary()).toBeNull();
   });
 });
+
+test('a library file whose puzzles all fail the check is refused, and the stored library stays', async () => {
+  await importLibrary(new Blob([libraryText([puzzle('1')])]));
+  await expect(importLibrary(new Blob([libraryText([puzzle('2', { code: 'zz!' })])]))).rejects.toThrow("That file isn't a Trainyard library.");
+  await expect(importLibrary(new Blob([libraryText([])]))).rejects.toThrow("That file isn't a Trainyard library.");
+  expect((await loadLibrary())?.map((p) => p.id)).toEqual(['1']);
+});

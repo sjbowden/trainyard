@@ -53,3 +53,24 @@ test('a name with markup shows as text', () => {
   expect(container.textContent).toContain('by "Q" & 🚂');
   expect(container.querySelector('b')).toBeNull();
 });
+
+test('loading a library says how many puzzles could not be read', async () => {
+  const { libraryText } = await import('./libraryFixture.ts');
+  render(<LibraryScreen library={null} progress={emptyProgress()} onLoaded={() => {}} />);
+  const input = document.querySelector('input[type=file]') as HTMLInputElement;
+  const file = new File([libraryText([puzzle('1'), puzzle('2'), puzzle('3', { code: 'zz!' })])], 'library.json');
+  Object.defineProperty(input, 'files', { value: [file] });
+  fireEvent.change(input);
+  expect(await screen.findByText("Loaded 2 puzzles (1 couldn't be read).")).toBeTruthy();
+});
+
+test('coming back to a long list shows the puzzle just played, past the first 100', () => {
+  const scrolled: string[] = [];
+  const original = Element.prototype.scrollIntoView;
+  Element.prototype.scrollIntoView = function (this: Element) { scrolled.push(this.textContent ?? ''); };
+  const lib = Array.from({ length: 300 }, (_, i) => puzzle(String(i), { name: `P${i}`, wrenches: 7, likes: 300 - i }));
+  render(<LibraryListScreen library={lib} group={{ kind: 'band', band: 1 }} progress={emptyProgress()} sort="likes" onSort={() => {}} focusId="250" />);
+  expect(screen.getAllByRole('link').filter((a) => a.getAttribute('href')?.startsWith('#/library/w-1/'))).toHaveLength(300);
+  expect(scrolled.some((t) => t.includes('P250'))).toBe(true);
+  Element.prototype.scrollIntoView = original;
+});
