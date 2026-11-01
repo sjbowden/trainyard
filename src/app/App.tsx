@@ -11,7 +11,7 @@ import { sharePuzzle } from './sharing.ts';
 import { LinkProblem, SharedScreen } from './screens/SharedScreen.tsx';
 import { decodeShare, type SharedPuzzle } from './share.ts';
 import { checkNotOriginal, parsePastedLink } from './sharedLinks.ts';
-import { loadSettings } from './settings.ts';
+import { loadSettings, saveSettings } from './settings.ts';
 import { SettingsScreen } from './screens/SettingsScreen.tsx';
 import { markTutorialSeen, tutorialSeen } from './tutorialsSeen.ts';
 import { emptyProgress, isWorldUnlocked, levelKey, recordAttempt, withoutLevel, type Progress } from './progress.ts';
@@ -24,8 +24,12 @@ import { PuzzleScreen } from './screens/PuzzleScreen.tsx';
 import { TutorialOverlay } from './screens/TutorialOverlay.tsx';
 import { defaultTheme } from './theme/default.ts';
 import { forgetOriginalTheme, resolveTheme } from './theme/original/index.ts';
+import type { LibraryPuzzle } from '../data/library.ts';
+import { libraryKey, nextInGroup, parseGroupSlug } from './library.ts';
+import { LibraryListScreen } from './screens/LibraryListScreen.tsx';
+import { LibraryScreen } from './screens/LibraryScreen.tsx';
 import type { Theme } from './theme/theme.ts';
-import { loadCollections, loadProgress, saveProgress } from './store.ts';
+import { loadCollections, loadLibrary, loadProgress, saveProgress } from './store.ts';
 
 /** A puzzle, with its city's tutorial the first time the city's first puzzle is opened. */
 function Puzzle({ collection, level, progress, theme, onResult, onNext }: { collection: Collection; level: Level; progress: Progress; theme: Theme; onResult: (solution: string, solved: boolean) => void; onNext?: () => void }) {
@@ -106,6 +110,9 @@ export function App() {
   const [custom, setCustom] = useState<CustomPuzzle[]>([]);
   const [pasteMessage, setPasteMessage] = useState<string | undefined>(undefined);
   const refreshCustom = () => void listCustomPuzzles().then(setCustom);
+  const [library, setLibrary] = useState<LibraryPuzzle[] | null>(null);
+  const [libraryNotice, setLibraryNotice] = useState<string | undefined>(undefined);
+  const [librarySort, setLibrarySort] = useState(() => loadSettings().librarySort);
   const [theme, setTheme] = useState<Theme>(defaultTheme);
   const [hasOriginal, setHasOriginal] = useState(false);
   /** Shows the chosen board style; Original falls back to the default when its art is missing or unreadable. */
@@ -123,10 +130,11 @@ export function App() {
     const onHash = () => setRoute(parseRoute(location.hash));
     addEventListener('hashchange', onHash);
     applyTheme(loadSettings().theme);
-    void Promise.all([loadCollections(), loadProgress(), listCustomPuzzles()]).then(([c, p, mine]) => {
+    void Promise.all([loadCollections(), loadProgress(), listCustomPuzzles(), loadLibrary()]).then(([c, p, mine, lib]) => {
       setCollections(c);
       setProgress(p);
       setCustom(mine);
+      setLibrary(lib);
     });
     return () => removeEventListener('hashchange', onHash);
   }, []);
@@ -140,6 +148,18 @@ export function App() {
     setProgress(next);
     void saveProgress(next);
   };
+
+  const libraryHome = () => (
+    <LibraryScreen
+      library={library}
+      progress={progress}
+      onLoaded={(lib, saved) => {
+        setLibrary(lib);
+        setLibraryNotice(saved ? undefined : "This phone wouldn't save the library, so you'll need to load it again next time.");
+      }}
+      notice={libraryNotice}
+    />
+  );
 
   const collection = 'collection' in route ? collections?.find((c) => c.id === route.collection) : undefined;
   if (route.name === 'home' || route.name === 'collection' || route.name === 'city') lastList = route;
@@ -262,6 +282,48 @@ export function App() {
           theme={theme}
         >
           {puzzle.note && <p class="notice">{puzzle.note}</p>}
+        </PuzzleScreen>
+      );
+    }
+    case 'library':
+      return libraryHome();
+    case 'libraryList': {
+      const group = parseGroupSlug(route.group);
+      if (!library || !group) return libraryHome();
+      return (
+        <LibraryListScreen
+          library={library}
+          group={group}
+          progress={progress}
+          sort={librarySort}
+          onSort={(s) => {
+            saveSettings({ ...loadSettings(), librarySort: s });
+            setLibrarySort(s);
+          }}
+        />
+      );
+    }
+    case 'libraryPuzzle': {
+      const group = parseGroupSlug(route.group);
+      const puzzle = library?.find((p) => p.id === route.id);
+      if (!library || !group || !puzzle) return libraryHome(); // an old link, or no library loaded
+      const key = libraryKey(puzzle.id);
+      const next = nextInGroup(library, group, librarySort, puzzle.id);
+      return (
+        <PuzzleScreen
+          key={key}
+          title={puzzle.name}
+          stars={0}
+          puzzleCode={puzzle.code}
+          savedSolution={progress.levels[key]?.solution ?? ''}
+          onResult={(solution, solved) => record(key, solution, solved)}
+          onBack={() => go({ name: 'libraryList', group: route.group })}
+          onNext={next ? () => go({ name: 'libraryPuzzle', group: route.group, id: next.id }) : undefined}
+          theme={theme}
+        >
+          <p class="muted credit">
+            by {puzzle.creator} · {puzzle.wrenches} 🔧 · {puzzle.likes} likes
+          </p>
         </PuzzleScreen>
       );
     }

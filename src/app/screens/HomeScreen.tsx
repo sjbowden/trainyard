@@ -47,6 +47,10 @@ export function HomeScreen({ collections, progress, notice }: { collections: Col
         <span class="name">My puzzles</span>
         <span class="muted">Make and share</span>
       </a>
+      <a class="tile spaced" href={buildRoute({ name: 'library' })}>
+        <span class="name">Player puzzles</span>
+        <span class="muted">From trainyard.ca</span>
+      </a>
       <p class="footer">
         <a href={buildRoute({ name: 'settings' })}>Settings</a>
       </p>

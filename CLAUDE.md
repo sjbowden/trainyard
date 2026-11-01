@@ -5,7 +5,7 @@ Personal web remake of Trainyard for Scott's iPhone. Design: `docs/superpowers/s
 ## Never commit or publish
 - `*.apk`, anything extracted from it (`local/`), the decompiled ActionScript from `BlueprintViewer.swf`, or original puzzle codes.
 - The original's art and sounds: the atlas PNG, crops or screenshots of it, and `.ogg` files. Frame rectangles and names (`src/app/theme/original/frames.ts`) are fine.
-- The scraped player-made puzzles (`local/library-raw.json`).
+- The scraped player-made puzzles (`local/library-raw.json`) and the library file built from them (`local/trainyard-library.json`).
 - `fixtures/solutions.json` holds solution halves only (the text after `_`), keyed by level slug.
 
 ## Commands
@@ -13,6 +13,7 @@ Personal web remake of Trainyard for Scott's iPhone. Design: `docs/superpowers/s
 - `npm run typecheck`
 - `npm run extract`: APK in the repo root → `local/collections.json`
 - `npm run scrape:fixtures`: trainyard.ca solutions → `fixtures/solutions.json` (slow, polite)
+- `npm run library:build`: `local/library-raw.json` → `local/trainyard-library.json`, the file loaded onto the phone
 - `npm run e2e`: end-to-end smoke test (Chromium, iPhone emulation; needs an APK)
 
 ## Before every push to main

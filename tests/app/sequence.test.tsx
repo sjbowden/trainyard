@@ -64,7 +64,7 @@ test('home offers Play at the next puzzle and a way to choose one', () => {
 
 test('home says Play on a fresh start', () => {
   render(<HomeScreen collections={[c]} progress={emptyProgress()} />);
-  expect(screen.getByRole('link', { name: /Play/ }).getAttribute('href')).toBe('#/p/trainyard/a1');
+  expect(screen.getByRole('link', { name: /^Play A1/ }).getAttribute('href')).toBe('#/p/trainyard/a1');
 });
 
 test('the settings screen turns the Solved! card off', async () => {

@@ -26,6 +26,14 @@ A link opens in Safari, where the puzzle can be played straight away. **Add to m
 
 **Settings → Board style** switches between the default look and **Original**, the original game's art and sounds. They come from your APK when you load it, and are kept on the phone like the puzzles. If you loaded the APK before this option existed, load it once more. Any sound the phone can't play falls back to the default one.
 
+## Player puzzle library
+
+The best puzzles players made in the original's editor, from trainyard.ca: the 28 featured puzzles in their four sets, and about 2,750 more grouped by difficulty in wrenches. Like the APK, the library never goes on the public site; you make the file on your computer and load it onto the phone once.
+
+1. `npm run scrape:library` (slow and polite; already done once, resumes) collects them into `local/library-raw.json`.
+2. `npm run library:build` writes `local/trainyard-library.json`. Save it to iCloud Drive.
+3. On the phone: Home → Player puzzles → Choose library file. Each puzzle credits its creator.
+
 ## Development
 
 - Design: `docs/superpowers/specs/2026-10-29-trainyard-design.md`
