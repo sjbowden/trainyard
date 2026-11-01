@@ -11,8 +11,8 @@ const VERSION = 1;
 const SHARED = /^(trainyard|express|library)\//;
 
 export class ProgressFileError extends Error {
-  constructor() {
-    super("That file isn't a Trainyard progress file.");
+  constructor(message = "That file isn't a Trainyard progress file.") {
+    super(message);
     this.name = 'ProgressFileError';
   }
 }
@@ -44,6 +44,7 @@ export function parseProgressFile(text: string): Progress {
     throw new ProgressFileError();
   }
   const f = file as { format?: unknown; version?: unknown; levels?: unknown } | null;
+  if (f?.format === FORMAT && typeof f.version === 'number' && f.version > VERSION) throw new ProgressFileError('This progress file needs a newer version of the app.');
   if (f?.format !== FORMAT || f.version !== VERSION || typeof f.levels !== 'object' || f.levels === null) throw new ProgressFileError();
   const levels: Progress['levels'] = {};
   for (const [key, e] of Object.entries(f.levels)) {

@@ -38,8 +38,8 @@ const FORMAT = 'trainyard-library';
 const VERSION = 1;
 
 export class LibraryError extends Error {
-  constructor() {
-    super("That file isn't a Trainyard library.");
+  constructor(message = "That file isn't a Trainyard library.") {
+    super(message);
     this.name = 'LibraryError';
   }
 }
@@ -82,6 +82,7 @@ export function parseLibrary(text: string): { puzzles: LibraryPuzzle[]; dropped:
     throw new LibraryError();
   }
   const f = file as { format?: unknown; version?: unknown; puzzles?: unknown } | null;
+  if (f?.format === FORMAT && typeof f.version === 'number' && f.version > VERSION) throw new LibraryError('This library file needs a newer version of the app.');
   if (f?.format !== FORMAT || f.version !== VERSION || !Array.isArray(f.puzzles)) throw new LibraryError();
   const puzzles = f.puzzles.map(check).filter((p): p is LibraryPuzzle => p !== null);
   if (!puzzles.length) throw new LibraryError(); // nothing usable: keep whatever library is loaded

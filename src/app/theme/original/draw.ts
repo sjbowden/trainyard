@@ -14,8 +14,14 @@ export interface Sprites {
   tinted(name: FrameName, color: Color): CanvasImageSource;
 }
 
-/** Builds the sprites with offscreen canvases. Tinted frames are made once per color, on first use. */
-export function canvasSprites(atlas: CanvasImageSource, make = (w: number, h: number) => new OffscreenCanvas(w, h)): Sprites {
+/** A canvas off the page: an OffscreenCanvas, or a detached page canvas on Safari before 16.4. */
+function offPage(w: number, h: number): OffscreenCanvas | HTMLCanvasElement {
+  if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(w, h);
+  return Object.assign(document.createElement('canvas'), { width: w, height: h });
+}
+
+/** Builds the sprites with off-page canvases. Tinted frames are made once per color, on first use. */
+export function canvasSprites(atlas: CanvasImageSource, make: (w: number, h: number) => OffscreenCanvas | HTMLCanvasElement = offPage): Sprites {
   const q = FRAMES.floorQuarter;
   const floorCanvas = make(TILE, TILE);
   const f = floorCanvas.getContext('2d')!;

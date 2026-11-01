@@ -27,6 +27,12 @@ test('a band sorts by likes or by solves, most first, ties by name', () => {
   expect(ids(groupPuzzles(lib, band6, 'solves'))).toEqual(['a', 'c', 'b']);
 });
 
+test('puzzles tied on count and name keep the same order whatever order the file lists them in', () => {
+  const twins = [puzzle('y', { name: 'Same', likes: 4 }), puzzle('x', { name: 'Same', likes: 4 })];
+  expect(ids(groupPuzzles(twins, band6, 'likes'))).toEqual(['x', 'y']);
+  expect(ids(groupPuzzles([...twins].reverse(), band6, 'likes'))).toEqual(['x', 'y']);
+});
+
 test("a featured set keeps the site's order whatever the sort", () => {
   expect(ids(groupPuzzles(lib, lorne, 'likes'))).toEqual(['f', 'e']);
   expect(ids(groupPuzzles(lib, lorne, 'solves'))).toEqual(['f', 'e']);

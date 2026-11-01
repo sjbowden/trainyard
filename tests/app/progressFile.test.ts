@@ -24,10 +24,14 @@ test('the file is named for the day it was saved', () => {
 });
 
 test('refuses files that are not progress files', () => {
-  for (const text of ['not json', '{}', 'null', JSON.stringify({ format: 'trainyard-library', version: 1, puzzles: [] }), JSON.stringify({ format: 'trainyard-progress', version: 2, levels: {} })]) {
+  for (const text of ['not json', '{}', 'null', JSON.stringify({ format: 'trainyard-library', version: 1, puzzles: [] })]) {
     expect(() => parseProgressFile(text)).toThrow(ProgressFileError);
     expect(() => parseProgressFile(text)).toThrow("That file isn't a Trainyard progress file.");
   }
+});
+
+test('a progress file from a newer version of the app says so', () => {
+  expect(() => parseProgressFile(JSON.stringify({ format: 'trainyard-progress', version: 2, levels: {} }))).toThrow('This progress file needs a newer version of the app.');
 });
 
 test('skips entries it cannot read', () => {

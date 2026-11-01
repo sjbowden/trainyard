@@ -40,6 +40,15 @@ test('load a library, play a puzzle to a win, and keep it after a reload', async
   await page.getByRole('link', { name: 'Back' }).click();
   await expect(page.getByRole('link', { name: /6–10 wrenches/ })).toContainText('1 of 2 solved');
   await page.screenshot({ path: 'test-results/library.png' });
+
+  // a newer library file, with new counts and one more puzzle, keeps the solve
+  const newer = info.outputPath('library-newer.json');
+  const added = { ...puzzles[1]!, id: '4', name: 'Third Line' };
+  writeFileSync(newer, JSON.stringify({ format: 'trainyard-library', version: 1, puzzles: [...puzzles.map((p) => ({ ...p, likes: p.likes + 1 })), added] }));
+  await page.locator('input[type=file]').setInputFiles(newer);
+  await expect(page.getByRole('link', { name: /6–10 wrenches/ })).toContainText('1 of 3 solved');
+  await page.reload();
+  await expect(page.getByRole('link', { name: /6–10 wrenches/ })).toContainText('1 of 3 solved');
 });
 
 test('a file that is not a library is refused with a plain message', async ({ page }, info) => {

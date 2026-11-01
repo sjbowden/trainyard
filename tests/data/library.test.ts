@@ -32,8 +32,12 @@ describe('parseLibrary', () => {
     expect(parsed.puzzles).toEqual(JSON.parse(built.text).puzzles);
   });
 
+  test('a library file from a newer version of the app says so', () => {
+    expect(() => parseLibrary(JSON.stringify({ format: 'trainyard-library', version: 2, puzzles: [] }))).toThrow('This library file needs a newer version of the app.');
+  });
+
   test('refuses other files', () => {
-    for (const text of ['not json', '{}', 'null', JSON.stringify({ format: 'trainyard-library', version: 2, puzzles: [] }), JSON.stringify({ format: 'trainyard-library', version: 1 })]) {
+    for (const text of ['not json', '{}', 'null', JSON.stringify({ format: 'trainyard-library', version: 1 })]) {
       expect(() => parseLibrary(text)).toThrow(LibraryError);
       expect(() => parseLibrary(text)).toThrow("That file isn't a Trainyard library.");
     }

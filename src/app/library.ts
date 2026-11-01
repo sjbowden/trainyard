@@ -24,11 +24,11 @@ function inGroup(p: LibraryPuzzle, g: LibraryGroup): boolean {
   return p.wrenches >= b.from && p.wrenches <= b.to;
 }
 
-/** A group's puzzles in list order: a featured set in the site's order, a band by the sort, most first. */
+/** A group's puzzles in list order: a featured set in the site's order, a band by the sort, most first, then by name and id. */
 export function groupPuzzles(lib: LibraryPuzzle[], g: LibraryGroup, sort: LibrarySort): LibraryPuzzle[] {
   const ps = lib.filter((p) => inGroup(p, g));
   if (g.kind === 'featured') return ps.sort((a, b) => a.featured!.order - b.featured!.order);
-  return ps.sort((a, b) => b[sort] - a[sort] || a.name.localeCompare(b.name));
+  return ps.sort((a, b) => b[sort] - a[sort] || a.name.localeCompare(b.name) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 }
 
 export function groupLabel(g: LibraryGroup): string {
