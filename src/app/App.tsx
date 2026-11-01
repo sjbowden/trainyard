@@ -28,15 +28,17 @@ import type { LibraryPuzzle } from '../data/library.ts';
 import { libraryKey, nextInGroup, parseGroupSlug } from './library.ts';
 import { LibraryListScreen } from './screens/LibraryListScreen.tsx';
 import { LibraryScreen } from './screens/LibraryScreen.tsx';
+import { Arrival } from './screens/Arrival.tsx';
 import type { Theme } from './theme/theme.ts';
 import { loadCollections, loadLibrary, loadProgress, saveProgress } from './store.ts';
 
-/** A puzzle, with its city's tutorial the first time the city's first puzzle is opened. */
-function Puzzle({ collection, level, progress, theme, onResult, onNext }: { collection: Collection; level: Level; progress: Progress; theme: Theme; onResult: (solution: string, solved: boolean) => void; onNext?: () => void }) {
+/** A puzzle, with its city's tutorial the first time the city's first puzzle is opened, and a brief "Now in <city>" when Next brought you here from the city before. */
+function Puzzle({ collection, level, progress, theme, arrived, onResult, onNext }: { collection: Collection; level: Level; progress: Progress; theme: Theme; arrived: boolean; onResult: (solution: string, solved: boolean) => void; onNext?: () => void }) {
   const id = `${collection.id}/${level.worldSlug}`;
   const tutorials = collection.tutorials.filter((t) => t.worldSlug === level.worldSlug).sort((a, b) => a.ordinal - b.ordinal);
   const [tutorial, setTutorial] = useState(() => tutorials.length > 0 && firstOfCity(collection, level.slug) && !tutorialSeen(id));
   const key = levelKey(collection.id, level.slug);
+  const [city] = useState(() => (arrived ? collection.worlds.find((w) => w.slug === level.worldSlug)?.name : undefined));
   return (
     <>
       <PuzzleScreen
@@ -49,6 +51,7 @@ function Puzzle({ collection, level, progress, theme, onResult, onNext }: { coll
         onBack={() => go(puzzleBackRoute(lastList, collection.id, level.worldSlug))}
         onNext={onNext}
         theme={theme}
+        overlay={city && <Arrival city={city} waiting={tutorial} />}
       />
       {tutorial && (
         <TutorialOverlay
@@ -66,6 +69,8 @@ function Puzzle({ collection, level, progress, theme, onResult, onNext }: { coll
 
 /** The last list screen shown (home, a collection or a city), which decides where a puzzle's Back goes. */
 let lastList: Route | null = null;
+/** The puzzle Next just moved to from the city before, so it can say which city you're now in. */
+let arrivedAt: string | undefined;
 /** The library puzzle played last, so its list reopens at it. */
 let lastLibraryId: string | undefined;
 
@@ -355,6 +360,8 @@ export function App() {
       if (collection && level && isWorldUnlocked(collection, level.worldSlug, progress)) {
         const key = levelKey(collection.id, level.slug);
         const next = nextLevel(collection, level.slug, progress);
+        const arrived = arrivedAt === key;
+        if (arrived) arrivedAt = undefined; // read once: coming back later from a list says nothing
         return (
           <Puzzle
             key={key}
@@ -362,8 +369,16 @@ export function App() {
             level={level}
             progress={progress}
             theme={theme}
+            arrived={arrived}
             onResult={(solution, solved) => record(key, solution, solved)}
-            onNext={next ? () => go({ name: 'puzzle', collection: collection.id, slug: next.slug }) : undefined}
+            onNext={
+              next
+                ? () => {
+                    if (next.worldSlug !== level.worldSlug) arrivedAt = levelKey(collection.id, next.slug);
+                    go({ name: 'puzzle', collection: collection.id, slug: next.slug });
+                  }
+                : undefined
+            }
           />
         );
       }

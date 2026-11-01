@@ -193,3 +193,44 @@ test('the Original board style plays Red Line with no errors', async ({ page }) 
   await expect(page.getByText('Solved!')).toBeVisible({ timeout: 15_000 });
   expect(errors).toEqual([]);
 });
+
+test('Next into a new city says so briefly; opening that city from its list does not', async ({ page }) => {
+  await page.goto('./');
+  await page.getByText('Load APK').click();
+  await page.locator('input[type=file]').setInputFiles(apk!);
+  await expect(page.getByRole('link', { name: /^Play Red Line/ })).toBeVisible({ timeout: 20_000 }); // saved, not just reading
+
+  // All of Abbotsford solved (which unlocks Brampton), with Purpablu's solution laid down.
+  // The solution half comes from fixtures/solutions.json; the puzzle itself comes from the APK.
+  await page.evaluate(
+    (purpablu) =>
+      new Promise<void>((resolve) => {
+        const slugs = ['redLine', 'grorangeLines', 'yorpleLines', 'magicalTrains', 'theRedCorner', 'purpablu'];
+        const levels = Object.fromEntries(slugs.map((s) => [`trainyard/${s}`, { solved: true, solution: s === 'purpablu' ? purpablu : '' }]));
+        const open = indexedDB.open('trainyard');
+        open.onsuccess = () => {
+          const tx = open.result.transaction('kv', 'readwrite');
+          tx.objectStore('kv').put({ levels }, 'progress/v1');
+          tx.oncomplete = () => {
+            open.result.close();
+            resolve();
+          };
+        };
+      }),
+    '7C5vhQQQQQo01Cv3CQo3ho',
+  );
+  await page.goto('./#/p/trainyard/purpablu');
+  await page.reload();
+  await page.getByRole('button', { name: 'Start' }).click();
+  await page.getByRole('button', { name: 'Next puzzle' }).click({ timeout: 15_000 });
+
+  await expect(page.getByRole('heading', { name: 'A Rock in the Way' })).toBeVisible();
+  await expect(page.getByRole('status')).toHaveText('Now in Brampton');
+  await expect(page.getByRole('status')).toHaveCount(0, { timeout: 6_000 });
+
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await page.getByText('A Rock in the Way').click();
+  await expect(page.getByRole('heading', { name: 'A Rock in the Way' })).toBeVisible();
+  await page.waitForTimeout(500);
+  await expect(page.getByRole('status')).toHaveCount(0);
+});

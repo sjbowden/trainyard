@@ -25,6 +25,8 @@ export interface PuzzleScreenProps {
   theme?: Theme;
   /** Shown above the board, e.g. tutorial text. */
   children?: preact.ComponentChildren;
+  /** Floats at the top of the board area without moving the board, e.g. "Now in <city>". */
+  overlay?: preact.ComponentChildren;
 }
 
 const MESSAGES: Record<Exclude<Finish, 'won'>, string> = {
@@ -44,7 +46,7 @@ function initialBoard(code: string, solution: string): Board {
   return decodeBoard(code);
 }
 
-export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult, onBack, onNext, showSolvedCard = true, theme = defaultTheme, children }: PuzzleScreenProps) {
+export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult, onBack, onNext, showSolvedCard = true, theme = defaultTheme, children, overlay }: PuzzleScreenProps) {
   const [, setVersion] = useState(0);
   const refresh = () => setVersion((v) => v + 1);
   const [mode, setMode] = useState<'draw' | 'erase'>('draw');
@@ -145,6 +147,7 @@ export function PuzzleScreen({ title, stars, puzzleCode, savedSolution, onResult
       </header>
       {children}
       <div class="board-wrap" onPointerDown={unlockAudio}>
+        {overlay}
         <BoardCanvas controller={controller} theme={theme} mode={mode} speed={speedFromSlider(slider)} effects={effects} onEdit={edited} />
         {finish === 'won' && (showSolvedCard || !onNext) && (
           <div class="overlay">
