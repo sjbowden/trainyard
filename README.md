@@ -34,6 +34,10 @@ The best puzzles players made in the original's editor, from trainyard.ca: the 2
 2. `npm run library:build` writes `local/trainyard-library.json`. Save it to iCloud Drive.
 3. On the phone: Home → Player puzzles → Choose library file. Each puzzle credits its creator.
 
+## Moving progress between devices
+
+Each device keeps its own progress. To carry it over: **Settings → Save progress** on one device and choose Save to Files (iCloud Drive), then **Settings → Load progress** on the other. Loading merges rather than replaces: a puzzle solved on either device counts as solved, and each puzzle keeps the track laid most recently. It covers the original puzzles and the player library, not your own puzzles.
+
 ## Development
 
 - Design: `docs/superpowers/specs/2026-10-29-trainyard-design.md`

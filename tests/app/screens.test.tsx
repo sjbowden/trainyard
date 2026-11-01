@@ -53,7 +53,7 @@ test('solving a puzzle updates its tick and the city stars', () => {
 
 test('Settings offers the Original board style only once its art is loaded', async () => {
   const { SettingsScreen } = await import('../../src/app/screens/SettingsScreen.tsx');
-  render(<SettingsScreen hasOriginal={false} onTheme={() => {}} />);
+  render(<SettingsScreen hasOriginal={false} onTheme={() => {}} progress={{ levels: {} }} onProgress={() => {}} />);
   expect((screen.getByRole('radio', { name: 'Original' }) as HTMLInputElement).disabled).toBe(true);
   expect((screen.getByRole('radio', { name: 'Default' }) as HTMLInputElement).checked).toBe(true);
   const hint = screen.getByRole('link', { name: 'Load the APK again to add the original art and sounds' });
@@ -64,7 +64,7 @@ test('choosing Original saves it and switches at once', async () => {
   const { SettingsScreen } = await import('../../src/app/screens/SettingsScreen.tsx');
   const { loadSettings } = await import('../../src/app/settings.ts');
   const chosen: string[] = [];
-  render(<SettingsScreen hasOriginal onTheme={(id) => chosen.push(id)} />);
+  render(<SettingsScreen hasOriginal onTheme={(id) => chosen.push(id)} progress={{ levels: {} }} onProgress={() => {}} />);
   (screen.getByRole('radio', { name: 'Original' }) as HTMLInputElement).click();
   expect(loadSettings().theme).toBe('original');
   expect(chosen).toEqual(['original']);

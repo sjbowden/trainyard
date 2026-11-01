@@ -149,7 +149,7 @@ async function mergeAndSave(p: Progress): Promise<void> {
     const kv = store();
     const stored = (await withTimeout(get<Progress>(PROGRESS, kv))) ?? emptyProgress();
     const levels = { ...stored.levels };
-    for (const [key, l] of Object.entries(p.levels)) levels[key] = { solved: l.solved || (stored.levels[key]?.solved ?? false), solution: l.solution };
+    for (const [key, l] of Object.entries(p.levels)) levels[key] = { ...l, solved: l.solved || (stored.levels[key]?.solved ?? false) };
     await withTimeout(set(PROGRESS, { levels }, kv));
   } catch {
     forget();

@@ -38,8 +38,8 @@ test('stars count each solved level once', () => {
 });
 
 test('an unsolved attempt keeps an earlier solve', () => {
-  const p = recordAttempt(solve(undefined, 'trainyard', 'a1'), levelKey('trainyard', 'a1'), 'y', false);
-  expect(p.levels['trainyard/a1']).toEqual({ solved: true, solution: 'y' });
+  const p = recordAttempt(solve(undefined, 'trainyard', 'a1'), levelKey('trainyard', 'a1'), 'y', false, 99);
+  expect(p.levels['trainyard/a1']).toEqual({ solved: true, solution: 'y', at: 99 });
 });
 
 test('Trainyard and Express stars are separate', () => {

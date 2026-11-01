@@ -69,6 +69,12 @@ test('progress round-trips', async () => {
   expect(await loadProgress()).toEqual(p);
 });
 
+test('saving progress keeps when each track was laid', async () => {
+  const p = { levels: { 'trainyard/redLine': { solved: true, solution: '003QQQ00', at: 1234 } } };
+  await saveProgress(p);
+  expect(await loadProgress()).toEqual(p);
+});
+
 test('a file that cannot be read gives the friendly message', async () => {
   const unreadable = { arrayBuffer: () => Promise.reject(new DOMException('not downloaded', 'NotReadableError')) } as unknown as Blob;
   await expect(importApk(unreadable, wasmUrl)).rejects.toThrow("Couldn't read the APK. Check your connection and try again.");

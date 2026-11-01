@@ -6,6 +6,8 @@ export interface LevelProgress {
   solved: boolean;
   /** The solution half of a code (the text after `_`). */
   solution: string;
+  /** When this track was laid (ms since 1970), so two devices' progress can be merged. Missing on older saves. */
+  at?: number;
 }
 
 export interface Progress {
@@ -37,7 +39,7 @@ export function withoutLevel(p: Progress, key: string): Progress {
 }
 
 /** Saves the latest solution; a level stays solved once it has been solved. */
-export function recordAttempt(p: Progress, key: string, solution: string, solved: boolean): Progress {
+export function recordAttempt(p: Progress, key: string, solution: string, solved: boolean, at = Date.now()): Progress {
   const was = p.levels[key]?.solved ?? false;
-  return { levels: { ...p.levels, [key]: { solved: was || solved, solution } } };
+  return { levels: { ...p.levels, [key]: { solved: was || solved, solution, at } } };
 }

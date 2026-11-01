@@ -1,11 +1,17 @@
 import { useState } from 'preact/hooks';
+import type { Progress } from '../progress.ts';
+import { mergeProgress, parseProgressFile } from '../progressFile.ts';
 import { buildRoute } from '../router.ts';
+import { saveProgressFile } from '../sharing.ts';
 import { loadSettings, saveSettings, type Settings } from '../settings.ts';
 
 export interface SettingsScreenProps {
   /** Whether the Original theme's art was kept from the APK. */
   hasOriginal: boolean;
   onTheme: (theme: Settings['theme']) => void;
+  progress: Progress;
+  /** Called with this device's progress merged with a loaded file's. */
+  onProgress: (merged: Progress) => void;
 }
 
 const STYLES: { id: Settings['theme']; label: string }[] = [
@@ -13,8 +19,30 @@ const STYLES: { id: Settings['theme']; label: string }[] = [
   { id: 'original', label: 'Original' },
 ];
 
-export function SettingsScreen({ hasOriginal, onTheme }: SettingsScreenProps) {
+export function SettingsScreen({ hasOriginal, onTheme, progress, onProgress }: SettingsScreenProps) {
   const [settings, setSettings] = useState(loadSettings);
+  const [sync, setSync] = useState<string | null>(null);
+  const onFile = async (e: Event) => {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    let text: string;
+    try {
+      text = await file.text();
+    } catch {
+      setSync("Couldn't read the file. Check your connection and try again.");
+      return;
+    } finally {
+      input.value = ''; // so choosing the same file again retries
+    }
+    try {
+      const { progress: merged, newlySolved } = mergeProgress(progress, parseProgressFile(text));
+      onProgress(merged);
+      setSync(newlySolved ? `Added ${newlySolved} solved puzzle${newlySolved === 1 ? '' : 's'}.` : 'No new solved puzzles in that file.');
+    } catch (err) {
+      setSync((err as Error).message);
+    }
+  };
   const change = (patch: Partial<Settings>) => {
     const next = { ...loadSettings(), ...patch };
     saveSettings(next);
@@ -57,6 +85,18 @@ export function SettingsScreen({ hasOriginal, onTheme }: SettingsScreenProps) {
           <a class="hint" href={buildRoute({ name: 'load' })}>Load the APK again to add the original art and sounds</a>
         )}
       </fieldset>
+      <div class="tile setting sync">
+        <span class="name">Progress</span>
+        <span class="hint">Move your solved puzzles between your iPhone and iPad: save here, then load the file on the other device.</span>
+        <div class="choices">
+          <button onClick={() => void saveProgressFile(progress)}>Save progress</button>
+          <label class="button">
+            Load progress
+            <input type="file" accept=".json,application/json" onChange={onFile} hidden />
+          </label>
+        </div>
+        {sync && <p class="hint" role="status">{sync}</p>}
+      </div>
       <p class="footer">
         <a href={buildRoute({ name: 'load' })}>Load a different APK</a>
       </p>

@@ -173,7 +173,18 @@ export function App() {
 
   switch (route.name) {
     case 'settings':
-      return <SettingsScreen hasOriginal={hasOriginal} onTheme={applyTheme} />;
+      return (
+        <SettingsScreen
+          hasOriginal={hasOriginal}
+          onTheme={applyTheme}
+          progress={progress}
+          onProgress={(merged) => {
+            latest.current = merged;
+            setProgress(merged);
+            void saveProgress(merged);
+          }}
+        />
+      );
     case 'mine':
       return (
         <MyPuzzlesScreen

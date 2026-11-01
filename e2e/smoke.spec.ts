@@ -218,3 +218,28 @@ test('Next into a new city says so briefly; opening that city from its list does
   await page.waitForTimeout(500);
   await expect(page.getByRole('status')).toHaveCount(0);
 });
+
+test('progress saved on one device and loaded on another carries the solves over', async ({ page, browser }) => {
+  await loadApk(page);
+  await page.getByRole('link', { name: /^Play Red Line/ }).click();
+  await page.getByRole('button', { name: 'Close' }).click();
+  await page.waitForTimeout(300);
+  await dragAcrossRow(page, 3, 1, 5);
+  await page.getByRole('button', { name: 'Start' }).click();
+  await expect(page.getByText('Solved!')).toBeVisible({ timeout: 15_000 });
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await page.getByRole('link', { name: 'Settings' }).click();
+  const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Save progress' }).click()]);
+  const file = await download.path();
+
+  // a second device, with the APK loaded and nothing solved
+  const other = await (await browser.newContext()).newPage();
+  await loadApk(other);
+  await other.getByRole('link', { name: 'Settings' }).click();
+  await other.locator('input[type=file]').setInputFiles({ name: download.suggestedFilename(), mimeType: 'application/json', buffer: (await import('node:fs')).readFileSync(file) });
+  await expect(other.getByRole('status')).toHaveText('Added 1 solved puzzle.');
+  await other.getByRole('link', { name: 'Back' }).click();
+  await expect(other.getByRole('link', { name: /^Continue Grorange lines/ })).toBeVisible();
+  await other.reload();
+  await expect(other.getByRole('link', { name: /^Continue Grorange lines/ })).toBeVisible(); // kept
+});
