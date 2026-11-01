@@ -7,10 +7,12 @@ export interface Settings {
   speed: number;
   /** The board style. Original needs the art kept from the APK; without it the default shows. */
   theme: 'default' | 'original';
+  /** How the player puzzle library's difficulty lists are sorted. */
+  librarySort: 'likes' | 'solves';
 }
 
 const KEY = 'trainyard.settings';
-const DEFAULTS: Settings = { showSolvedCard: true, speed: 0.5, theme: 'default' };
+const DEFAULTS: Settings = { showSolvedCard: true, speed: 0.5, theme: 'default', librarySort: 'likes' };
 
 export function loadSettings(): Settings {
   try {

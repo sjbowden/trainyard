@@ -3,7 +3,8 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { clear, createStore } from 'idb-keyval';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { importApk, loadCollections, loadProgress, loadThemeAssets, saveProgress } from '../../src/app/store.ts';
+import { importApk, importLibrary, loadCollections, loadLibrary, loadProgress, loadThemeAssets, saveProgress } from '../../src/app/store.ts';
+import { libraryText, puzzle } from './libraryFixture.ts';
 
 const wasmUrl = createRequire(import.meta.url).resolve('sql.js/dist/sql-wasm.wasm');
 const apk = readdirSync('.').find((f) => f.endsWith('.apk'));
@@ -76,4 +77,37 @@ test('a file that cannot be read gives the friendly message', async () => {
 test('a read that fails with no error at all still gives the friendly message', async () => {
   const unreadable = { arrayBuffer: () => Promise.reject(undefined) } as unknown as Blob;
   await expect(importApk(unreadable, wasmUrl)).rejects.toThrow("Couldn't read the APK. Check your connection and try again.");
+});
+
+describe('the library', () => {
+  test('importLibrary keeps the library and loadLibrary returns it', async () => {
+    const lib = [puzzle('1'), puzzle('2', { name: 'Two' })];
+    const imported = await importLibrary(new Blob([libraryText(lib)]));
+    expect(imported).toEqual({ puzzles: lib, saved: true, dropped: 0 });
+    expect(await loadLibrary()).toEqual(lib);
+  });
+
+  test("importLibrary refuses a file that isn't a library and keeps the one already stored", async () => {
+    await importLibrary(new Blob([libraryText([puzzle('1')])]));
+    await expect(importLibrary(new Blob(['PK\u0003\u0004 an apk']))).rejects.toThrow("That file isn't a Trainyard library.");
+    expect((await loadLibrary())?.map((p) => p.id)).toEqual(['1']);
+  });
+
+  test('an unreadable library file gives the friendly message', async () => {
+    const unreadable = { text: () => Promise.reject(undefined) } as unknown as Blob;
+    await expect(importLibrary(unreadable)).rejects.toThrow("Couldn't read the file. Check your connection and try again.");
+  });
+
+  test("importLibrary still returns the puzzles when the phone won't save them", async () => {
+    vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(() => {
+      throw new DOMException('quota', 'QuotaExceededError');
+    });
+    const imported = await importLibrary(new Blob([libraryText([puzzle('1')])]));
+    expect(imported.saved).toBe(false);
+    expect(imported.puzzles).toHaveLength(1);
+  });
+
+  test('loadLibrary returns null when nothing is stored', async () => {
+    expect(await loadLibrary()).toBeNull();
+  });
 });

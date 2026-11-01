@@ -1,5 +1,6 @@
 import { createStore, get, set, type UseStore } from 'idb-keyval';
 import { readApk, readThemeAssets, type Collection } from '../data/apk.ts';
+import { parseLibrary, type LibraryPuzzle } from '../data/library.ts';
 import { emptyProgress, type Progress } from './progress.ts';
 
 /**
@@ -10,6 +11,7 @@ import { emptyProgress, type Progress } from './progress.ts';
 const COLLECTIONS = 'collections/v1';
 const PROGRESS = 'progress/v1';
 const THEME = 'theme/original/v1';
+const LIBRARY = 'library/v1';
 
 /** The Original theme's art and sounds, as kept on the device. */
 export interface StoredThemeAssets { atlas: Blob; sounds: Record<string, Blob> }
@@ -78,6 +80,36 @@ async function saveThemeAssets(bytes: Uint8Array): Promise<boolean> {
 export async function loadThemeAssets(): Promise<StoredThemeAssets | null> {
   try {
     return (await withTimeout(get<StoredThemeAssets>(THEME, store()))) ?? null;
+  } catch {
+    forget();
+    return null;
+  }
+}
+
+/**
+ * Reads a library file and keeps its puzzles. A file that isn't a library throws and leaves the
+ * stored library alone. `saved` is false if the phone wouldn't store it (the puzzles still play).
+ */
+export async function importLibrary(file: Blob): Promise<{ puzzles: LibraryPuzzle[]; saved: boolean; dropped: number }> {
+  let text: string;
+  try {
+    text = await file.text();
+  } catch {
+    throw new Error("Couldn't read the file. Check your connection and try again.");
+  }
+  const { puzzles, dropped } = parseLibrary(text);
+  try {
+    await withTimeout(set(LIBRARY, puzzles, store()));
+    return { puzzles, saved: true, dropped };
+  } catch {
+    forget();
+    return { puzzles, saved: false, dropped };
+  }
+}
+
+export async function loadLibrary(): Promise<LibraryPuzzle[] | null> {
+  try {
+    return (await withTimeout(get<LibraryPuzzle[]>(LIBRARY, store()))) ?? null;
   } catch {
     forget();
     return null;
