@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { Collection, Level } from '../data/apk.ts';
 import { encodeBoard } from '../engine/codec.ts';
-import { addShared, customKey, deleteCustomPuzzle, listCustomPuzzles, newPuzzleId, saveCustomPuzzle, type CustomPuzzle } from './customPuzzles.ts';
+import { addShared, customKey, deleteCustomPuzzle, listCustomPuzzles, newPuzzleId, saveCustomPuzzle, uniqueName, type CustomPuzzle } from './customPuzzles.ts';
 import { emptyBoard } from './editor.ts';
 import { firstOfCity, nextLevel } from './levels.ts';
 import { EditorScreen } from './screens/EditorScreen.tsx';
@@ -25,7 +25,7 @@ import { TutorialOverlay } from './screens/TutorialOverlay.tsx';
 import { defaultTheme } from './theme/default.ts';
 import { forgetOriginalTheme, resolveTheme } from './theme/original/index.ts';
 import type { LibraryPuzzle } from '../data/library.ts';
-import { libraryKey, nextInGroup, parseGroupSlug } from './library.ts';
+import { creditLine, libraryKey, nextInGroup, parseGroupSlug } from './library.ts';
 import { LibraryListScreen } from './screens/LibraryListScreen.tsx';
 import { LibraryScreen } from './screens/LibraryScreen.tsx';
 import { Arrival } from './screens/Arrival.tsx';
@@ -149,6 +149,16 @@ export function App() {
   if (dev) return <DevPuzzle slug={dev} />;
   if (collections === undefined) return <main class="screen" />;
 
+  const removeCustom = async (id: string) => {
+    // drop its progress from memory too, or the next save would write it back
+    const next = withoutLevel(latest.current, customKey(id));
+    latest.current = next;
+    setProgress(next);
+    setCustom((list) => list.filter((x) => x.id !== id));
+    await deleteCustomPuzzle(id);
+    refreshCustom();
+  };
+
   const record = (key: string, solution: string, solved: boolean) => {
     const next = recordAttempt(latest.current, key, solution, solved);
     latest.current = next;
@@ -197,6 +207,7 @@ export function App() {
           }}
           message={pasteMessage}
           onShare={(p) => void sharePuzzle(p.name, p.code).then((m) => m && setPasteMessage(m))}
+          onDelete={(p) => removeCustom(p.id)}
           onPaste={async () => {
             try {
               const shared = parsePastedLink(await navigator.clipboard.readText());
@@ -238,7 +249,7 @@ export function App() {
             const p: CustomPuzzle = {
               id: `g-${g.difficulty}-${g.seed}`,
               source: 'generated',
-              name: `${DIFFICULTY_NAMES[g.difficulty]} #${g.seed % 10000}`,
+              name: uniqueName(`${DIFFICULTY_NAMES[g.difficulty]} #${g.seed % 10000}`, custom.filter((x) => x.id !== `g-${g.difficulty}-${g.seed}`).map((x) => x.name)),
               code: g.code,
               proof: g.proof,
               created: Date.now(),
@@ -263,17 +274,7 @@ export function App() {
             void saveCustomPuzzle(p);
           }}
           onTest={() => go({ name: 'play', id: puzzle.id })}
-          onDelete={() => {
-            // drop its progress from memory too, or the next save would write it back
-            const next = withoutLevel(latest.current, customKey(puzzle.id));
-            latest.current = next;
-            setProgress(next);
-            setCustom((list) => list.filter((x) => x.id !== puzzle.id));
-            void deleteCustomPuzzle(puzzle.id).then(() => {
-              refreshCustom();
-              go({ name: 'mine' });
-            });
-          }}
+          onDelete={() => void removeCustom(puzzle.id).then(() => go({ name: 'mine' }))}
         />
       );
     }
@@ -343,7 +344,7 @@ export function App() {
           theme={theme}
         >
           <p class="muted credit">
-            by {puzzle.creator} · {puzzle.wrenches} 🔧 · {puzzle.likes} likes
+            {creditLine(puzzle)}
           </p>
         </PuzzleScreen>
       );

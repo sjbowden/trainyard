@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { BANDS, groupPuzzles, groupSlug, groupSummaries, libraryKey, nextInGroup, parseGroupSlug, type LibraryGroup } from '../../src/app/library.ts';
+import { BANDS, creditLine, groupPuzzles, groupSlug, groupSummaries, libraryKey, nextInGroup, parseGroupSlug, type LibraryGroup } from '../../src/app/library.ts';
 import { puzzle } from './libraryFixture.ts';
 
 const lib = [
@@ -56,4 +56,9 @@ test('nextInGroup follows the list order and stops at the end', () => {
 test('group slugs round-trip, including a set name with spaces, and nonsense parses to null', () => {
   for (const g of [lorne, band6, { kind: 'band', band: 0 } as LibraryGroup]) expect(parseGroupSlug(groupSlug(g))).toEqual(g);
   for (const s of ['', 'x', 'w-9', 'w-', 'w-1.5', 'f-', 'f-Nowhere']) expect(parseGroupSlug(s)).toBeNull();
+});
+
+test('the credit line leaves out a missing creator', () => {
+  expect(creditLine(puzzle('1', { creator: 'Matt', wrenches: 7, likes: 3 }))).toBe('by Matt · 7 🔧 · 3 likes');
+  expect(creditLine(puzzle('1', { creator: '', wrenches: 7, likes: 3 }))).toBe('7 🔧 · 3 likes');
 });

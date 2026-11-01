@@ -65,3 +65,8 @@ export function parseGroupSlug(s: string): LibraryGroup | null {
   const m = /^w-(\d)$/.exec(s);
   return m && Number(m[1]) < BANDS.length ? { kind: 'band', band: Number(m[1]) } : null;
 }
+
+/** "by Matt · 7 🔧 · 3 likes", leaving out "by" when the creator has no name. */
+export function creditLine(p: LibraryPuzzle): string {
+  return [p.creator.trim() && `by ${p.creator}`, `${p.wrenches} 🔧`, `${p.likes} likes`].filter(Boolean).join(' · ');
+}

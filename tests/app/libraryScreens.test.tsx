@@ -74,3 +74,8 @@ test('coming back to a long list shows the puzzle just played, past the first 10
   expect(scrolled.some((t) => t.includes('P250'))).toBe(true);
   Element.prototype.scrollIntoView = original;
 });
+
+test('a puzzle with no creator name shows no "by" line', () => {
+  render(<LibraryListScreen library={[puzzle('1', { creator: ' ' }), puzzle('2', { creator: 'Matt' })]} group={{ kind: 'band', band: 1 }} progress={emptyProgress()} sort="likes" onSort={() => {}} />);
+  expect(screen.getAllByText(/^by\b/).map((e) => e.textContent)).toEqual(['by Matt']);
+});

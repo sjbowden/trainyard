@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
 import { clear, createStore } from 'idb-keyval';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
-import { addShared, deleteCustomPuzzle, listCustomPuzzles, saveCustomPuzzle, type CustomPuzzle } from '../../src/app/customPuzzles.ts';
+import { addShared, deleteCustomPuzzle, listCustomPuzzles, saveCustomPuzzle, uniqueName, type CustomPuzzle } from '../../src/app/customPuzzles.ts';
 import { loadProgress, saveProgress } from '../../src/app/store.ts';
 
 beforeEach(() => clear(createStore('trainyard', 'kv')));
@@ -39,4 +39,10 @@ test('a storage failure lists nothing', async () => {
     throw new Error('storage unavailable');
   });
   expect(await listCustomPuzzles()).toEqual([]);
+});
+
+test('a new name that is already taken gets a number', () => {
+  expect(uniqueName('Hard #12', ['Easy #12'])).toBe('Hard #12');
+  expect(uniqueName('Hard #12', ['Hard #12'])).toBe('Hard #12 (2)');
+  expect(uniqueName('Hard #12', ['Hard #12', 'Hard #12 (2)'])).toBe('Hard #12 (3)');
 });

@@ -54,3 +54,11 @@ export async function deleteCustomPuzzle(id: string): Promise<void> {
 export function newPuzzleId(): string {
   return `m-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 }
+
+/** The name, or with " (2)", " (3)"… added if another puzzle already has it. */
+export function uniqueName(name: string, taken: string[]): string {
+  if (!taken.includes(name)) return name;
+  let n = 2;
+  while (taken.includes(`${name} (${n})`)) n++;
+  return `${name} (${n})`;
+}

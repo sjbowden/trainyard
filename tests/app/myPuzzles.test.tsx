@@ -53,3 +53,27 @@ test('generated puzzles have their own section, open to play, and can be shared'
   expect(screen.getByText('Hard #4821').closest('a')?.getAttribute('href')).toBe('#/play/g-1');
   expect(screen.getByRole('button', { name: 'Share Hard #4821' })).toBeTruthy();
 });
+
+test('generated and shared puzzles can be deleted, after asking', () => {
+  const deleted: string[] = [];
+  const asked: string[] = [];
+  globalThis.confirm = (q?: string) => {
+    asked.push(q ?? '');
+    return asked.length > 1; // say no the first time
+  };
+  render(
+    <MyPuzzlesScreen
+      puzzles={[p({ id: 'g-1', source: 'generated', name: 'Hard #12' }), p({ id: 's-1', source: 'shared', name: 'Gift' }), p({ id: 'm-1', name: 'Draft' })]}
+      onNew={() => {}}
+      onPaste={() => {}}
+      onDelete={(x) => deleted.push(x.id)}
+    />,
+  );
+  screen.getByRole('button', { name: 'Delete Hard #12' }).click();
+  expect(deleted).toEqual([]);
+  screen.getByRole('button', { name: 'Delete Hard #12' }).click();
+  screen.getByRole('button', { name: 'Delete Gift' }).click();
+  expect(asked).toEqual(['Delete “Hard #12”?', 'Delete “Hard #12”?', 'Delete “Gift”?']);
+  expect(deleted).toEqual(['g-1', 's-1']);
+  expect(screen.queryByRole('button', { name: 'Delete Draft' })).toBeNull(); // your own are deleted in the editor
+});

@@ -2,7 +2,13 @@ import type { CustomPuzzle } from '../customPuzzles.ts';
 import { proofHolds } from '../editor.ts';
 import { buildRoute } from '../router.ts';
 
-export function MyPuzzlesScreen({ puzzles, onNew, onPaste, onShare, message }: { puzzles: CustomPuzzle[]; onNew: () => void; onPaste: () => void; onShare?: (p: CustomPuzzle) => void; message?: string }) {
+export function MyPuzzlesScreen({ puzzles, onNew, onPaste, onShare, onDelete, message }: { puzzles: CustomPuzzle[]; onNew: () => void; onPaste: () => void; onShare?: (p: CustomPuzzle) => void; onDelete?: (p: CustomPuzzle) => void; message?: string }) {
+  const remove = (p: CustomPuzzle) =>
+    onDelete && (
+      <button class="danger" onClick={() => confirm(`Delete “${p.name}”?`) && onDelete(p)} aria-label={`Delete ${p.name}`}>
+        Delete
+      </button>
+    );
   const mine = puzzles.filter((p) => p.source === 'mine');
   const shared = puzzles.filter((p) => p.source === 'shared');
   const generated = puzzles.filter((p) => p.source === 'generated');
@@ -35,6 +41,7 @@ export function MyPuzzlesScreen({ puzzles, onNew, onPaste, onShare, message }: {
                 {onShare && proofHolds(p.code, p.proof) && (
                   <button onClick={() => onShare(p)} aria-label={`Share ${p.name}`}>Share</button>
                 )}
+                {remove(p)}
               </div>
             ))}
           </nav>
@@ -44,9 +51,12 @@ export function MyPuzzlesScreen({ puzzles, onNew, onPaste, onShare, message }: {
       {shared.length > 0 ? (
         <nav class="list">
           {shared.map((p) => (
-            <a class="tile" href={buildRoute({ name: 'play', id: p.id })} key={p.id}>
-              <span class="name">{p.name}</span>
-            </a>
+            <div class="tile-row" key={p.id}>
+              <a class="tile" href={buildRoute({ name: 'play', id: p.id })}>
+                <span class="name">{p.name}</span>
+              </a>
+              {remove(p)}
+            </div>
           ))}
         </nav>
       ) : (

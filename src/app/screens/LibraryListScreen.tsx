@@ -35,7 +35,7 @@ export function LibraryListScreen({ library, group, progress, sort, onSort, focu
           <a class="tile library-row" ref={p.id === focusId ? focused : undefined} href={buildRoute({ name: 'libraryPuzzle', group: slug, id: p.id })} key={p.id}>
             <span>
               <span class="name">{p.name}</span>
-              <span class="muted by">by {p.creator}</span>
+              {p.creator.trim() && <span class="muted by">by {p.creator}</span>}
             </span>
             <span class="muted">
               {progress.levels[libraryKey(p.id)]?.solved && <span class="solved">✓ </span>}
