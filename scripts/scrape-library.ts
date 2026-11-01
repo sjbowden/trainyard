@@ -5,19 +5,7 @@
 // Polite: one request at a time, at least DELAY_MS apart. Resumes from the existing file.
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { splitCode } from '../src/engine/codec.ts';
-
-export interface LibraryPuzzle {
-  id: string;
-  encodedID: string;
-  name: string;
-  creator: string;
-  wrenches: number | null; // null for a featured puzzle the feeds didn't list
-  likes: number | null;
-  solves: number;
-  featured?: { set: string; order: number };
-  /** The puzzle code, or null when no solution could be read. */
-  code: string | null;
-}
+import type { ScrapedPuzzle as LibraryPuzzle } from '../src/data/library.ts';
 
 interface Raw { puzzles: Record<string, LibraryPuzzle>; listed: string[] }
 

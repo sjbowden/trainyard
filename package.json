@@ -16,6 +16,7 @@
     "e2e": "playwright test",
     "calibrate:solver": "tsx scripts/calibrate-solver.ts",
     "scrape:library": "tsx scripts/scrape-library.ts",
+    "library:build": "tsx scripts/build-library.ts",
     "atlas:sheet": "tsx scripts/atlas-sheet.ts"
   },
   "type": "module",
