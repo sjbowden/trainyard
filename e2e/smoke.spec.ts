@@ -31,13 +31,18 @@ function storedSolution(page: Page, key: string): Promise<string | undefined> {
   );
 }
 
-test.skip(!apk, 'needs an APK in the repo root');
-
-test('load the APK, solve Red Line, and keep it offline', async ({ page, context }) => {
+/** Loads the APK and waits for home, where it is saved (the Load screen's own text names Trainyard Express while it's still reading). */
+async function loadApk(page: Page) {
   await page.goto('./');
   await page.getByText('Load APK').click();
   await page.locator('input[type=file]').setInputFiles(apk!);
-  await expect(page.getByText('Trainyard Express')).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('link', { name: /^Play Red Line/ })).toBeVisible({ timeout: 20_000 });
+}
+
+test.skip(!apk, 'needs an APK in the repo root');
+
+test('load the APK, solve Red Line, and keep it offline', async ({ page, context }) => {
+  await loadApk(page);
 
   // Play starts at the very first puzzle, with Abbotsford's tutorial
   await page.getByRole('link', { name: /^Play Red Line/ }).click();
@@ -69,10 +74,7 @@ test('load the APK, solve Red Line, and keep it offline', async ({ page, context
 });
 
 test('with the Solved! card turned off, a win opens the next puzzle', async ({ page }) => {
-  await page.goto('./');
-  await page.getByText('Load APK').click();
-  await page.locator('input[type=file]').setInputFiles(apk!);
-  await expect(page.getByText('Trainyard Express')).toBeVisible({ timeout: 20_000 });
+  await loadApk(page);
   await page.getByRole('link', { name: 'Settings' }).click();
   await page.getByRole('switch').click();
   await page.getByRole('link', { name: 'Back' }).click();
@@ -87,10 +89,7 @@ test('with the Solved! card turned off, a win opens the next puzzle', async ({ p
 });
 
 test('after a crash, a tap anywhere goes back to editing', async ({ page }) => {
-  await page.goto('./');
-  await page.getByText('Load APK').click();
-  await page.locator('input[type=file]').setInputFiles(apk!);
-  await expect(page.getByText('Trainyard Express')).toBeVisible({ timeout: 20_000 });
+  await loadApk(page);
   await page.getByRole('link', { name: /^Play Red Line/ }).click();
   await page.getByRole('button', { name: 'Close' }).click();
   await page.waitForTimeout(300);
@@ -103,10 +102,7 @@ test('after a crash, a tap anywhere goes back to editing', async ({ page }) => {
 });
 
 test('the speed setting carries from puzzle to puzzle', async ({ page }) => {
-  await page.goto('./');
-  await page.getByText('Load APK').click();
-  await page.locator('input[type=file]').setInputFiles(apk!);
-  await expect(page.getByText('Trainyard Express')).toBeVisible({ timeout: 20_000 });
+  await loadApk(page);
   await page.getByRole('link', { name: /^Play Red Line/ }).click();
   await page.getByRole('button', { name: 'Close' }).click();
   await page.locator('input[type=range]').fill('0.9');
@@ -117,10 +113,7 @@ test('the speed setting carries from puzzle to puzzle', async ({ page }) => {
 });
 
 test('after a solve, Back to puzzle returns to it, and the header goes home', async ({ page }) => {
-  await page.goto('./');
-  await page.getByText('Load APK').click();
-  await page.locator('input[type=file]').setInputFiles(apk!);
-  await expect(page.getByText('Trainyard Express')).toBeVisible({ timeout: 20_000 });
+  await loadApk(page);
   await page.getByRole('link', { name: /^Play Red Line/ }).click();
   await page.getByRole('button', { name: 'Close' }).click();
   await page.waitForTimeout(300);
@@ -151,10 +144,7 @@ test('after a solve, Back to puzzle returns to it, and the header goes home', as
 
 
 test('Erase is a toggle that lights up while erasing', async ({ page }) => {
-  await page.goto('./');
-  await page.getByText('Load APK').click();
-  await page.locator('input[type=file]').setInputFiles(apk!);
-  await expect(page.getByText('Trainyard Express')).toBeVisible({ timeout: 20_000 });
+  await loadApk(page);
   await page.getByRole('link', { name: /^Play Red Line/ }).click();
   await page.getByRole('button', { name: 'Close' }).click();
   await page.waitForTimeout(300);
@@ -174,10 +164,7 @@ test('the Original board style plays Red Line with no errors', async ({ page }) 
   const errors: string[] = [];
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
   page.on('pageerror', (e) => errors.push(String(e)));
-  await page.goto('./');
-  await page.getByText('Load APK').click();
-  await page.locator('input[type=file]').setInputFiles(apk!);
-  await expect(page.getByText('Trainyard Express')).toBeVisible({ timeout: 20_000 });
+  await loadApk(page);
   await page.getByRole('link', { name: 'Settings' }).click();
   await page.getByRole('radio', { name: 'Original' }).check();
   await page.reload();
@@ -195,10 +182,7 @@ test('the Original board style plays Red Line with no errors', async ({ page }) 
 });
 
 test('Next into a new city says so briefly; opening that city from its list does not', async ({ page }) => {
-  await page.goto('./');
-  await page.getByText('Load APK').click();
-  await page.locator('input[type=file]').setInputFiles(apk!);
-  await expect(page.getByRole('link', { name: /^Play Red Line/ })).toBeVisible({ timeout: 20_000 }); // saved, not just reading
+  await loadApk(page);
 
   // All of Abbotsford solved (which unlocks Brampton), with Purpablu's solution laid down.
   // The solution half comes from fixtures/solutions.json; the puzzle itself comes from the APK.
