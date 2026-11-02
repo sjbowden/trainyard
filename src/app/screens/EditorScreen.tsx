@@ -114,6 +114,7 @@ export function EditorScreen({ puzzle, onSave, onTest, onDelete, theme }: Editor
       if (latest.current.code !== asked) return setMessage('The puzzle changed while the solver worked. Ask again.');
       if (r.status === 'solved') {
         setProof(r.solution);
+        saver.cancel(); // a pending rename save has the old proof; this save has the new name too
         onSave({ ...latest.current, proof: r.solution });
         setMessage('The solver found a solution.');
       } else {

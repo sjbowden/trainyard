@@ -67,6 +67,8 @@ function Puzzle({ collection, level, progress, theme, arrived, onResult, onNext 
   );
 }
 
+const UNSAVED = "This phone wouldn't save your puzzles, so they'll be gone when the app closes.";
+
 /** The last list screen shown (home, a collection or a city), which decides where a puzzle's Back goes. */
 let lastList: Route | null = null;
 /** The puzzle Next just moved to from the city before, so it can say which city you're now in. */
@@ -173,6 +175,12 @@ export function App() {
     refreshCustom();
   };
 
+  /** Saves a custom puzzle; if the phone won't, it stays for this session and My puzzles says so. */
+  const saveCustom = (p: CustomPuzzle) =>
+    void saveCustomPuzzle(p).then((saved) => {
+      if (!saved) setPasteMessage(UNSAVED);
+    });
+
   const record = (key: string, solution: string, solved: boolean) => {
     const next = recordAttempt(latest.current, key, solution, solved);
     latest.current = next;
@@ -226,7 +234,7 @@ export function App() {
           onNew={() => {
             const p: CustomPuzzle = { id: newPuzzleId(), source: 'mine', name: 'Untitled', code: encodeBoard(emptyBoard(), { solution: false }), proof: null, created: Date.now() };
             setCustom((list) => [p, ...list]);
-            void saveCustomPuzzle(p);
+            saveCustom(p);
             go({ name: 'edit', id: p.id });
           }}
           message={pasteMessage}
@@ -236,9 +244,9 @@ export function App() {
             try {
               const shared = parsePastedLink(await navigator.clipboard.readText());
               checkNotOriginal(shared, collections);
-              const p = await addShared(shared);
-              refreshCustom();
-              setPasteMessage(`Added “${p.name}”.`);
+              const { puzzle: p, saved } = await addShared(shared);
+              setCustom((list) => [p, ...list.filter((x) => x.id !== p.id)]);
+              setPasteMessage(saved ? `Added “${p.name}”.` : UNSAVED);
             } catch (err) {
               setPasteMessage(err instanceof Error && err.name === 'LinkError' ? err.message : "Couldn't read the clipboard. Copy the link again and retry.");
             }
@@ -259,7 +267,8 @@ export function App() {
           progress={progress}
           onResult={record}
           theme={theme}
-          onAdded={(p) => {
+          onAdded={(p, saved) => {
+            if (!saved) setPasteMessage(UNSAVED);
             setCustom((list) => [p, ...list.filter((x) => x.id !== p.id)]);
             location.replace(buildRoute({ name: 'play', id: p.id }));
           }}
@@ -280,7 +289,7 @@ export function App() {
               ...(g.note ? { note: g.note } : {}),
             };
             setCustom((list) => [p, ...list.filter((x) => x.id !== p.id)]);
-            void saveCustomPuzzle(p);
+            saveCustom(p);
             location.replace(buildRoute({ name: 'play', id: p.id }));
           }}
         />
@@ -295,7 +304,7 @@ export function App() {
           theme={theme}
           onSave={(p) => {
             setCustom((list) => list.map((x) => (x.id === p.id ? p : x)));
-            void saveCustomPuzzle(p);
+            saveCustom(p);
           }}
           onTest={() => go({ name: 'play', id: puzzle.id })}
           onDelete={() => void removeCustom(puzzle.id).then(() => go({ name: 'mine' }))}
@@ -318,7 +327,7 @@ export function App() {
             if (solved && puzzle.source === 'mine') {
               const proven = { ...puzzle, proof: solution };
               setCustom((list) => list.map((x) => (x.id === puzzle.id ? proven : x)));
-              void saveCustomPuzzle(proven);
+              saveCustom(proven);
             }
           }}
           onBack={() => go(puzzle.source === 'mine' ? { name: 'edit', id: puzzle.id } : { name: 'mine' })}

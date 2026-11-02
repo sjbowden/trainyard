@@ -24,7 +24,7 @@ export class Updater {
 }
 
 /** Screens where a reload would interrupt the player: any puzzle being played, tested, edited or generated. */
-const BUSY = new Set(['puzzle', 'play', 'shared', 'edit', 'new']);
+const BUSY = new Set(['puzzle', 'play', 'shared', 'edit', 'new', 'libraryPuzzle']);
 
 export function isSafeToUpdate(hash: string): boolean {
   return !BUSY.has(parseRoute(hash).name);

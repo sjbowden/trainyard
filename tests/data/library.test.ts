@@ -36,6 +36,20 @@ describe('parseLibrary', () => {
     expect(() => parseLibrary(JSON.stringify({ format: 'trainyard-library', version: 2, puzzles: [] }))).toThrow('This library file needs a newer version of the app.');
   });
 
+  test('a puzzle id listed twice keeps only the first', () => {
+    const built = JSON.parse(buildLibraryFile({ puzzles: { 1: scraped('1'), 4: scraped('4', { code: code(0, 6) }) } }).text);
+    built.puzzles[1].id = '1';
+    const parsed = parseLibrary(JSON.stringify(built));
+    expect(parsed.puzzles.map((p) => p.code)).toEqual([built.puzzles[0].code]);
+    expect(parsed.dropped).toBe(1);
+  });
+
+  test('a code that carries a solution is dropped', () => {
+    const built = JSON.parse(buildLibraryFile({ puzzles: { 1: scraped('1'), 2: scraped('2') } }).text);
+    built.puzzles[1].code += '_abc';
+    expect(parseLibrary(JSON.stringify(built)).puzzles.map((p) => p.id)).toEqual(['1']);
+  });
+
   test('refuses other files', () => {
     for (const text of ['not json', '{}', 'null', JSON.stringify({ format: 'trainyard-library', version: 1 })]) {
       expect(() => parseLibrary(text)).toThrow(LibraryError);

@@ -27,23 +27,23 @@ export async function listCustomPuzzles(): Promise<CustomPuzzle[]> {
   return [...list].sort((a, b) => b.created - a.created);
 }
 
-export function saveCustomPuzzle(p: CustomPuzzle): Promise<void> {
+/** Resolves to whether the phone saved it. */
+export function saveCustomPuzzle(p: CustomPuzzle): Promise<boolean> {
   return updateStored<CustomPuzzle[]>(KEY, (old = []) => [...old.filter((x) => x.id !== p.id), p]);
 }
 
 /** A shared puzzle's id comes from its code alone, so the same puzzle is never added twice. */
 export const sharedId = (code: string) => `s-${encodeShare({ name: '', code }).slice(-8)}`;
 
-export async function addShared(s: SharedPuzzle): Promise<CustomPuzzle> {
+export async function addShared(s: SharedPuzzle): Promise<{ puzzle: CustomPuzzle; saved: boolean }> {
   const list = await listCustomPuzzles();
   const same = list.find((p) => p.source === 'shared' && p.code === s.code);
-  if (same) return same;
+  if (same) return { puzzle: same, saved: true };
   // a different puzzle with the same short id (very unlikely) gets its own id
   const base = sharedId(s.code);
   const id = list.some((p) => p.id === base) ? `${base}-${Date.now().toString(36)}` : base;
   const p: CustomPuzzle = { id, source: 'shared', name: s.name, code: s.code, proof: null, created: Date.now() };
-  await saveCustomPuzzle(p);
-  return p;
+  return { puzzle: p, saved: await saveCustomPuzzle(p) };
 }
 
 export async function deleteCustomPuzzle(id: string): Promise<void> {

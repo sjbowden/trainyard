@@ -27,10 +27,11 @@ export async function saveProgressFile(p: Progress): Promise<void> {
   if (navigator.canShare?.({ files: [file] })) {
     try {
       await navigator.share({ files: [file] });
-    } catch {
-      // closing the share sheet without saving is fine
+      return;
+    } catch (err) {
+      if ((err as Error).name === 'AbortError') return; // closing the share sheet without saving is fine
+      // any other failure: download it instead
     }
-    return;
   }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(file);

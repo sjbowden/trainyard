@@ -1,4 +1,4 @@
-import { createStore, get, set, type UseStore } from 'idb-keyval';
+import { createStore, get, set, update, type UseStore } from 'idb-keyval';
 import { readApk, readThemeAssets, type Collection } from '../data/apk.ts';
 import { parseLibrary, type LibraryPuzzle } from '../data/library.ts';
 import { emptyProgress, type Progress } from './progress.ts';
@@ -136,8 +136,10 @@ export async function loadProgress(): Promise<Progress> {
 
 /**
  * Saves progress merged into what is stored, so a session that couldn't read progress at
- * launch never overwrites earlier solves. A level stays solved once solved. If the stored
- * record can't be read, nothing is written.
+ * launch, or another tab, never overwrites earlier solves. A level stays solved once solved,
+ * and keeps the newer track (an untimed track is the oldest). The read and the write are one
+ * storage transaction, so a save from another tab can't land in between. If the stored record
+ * can't be read, nothing is written.
  */
 export function saveProgress(p: Progress): Promise<void> {
   saving = saving.then(() => mergeAndSave(p));
@@ -147,10 +149,22 @@ export function saveProgress(p: Progress): Promise<void> {
 async function mergeAndSave(p: Progress): Promise<void> {
   try {
     const kv = store();
-    const stored = (await withTimeout(get<Progress>(PROGRESS, kv))) ?? emptyProgress();
-    const levels = { ...stored.levels };
-    for (const [key, l] of Object.entries(p.levels)) levels[key] = { ...l, solved: l.solved || (stored.levels[key]?.solved ?? false) };
-    await withTimeout(set(PROGRESS, { levels }, kv));
+    await withTimeout(
+      update<Progress>(
+        PROGRESS,
+        (old) => {
+          const stored = old ?? emptyProgress();
+          const levels = { ...stored.levels };
+          for (const [key, l] of Object.entries(p.levels)) {
+            const s = stored.levels[key];
+            const newer = !s || (l.at ?? 0) >= (s.at ?? 0) ? l : s;
+            levels[key] = { ...newer, solved: l.solved || (s?.solved ?? false) };
+          }
+          return { levels };
+        },
+        kv,
+      ),
+    );
   } catch {
     forget();
     // Nothing to do: progress for this session stays in memory.
@@ -168,25 +182,27 @@ export async function readStored<T>(key: string, fallback: T): Promise<T> {
 }
 
 /**
- * Read-modify-write of one stored value, queued with every other write so overlapping
- * updates can't undo each other. Nothing is written if the stored value can't be read.
+ * Read-modify-write of one stored value in one storage transaction, queued with every other
+ * write, so overlapping updates (from this tab or another) can't undo each other. Nothing is
+ * written if the stored value can't be read. Resolves to whether it was saved.
  */
-export function updateStored<T>(key: string, change: (old: T | undefined) => T): Promise<void> {
-  saving = saving.then(async () => {
+export function updateStored<T>(key: string, change: (old: T | undefined) => T): Promise<boolean> {
+  const done = saving.then(async () => {
     try {
-      const kv = store();
-      const old = await withTimeout(get<T>(key, kv));
-      await withTimeout(set(key, change(old), kv));
+      await withTimeout(update<T>(key, change, store()));
+      return true;
     } catch {
       forget();
+      return false;
     }
   });
-  return saving;
+  saving = done.then(() => {});
+  return done;
 }
 
 /** Removes one level's progress (used when a custom puzzle is deleted). */
-export function forgetProgress(levelKey: string): Promise<void> {
-  return updateStored<Progress>(PROGRESS, (old) => {
+export async function forgetProgress(levelKey: string): Promise<void> {
+  await updateStored<Progress>(PROGRESS, (old) => {
     const levels = { ...(old?.levels ?? {}) };
     delete levels[levelKey];
     return { levels };

@@ -1,5 +1,5 @@
 import { decodeBoard, encodeBoard, splitCode } from '../engine/codec.ts';
-import { createRun, segmentFor, simulate } from '../engine/sim.ts';
+import { createRun, deliveredColorsAt, segmentFor, simulate } from '../engine/sim.ts';
 import type { Board, Color, Piece, Segment, Side } from '../engine/types.ts';
 import { BANDS, grade, type Difficulty } from './difficulty.ts';
 import { solve } from './solve.ts';
@@ -152,10 +152,8 @@ export function generateCandidate(seed: number, difficulty: Difficulty): { code:
   while (!run.ended && run.halfSteps < 600) {
     const ev = run.halfStep();
     if (ev.crashes.length) return null;
-    for (const cell of ev.delivered) {
-      const t = run.trainsBefore.find((x) => x.cell === cell);
-      if (t) received.set(cell, [...(received.get(cell) ?? []), t.color]);
-    }
+    const colors = deliveredColorsAt(run.trainsBefore, ev.delivered);
+    ev.delivered.forEach((cell, i) => received.set(cell, [...(received.get(cell) ?? []), colors[i]!]));
   }
   if (!run.ended || run.trains.length) return null;
   const goals = b.cells.flatMap((p, c) => (p.kind === 'goal' ? [c] : []));

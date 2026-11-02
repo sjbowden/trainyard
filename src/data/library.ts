@@ -61,7 +61,8 @@ function check(e: unknown): LibraryPuzzle | null {
   const numbers = ['wrenches', 'likes', 'solves'].every((k) => Number.isFinite(p[k]));
   const f = p.featured as Record<string, unknown> | undefined;
   const featured = f === undefined || (typeof f === 'object' && f !== null && typeof f.set === 'string' && Number.isFinite(f.order));
-  if (!strings || !numbers || !featured || !decodes(p.code as string)) return null;
+  // a code carrying a solution would give the answer away
+  if (!strings || !numbers || !featured || (p.code as string).includes('_') || !decodes(p.code as string)) return null;
   const { id, name, creator, wrenches, likes, solves, code } = p as unknown as LibraryPuzzle;
   return { id, name, creator, wrenches, likes, solves, ...(f ? { featured: { set: f.set as string, order: f.order as number } } : {}), code };
 }
@@ -84,7 +85,9 @@ export function parseLibrary(text: string): { puzzles: LibraryPuzzle[]; dropped:
   const f = file as { format?: unknown; version?: unknown; puzzles?: unknown } | null;
   if (f?.format === FORMAT && typeof f.version === 'number' && f.version > VERSION) throw new LibraryError('This library file needs a newer version of the app.');
   if (f?.format !== FORMAT || f.version !== VERSION || !Array.isArray(f.puzzles)) throw new LibraryError();
-  const puzzles = f.puzzles.map(check).filter((p): p is LibraryPuzzle => p !== null);
+  const ids = new Set<string>();
+  // a repeated id would share a route and progress with the first: keep only the first
+  const puzzles = f.puzzles.map(check).filter((p): p is LibraryPuzzle => p !== null && !ids.has(p.id) && !!ids.add(p.id));
   if (!puzzles.length) throw new LibraryError(); // nothing usable: keep whatever library is loaded
   return { puzzles, dropped: f.puzzles.length - puzzles.length };
 }

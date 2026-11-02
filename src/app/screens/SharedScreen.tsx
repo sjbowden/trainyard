@@ -22,7 +22,7 @@ export interface SharedScreenProps {
   puzzle: SharedPuzzle;
   progress: Progress;
   onResult: (key: string, solution: string, solved: boolean) => void;
-  onAdded: (p: CustomPuzzle) => void;
+  onAdded: (p: CustomPuzzle, saved: boolean) => void;
   theme?: Theme;
 }
 
@@ -35,7 +35,7 @@ export function SharedScreen({ puzzle, progress, onResult, onAdded, theme }: Sha
   const installed = isInstalledApp();
   const [copied, setCopied] = useState<string | null>(null);
   useEffect(() => {
-    if (installed) void addShared(puzzle).then(onAdded);
+    if (installed) void addShared(puzzle).then(({ puzzle: p, saved }) => onAdded(p, saved));
   }, [installed, puzzle.code]);
   if (installed) return <main class="screen" />;
 

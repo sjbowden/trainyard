@@ -22,7 +22,8 @@ test('adding the same shared puzzle twice keeps one', async () => {
   const s = { name: 'Gift', code: 'hh002OjC3GiaC00' };
   const first = await addShared(s);
   const second = await addShared(s);
-  expect(second.id).toBe(first.id);
+  expect(second.puzzle.id).toBe(first.puzzle.id);
+  expect(first.saved).toBe(true);
   expect((await listCustomPuzzles()).filter((p) => p.source === 'shared')).toHaveLength(1);
 });
 

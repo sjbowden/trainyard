@@ -24,6 +24,8 @@ const VERSION = '1';
 const MAX_NAME = 40;
 const DAMAGED = 'This puzzle link is damaged.';
 
+const MAX_PAYLOAD = 1000;
+
 function cleanName(name: string): string {
   return [...name.trim()].slice(0, MAX_NAME).join('').trim() || 'Untitled';
 }
@@ -67,6 +69,8 @@ export function decodeShare(payload: string): SharedPuzzle {
   // the version comes first, so a future format of any shape gets the right message
   const version = /^(\d+)\./.exec(payload.trim())?.[1];
   if (version && version !== VERSION) throw new LinkError('This puzzle link needs a newer version of the app.');
+  // a real link is a few hundred characters; a longer one could unpack to megabytes
+  if (payload.trim().length > MAX_PAYLOAD) throw new LinkError(DAMAGED);
   const m = /^(\d+)\.([A-Za-z0-9_-]+)\.([0-9a-f]{8})$/.exec(payload.trim());
   if (!m) throw new LinkError(DAMAGED);
   const [, , data, sum] = m;

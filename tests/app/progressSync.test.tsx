@@ -61,3 +61,15 @@ test('without a share sheet, saving downloads the file instead', async () => {
   expect(clicked[0]!.download).toMatch(/^trainyard-progress-.*\.json$/);
   expect(clicked[0]!.href).toBe('blob:progress');
 });
+
+test('if the share sheet fails for a reason other than closing it, saving downloads the file instead', async () => {
+  vi.stubGlobal('navigator', { ...navigator, canShare: () => true, share: async () => { throw new DOMException('no', 'NotAllowedError'); } });
+  vi.stubGlobal('URL', Object.assign(URL, { createObjectURL: () => 'blob:progress', revokeObjectURL: () => {} }));
+  const clicked: HTMLAnchorElement[] = [];
+  vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+    clicked.push(this);
+  });
+  render(<SettingsScreen hasOriginal={false} onTheme={() => {}} progress={here} onProgress={() => {}} />);
+  screen.getByRole('button', { name: 'Save progress' }).click();
+  await vi.waitFor(() => expect(clicked).toHaveLength(1));
+});

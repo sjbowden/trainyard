@@ -44,6 +44,15 @@ const opposite = (s: Side): Side => ((s + 2) % 4) as Side;
 
 const SECONDARY_PRIMARIES: Partial<Record<Color, [Color, Color]>> = { 3: [1, 0], 4: [2, 1], 5: [2, 0] };
 
+/** The colors of the trains delivered at these cells, each train counted once (two can reach one goal together). */
+export function deliveredColorsAt(trainsBefore: readonly TrainState[], cells: number[]): Color[] {
+  const left = [...trainsBefore];
+  return cells.flatMap((cell) => {
+    const i = left.findIndex((t) => t.cell === cell);
+    return i < 0 ? [] : [left.splice(i, 1)[0]!.color];
+  });
+}
+
 export function mix(a: Color, b: Color): Color {
   if (a === b) return a;
   for (const [secondary, [p, q]] of Object.entries(SECONDARY_PRIMARIES)) {
