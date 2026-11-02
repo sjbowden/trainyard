@@ -55,10 +55,15 @@ test('summaries list featured sets in order, then non-empty bands, with solved c
 
 test('Next follows the list, then opens the first puzzle of the following group, and stops after the last', () => {
   expect(nextPuzzle(lib, band6, 'likes', 'b')).toEqual({ puzzle: lib[0], group: band6 });
-  expect(nextPuzzle(lib, band6, 'likes', 'c')).toMatchObject({ puzzle: { id: 'f' }, group: { kind: 'band', band: 4 } });
+  expect(nextPuzzle(lib, band6, 'likes', 'c')).toMatchObject({ puzzle: { id: 'd' }, group: { kind: 'band', band: 4 } });
   expect(nextPuzzle(lib, { kind: 'featured', set: 'Port Credit' }, 'likes', 'g')).toMatchObject({ puzzle: { id: 'f' }, group: lorne });
   expect(nextPuzzle(lib, { kind: 'band', band: 4 }, 'likes', 'd')).toBeUndefined();
   expect(nextPuzzle(lib, band6, 'likes', 'zzz')).toBeUndefined();
+});
+
+test('in the wrench groups Next passes over puzzles from the featured sets, which were played there', () => {
+  expect(nextPuzzle(lib, { kind: 'band', band: 0 }, 'likes', 'g')).toMatchObject({ puzzle: { id: 'b' }, group: band6 });
+  expect(nextPuzzle(lib, lorne, 'likes', 'f')).toMatchObject({ puzzle: { id: 'e' }, group: lorne });
 });
 
 test('Next can skip solved puzzles, across groups too', () => {

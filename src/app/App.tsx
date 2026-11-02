@@ -180,8 +180,9 @@ export function App() {
     void saveProgress(next);
   };
 
-  const libraryHome = () => (
+  const libraryHome = (focusId?: string) => (
     <LibraryScreen
+      focusId={focusId}
       library={library}
       progress={progress}
       query={libraryQuery}
@@ -327,9 +328,12 @@ export function App() {
         </PuzzleScreen>
       );
     }
-    case 'library':
-      lastLibraryId = undefined; // leaving the list lets a solved puzzle hide
-      return libraryHome();
+    case 'library': {
+      // back from a search result: the results keep it in view; otherwise leaving a list lets a solved puzzle hide
+      const focus = openedFromSearch ? lastLibraryId : undefined;
+      lastLibraryId = undefined;
+      return libraryHome(focus);
+    }
     case 'libraryList': {
       const group = parseGroupSlug(route.group);
       if (!library || !group) return libraryHome();
@@ -373,6 +377,7 @@ export function App() {
             next &&
             (() => {
               const slug = groupSlug(next.group);
+              openedFromSearch = false; // Back now goes to the list you're in
               if (slug !== route.group) arrivedAt = libraryKey(next.puzzle.id);
               go({ name: 'libraryPuzzle', group: slug, id: next.puzzle.id });
             })

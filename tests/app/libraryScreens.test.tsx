@@ -130,3 +130,11 @@ test('Hide solved hides solved puzzles from a list, except the one just played',
   rerender(<LibraryListScreen {...props} hideSolved focusId="2" />);
   expect(rowLinks().map((a) => a.getAttribute('href'))).toEqual(['#/library/w-1/2', '#/library/w-1/3']);
 });
+
+test('coming back to search keeps the puzzle just played: shown past the first 100, and kept while hiding solved', () => {
+  const many = Array.from({ length: 130 }, (_, i) => puzzle(String(i), { name: `Match ${i}`, wrenches: 7, likes: 130 - i }));
+  const progress = recordAttempt(emptyProgress(), libraryKey('120'), 'x', true);
+  render(<LibraryScreen library={many} progress={progress} onLoaded={() => {}} query="match" hideSolved focusId="120" />);
+  expect(rowLinks()).toHaveLength(130);
+  expect(rowLinks().some((a) => a.getAttribute('href') === '#/library/w-1/120')).toBe(true);
+});

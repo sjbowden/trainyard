@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import type { LibraryPuzzle } from '../../data/library.ts';
 import { groupSlug, groupSummaries, homeGroup, searchLibrary } from '../library.ts';
 import type { Progress } from '../progress.ts';
@@ -8,17 +8,19 @@ import { HideSolved, LibraryRow, visible } from './LibraryListScreen.tsx';
 
 const PAGE = 100;
 
-/** Search results: matching puzzles, each opening in its home group. */
-function Results({ library, query, progress, hideSolved, onHideSolved, onOpen }: { library: LibraryPuzzle[]; query: string; progress: Progress; hideSolved: boolean; onHideSolved: (on: boolean) => void; onOpen: () => void }) {
-  const list = visible(searchLibrary(library, query), progress, hideSolved);
-  const [shown, setShown] = useState(PAGE);
+/** Search results: matching puzzles, each opening in its home group. `focusId` is the puzzle just played, kept in view as in a list. */
+function Results({ library, query, progress, hideSolved, onHideSolved, onOpen, focusId }: { library: LibraryPuzzle[]; query: string; progress: Progress; hideSolved: boolean; onHideSolved: (on: boolean) => void; onOpen: () => void; focusId?: string }) {
+  const list = visible(searchLibrary(library, query), progress, hideSolved, focusId);
+  const [shown, setShown] = useState(() => Math.max(PAGE, Math.ceil((list.findIndex((p) => p.id === focusId) + 1) / PAGE) * PAGE));
+  const focused = useRef<HTMLAnchorElement>(null);
+  useEffect(() => focused.current?.scrollIntoView({ block: 'center' }), []);
   return (
     <>
       <HideSolved on={hideSolved} onChange={onHideSolved} />
       {list.length ? (
         <nav class="list spaced">
           {list.slice(0, shown).map((p) => (
-            <LibraryRow key={p.id} p={p} href={buildRoute({ name: 'libraryPuzzle', group: groupSlug(homeGroup(p)), id: p.id })} progress={progress} onClick={onOpen} />
+            <LibraryRow key={p.id} p={p} href={buildRoute({ name: 'libraryPuzzle', group: groupSlug(homeGroup(p)), id: p.id })} progress={progress} focused={p.id === focusId ? focused : undefined} onClick={onOpen} />
           ))}
         </nav>
       ) : (
@@ -29,8 +31,8 @@ function Results({ library, query, progress, hideSolved, onHideSolved, onOpen }:
   );
 }
 
-/** `query` is the search as it was left; `onOpen` is told when a search result is opened. */
-export function LibraryScreen({ library, progress, onLoaded, notice, query: initialQuery = '', onQuery = () => {}, hideSolved = false, onHideSolved = () => {}, onOpen = () => {} }: { library: LibraryPuzzle[] | null; progress: Progress; onLoaded: (puzzles: LibraryPuzzle[], saved: boolean) => void; notice?: string; query?: string; onQuery?: (q: string) => void; hideSolved?: boolean; onHideSolved?: (on: boolean) => void; onOpen?: () => void }) {
+/** `query` is the search as it was left, and `focusId` the result just played; `onOpen` is told when a search result is opened. */
+export function LibraryScreen({ library, progress, onLoaded, notice, query: initialQuery = '', onQuery = () => {}, hideSolved = false, onHideSolved = () => {}, onOpen = () => {}, focusId }: { library: LibraryPuzzle[] | null; progress: Progress; onLoaded: (puzzles: LibraryPuzzle[], saved: boolean) => void; notice?: string; query?: string; onQuery?: (q: string) => void; hideSolved?: boolean; onHideSolved?: (on: boolean) => void; onOpen?: () => void; focusId?: string }) {
   const [query, setQuery] = useState(initialQuery);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,7 +84,7 @@ export function LibraryScreen({ library, progress, onLoaded, notice, query: init
             }}
           />
           {query.trim() ? (
-            <Results key={query} library={library} query={query} progress={progress} hideSolved={hideSolved} onHideSolved={onHideSolved} onOpen={onOpen} />
+            <Results key={query} library={library} query={query} progress={progress} hideSolved={hideSolved} onHideSolved={onHideSolved} onOpen={onOpen} focusId={focusId} />
           ) : (
             <nav class="list">
               {groupSummaries(library, progress).map((s) => (

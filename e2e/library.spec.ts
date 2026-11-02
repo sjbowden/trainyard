@@ -91,6 +91,18 @@ test('search finds a puzzle, and Back from it returns to the search', async ({ p
   await expect(page.getByRole('searchbox', { name: 'Search puzzles' })).toHaveValue('second');
   await expect(page.getByRole('link', { name: /Second Line/ })).toBeVisible();
   await page.screenshot({ path: 'test-results/library-search.png' });
+
+  // after Next, Back goes to the list you're now in, not the search
+  await page.getByRole('searchbox', { name: 'Search puzzles' }).fill('straight');
+  await page.getByRole('link', { name: /Straight Shot/ }).click();
+  await page.waitForTimeout(200);
+  await drag(page, 3, 0, 6);
+  await page.getByRole('button', { name: 'Start' }).click();
+  await expect(page.getByText('Solved!')).toBeVisible({ timeout: 15_000 });
+  await page.getByRole('button', { name: /Next/ }).click();
+  await expect(page.getByRole('heading', { name: 'Second Line' })).toBeVisible();
+  await page.getByRole('button', { name: 'Back' }).click();
+  await expect(page.getByRole('heading', { name: '6–10 wrenches' })).toBeVisible();
 });
 
 test('with Hide solved on, Next skips a solved puzzle and moves on to the next group, saying so', async ({ page }, info) => {
@@ -106,7 +118,7 @@ test('with Hide solved on, Next skips a solved puzzle and moves on to the next g
   await page.getByRole('button', { name: 'Start' }).click();
   await expect(page.getByText('Solved!')).toBeVisible({ timeout: 15_000 });
   await page.getByRole('button', { name: /Next/ }).click();
-  // Featured One is also first in 1–5 wrenches, but it's solved, so Next goes on to 6–10
+  // Featured One is also in 1–5 wrenches, but it's solved and was played in its set, so Next goes on to 6–10
   await expect(page.getByRole('heading', { name: 'Straight Shot' })).toBeVisible();
   await expect(page.getByRole('status')).toHaveText('Now in 6–10 wrenches');
   await page.screenshot({ path: 'test-results/library-next-group.png' });

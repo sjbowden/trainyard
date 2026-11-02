@@ -50,9 +50,12 @@ export function groupSummaries(lib: LibraryPuzzle[], progress: Progress): { grou
   });
 }
 
+const isFeatured = (p: LibraryPuzzle) => !!p.featured && FEATURED_SETS.includes(p.featured.set);
+
 /**
  * The puzzle Next opens: the one after this in its list, or else the first in the following group,
- * passing over any that `skip` says to. Undefined after the last group.
+ * passing over any that `skip` says to. In a band it also passes over featured puzzles, which were
+ * played in their sets. Undefined after the last group.
  */
 export function nextPuzzle(lib: LibraryPuzzle[], g: LibraryGroup, sort: LibrarySort, id: string, skip: (id: string) => boolean = () => false): { puzzle: LibraryPuzzle; group: LibraryGroup } | undefined {
   const at = groupPuzzles(lib, g, sort).findIndex((p) => p.id === id);
@@ -61,7 +64,9 @@ export function nextPuzzle(lib: LibraryPuzzle[], g: LibraryGroup, sort: LibraryS
   const from = groups.findIndex((x) => groupSlug(x) === groupSlug(g));
   for (let i = from; i < groups.length; i++) {
     const group = groups[i]!;
-    const puzzle = groupPuzzles(lib, group, sort).slice(i === from ? at + 1 : 0).find((p) => !skip(p.id));
+    const puzzle = groupPuzzles(lib, group, sort)
+      .slice(i === from ? at + 1 : 0)
+      .find((p) => !skip(p.id) && !(group.kind === 'band' && isFeatured(p)));
     if (puzzle) return { puzzle, group };
   }
   return undefined;
@@ -83,7 +88,7 @@ export function searchLibrary(lib: LibraryPuzzle[], query: string): LibraryPuzzl
 
 /** Where a search result opens: its featured set, or else its band (the nearest one, for a count outside them all). */
 export function homeGroup(p: LibraryPuzzle): LibraryGroup {
-  if (p.featured && FEATURED_SETS.includes(p.featured.set)) return { kind: 'featured', set: p.featured.set };
+  if (isFeatured(p)) return { kind: 'featured', set: p.featured!.set };
   const band = BANDS.findIndex((b) => p.wrenches <= b.to);
   return { kind: 'band', band: band < 0 ? BANDS.length - 1 : band };
 }
