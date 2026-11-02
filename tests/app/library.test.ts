@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { BANDS, creditLine, groupPuzzles, groupSlug, groupSummaries, libraryKey, nextInGroup, parseGroupSlug, type LibraryGroup } from '../../src/app/library.ts';
+import { BANDS, creditLine, groupPuzzles, groupSlug, groupSummaries, homeGroup, libraryKey, nextPuzzle, parseGroupSlug, searchLibrary, type LibraryGroup } from '../../src/app/library.ts';
 import { puzzle } from './libraryFixture.ts';
 
 const lib = [
@@ -53,10 +53,37 @@ test('summaries list featured sets in order, then non-empty bands, with solved c
   ]);
 });
 
-test('nextInGroup follows the list order and stops at the end', () => {
-  expect(nextInGroup(lib, band6, 'likes', 'b')?.id).toBe('a');
-  expect(nextInGroup(lib, band6, 'likes', 'c')).toBeUndefined();
-  expect(nextInGroup(lib, band6, 'likes', 'zzz')).toBeUndefined();
+test('Next follows the list, then opens the first puzzle of the following group, and stops after the last', () => {
+  expect(nextPuzzle(lib, band6, 'likes', 'b')).toEqual({ puzzle: lib[0], group: band6 });
+  expect(nextPuzzle(lib, band6, 'likes', 'c')).toMatchObject({ puzzle: { id: 'f' }, group: { kind: 'band', band: 4 } });
+  expect(nextPuzzle(lib, { kind: 'featured', set: 'Port Credit' }, 'likes', 'g')).toMatchObject({ puzzle: { id: 'f' }, group: lorne });
+  expect(nextPuzzle(lib, { kind: 'band', band: 4 }, 'likes', 'd')).toBeUndefined();
+  expect(nextPuzzle(lib, band6, 'likes', 'zzz')).toBeUndefined();
+});
+
+test('Next can skip solved puzzles, across groups too', () => {
+  const solved = (id: string) => ['a', 'c', 'f'].includes(id);
+  expect(nextPuzzle(lib, band6, 'likes', 'b', solved)).toMatchObject({ puzzle: { id: 'd' }, group: { kind: 'band', band: 4 } });
+  expect(nextPuzzle(lib, band6, 'likes', 'b', () => true)).toBeUndefined();
+});
+
+test('search matches names and creators, ignoring capitals and accents, most liked first', () => {
+  const ps = [
+    puzzle('1', { name: 'Crème Brûlée', creator: 'x', likes: 1 }),
+    puzzle('2', { name: 'Loop', creator: 'José', likes: 5 }),
+    puzzle('3', { name: 'Other', creator: 'y', likes: 9 }),
+  ];
+  expect(ids(searchLibrary(ps, 'creme'))).toEqual(['1']);
+  expect(ids(searchLibrary(ps, 'JOSE'))).toEqual(['2']);
+  expect(ids(searchLibrary(ps, 'o'))).toEqual(['3', '2']);
+  expect(ids(searchLibrary(ps, '  loop  jose '))).toEqual(['2']);
+  expect(searchLibrary(ps, '   ')).toEqual([]);
+});
+
+test("a puzzle's home group is its featured set, or else its wrench band", () => {
+  expect(homeGroup(lib[5]!)).toEqual(lorne);
+  expect(homeGroup(lib[0]!)).toEqual(band6);
+  expect(homeGroup(puzzle('z', { wrenches: 0 }))).toEqual({ kind: 'band', band: 0 });
 });
 
 test('group slugs round-trip, including a set name with spaces, and nonsense parses to null', () => {

@@ -9,10 +9,12 @@ export interface Settings {
   theme: 'default' | 'original';
   /** How the player puzzle library's difficulty lists are sorted. */
   librarySort: 'likes' | 'solves';
+  /** Leave solved puzzles out of the player puzzle lists and search, and out of Next. */
+  hideSolved: boolean;
 }
 
 const KEY = 'trainyard.settings';
-const DEFAULTS: Settings = { showSolvedCard: true, speed: 0.5, theme: 'default', librarySort: 'likes' };
+const DEFAULTS: Settings = { showSolvedCard: true, speed: 0.5, theme: 'default', librarySort: 'likes', hideSolved: false };
 
 export function loadSettings(): Settings {
   try {

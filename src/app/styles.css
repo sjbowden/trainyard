@@ -180,3 +180,6 @@ label.link { color: var(--accent); text-decoration: underline; cursor: pointer; 
 .setting.sync { display: block; } .setting.sync .choices { padding-top: 12px; gap: 12px; }
 .setting.sync .choices > * { flex: 1; min-height: 48px; font-size: 17px; }
 .setting.sync [role=status] { margin: 12px 0 0; }
+.search { display: block; width: 100%; min-height: 44px; margin-bottom: 12px; padding: 0 14px; font: inherit; font-size: 17px; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 12px; user-select: text; -webkit-user-select: text; }
+.hide-solved { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; color: var(--muted); }
+.hide-solved input { width: 22px; height: 22px; accent-color: var(--accent); }

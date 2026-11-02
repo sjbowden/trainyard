@@ -25,7 +25,7 @@ import { TutorialOverlay } from './screens/TutorialOverlay.tsx';
 import { defaultTheme } from './theme/default.ts';
 import { forgetOriginalTheme, resolveTheme } from './theme/original/index.ts';
 import type { LibraryPuzzle } from '../data/library.ts';
-import { creditLine, libraryKey, nextInGroup, parseGroupSlug } from './library.ts';
+import { creditLine, groupLabel, groupSlug, libraryKey, nextPuzzle, parseGroupSlug } from './library.ts';
 import { LibraryListScreen } from './screens/LibraryListScreen.tsx';
 import { LibraryScreen } from './screens/LibraryScreen.tsx';
 import { Arrival } from './screens/Arrival.tsx';
@@ -73,6 +73,15 @@ let lastList: Route | null = null;
 let arrivedAt: string | undefined;
 /** The library puzzle played last, so its list reopens at it. */
 let lastLibraryId: string | undefined;
+/** The library search as it was left, and whether the puzzle showing was opened from it (so Back returns there). */
+let libraryQuery = '';
+let openedFromSearch = false;
+
+/** "Now in <group>" for a puzzle Next brought you to from another group. Kept through re-renders of the same puzzle. */
+function GroupArrival({ label }: { label?: string }) {
+  const [shown] = useState(label);
+  return shown ? <Arrival city={shown} waiting={false} /> : null;
+}
 
 function City({ collection, world, progress, theme }: { collection: Collection; world: string; progress: Progress; theme: Theme }) {
   const id = `${collection.id}/${world}`;
@@ -120,6 +129,11 @@ export function App() {
   const [library, setLibrary] = useState<LibraryPuzzle[] | null>(null);
   const [libraryNotice, setLibraryNotice] = useState<string | undefined>(undefined);
   const [librarySort, setLibrarySort] = useState(() => loadSettings().librarySort);
+  const [hideSolved, setHideSolved] = useState(() => loadSettings().hideSolved);
+  const changeHideSolved = (on: boolean) => {
+    saveSettings({ ...loadSettings(), hideSolved: on });
+    setHideSolved(on);
+  };
   const [theme, setTheme] = useState<Theme>(defaultTheme);
   const [hasOriginal, setHasOriginal] = useState(false);
   /** Shows the chosen board style; Original falls back to the default when its art is missing or unreadable. */
@@ -170,6 +184,15 @@ export function App() {
     <LibraryScreen
       library={library}
       progress={progress}
+      query={libraryQuery}
+      onQuery={(q) => {
+        libraryQuery = q;
+      }}
+      hideSolved={hideSolved}
+      onHideSolved={changeHideSolved}
+      onOpen={() => {
+        openedFromSearch = true;
+      }}
       onLoaded={(lib, saved) => {
         setLibrary(lib);
         setLibraryNotice(saved ? undefined : "This phone wouldn't save the library, so you'll need to load it again next time.");
@@ -305,10 +328,12 @@ export function App() {
       );
     }
     case 'library':
+      lastLibraryId = undefined; // leaving the list lets a solved puzzle hide
       return libraryHome();
     case 'libraryList': {
       const group = parseGroupSlug(route.group);
       if (!library || !group) return libraryHome();
+      openedFromSearch = false;
       return (
         <LibraryListScreen
           library={library}
@@ -316,6 +341,8 @@ export function App() {
           progress={progress}
           sort={librarySort}
           focusId={lastLibraryId}
+          hideSolved={hideSolved}
+          onHideSolved={changeHideSolved}
           onSort={(s) => {
             saveSettings({ ...loadSettings(), librarySort: s });
             setLibrarySort(s);
@@ -328,7 +355,10 @@ export function App() {
       const puzzle = library?.find((p) => p.id === route.id);
       if (!library || !group || !puzzle) return libraryHome(); // an old link, or no library loaded
       const key = libraryKey(puzzle.id);
-      const next = nextInGroup(library, group, librarySort, puzzle.id);
+      const solved = (id: string) => !!progress.levels[libraryKey(id)]?.solved;
+      const next = nextPuzzle(library, group, librarySort, puzzle.id, hideSolved ? solved : undefined);
+      const arrived = arrivedAt === key;
+      if (arrived) arrivedAt = undefined;
       lastLibraryId = puzzle.id;
       return (
         <PuzzleScreen
@@ -338,10 +368,18 @@ export function App() {
           puzzleCode={puzzle.code}
           savedSolution={progress.levels[key]?.solution ?? ''}
           onResult={(solution, solved) => record(key, solution, solved)}
-          onBack={() => go({ name: 'libraryList', group: route.group })}
-          onNext={next ? () => go({ name: 'libraryPuzzle', group: route.group, id: next.id }) : undefined}
+          onBack={() => go(openedFromSearch ? { name: 'library' } : { name: 'libraryList', group: route.group })}
+          onNext={
+            next &&
+            (() => {
+              const slug = groupSlug(next.group);
+              if (slug !== route.group) arrivedAt = libraryKey(next.puzzle.id);
+              go({ name: 'libraryPuzzle', group: slug, id: next.puzzle.id });
+            })
+          }
           showSolvedCard={loadSettings().showSolvedCard}
           theme={theme}
+          overlay={<GroupArrival label={arrived ? groupLabel(group) : undefined} />}
         >
           <p class="muted credit">
             {creditLine(puzzle)}

@@ -79,3 +79,54 @@ test('a puzzle with no creator name shows no "by" line', () => {
   render(<LibraryListScreen library={[puzzle('1', { creator: ' ' }), puzzle('2', { creator: 'Matt' })]} group={{ kind: 'band', band: 1 }} progress={emptyProgress()} sort="likes" onSort={() => {}} />);
   expect(screen.getAllByText(/^by\b/).map((e) => e.textContent)).toEqual(['by Matt']);
 });
+
+const searchLib = [
+  puzzle('1', { name: 'Straight Shot', creator: 'Tester', wrenches: 7, likes: 5 }),
+  puzzle('2', { name: 'Loop de Loop', creator: 'Someone', wrenches: 12, likes: 9, featured: { set: 'Erindale', order: 0 } }),
+  puzzle('3', { name: 'Other', creator: 'Tester', wrenches: 7, likes: 1 }),
+];
+const rowLinks = () => screen.getAllByRole('link').filter((a) => /^#\/library\/[^/]+\/[^/]+$/.test(a.getAttribute('href') ?? ''));
+
+test('searching shows matching puzzles in place of the groups, each opening in its home group', () => {
+  const queries: string[] = [];
+  render(<LibraryScreen library={searchLib} progress={emptyProgress()} onLoaded={() => {}} onQuery={(q) => queries.push(q)} />);
+  fireEvent.input(screen.getByRole('searchbox', { name: 'Search puzzles' }), { target: { value: 'tester' } });
+  expect(rowLinks().map((a) => [a.textContent?.split('by')[0], a.getAttribute('href')])).toEqual([
+    ['Straight Shot', '#/library/w-1/1'],
+    ['Other', '#/library/w-1/3'],
+  ]);
+  expect(screen.queryByText('6–10 wrenches')).toBeNull();
+  expect(queries.at(-1)).toBe('tester');
+  fireEvent.input(screen.getByRole('searchbox'), { target: { value: 'loop' } });
+  expect(rowLinks().map((a) => a.getAttribute('href'))).toEqual(['#/library/f-Erindale/2']);
+  fireEvent.input(screen.getByRole('searchbox'), { target: { value: 'nothing like it' } });
+  expect(screen.getByText('No puzzles match.')).toBeTruthy();
+});
+
+test('the search comes back as it was left', () => {
+  render(<LibraryScreen library={searchLib} progress={emptyProgress()} onLoaded={() => {}} query="loop" />);
+  expect((screen.getByRole('searchbox') as HTMLInputElement).value).toBe('loop');
+  expect(rowLinks()).toHaveLength(1);
+});
+
+test('Hide solved hides solved puzzles from search results', () => {
+  const progress = recordAttempt(emptyProgress(), libraryKey('1'), 'x', true);
+  const changes: boolean[] = [];
+  render(<LibraryScreen library={searchLib} progress={progress} onLoaded={() => {}} query="tester" hideSolved onHideSolved={(h) => changes.push(h)} />);
+  expect(rowLinks().map((a) => a.getAttribute('href'))).toEqual(['#/library/w-1/3']);
+  fireEvent.click(screen.getByRole('checkbox', { name: 'Hide solved' }));
+  expect(changes).toEqual([false]);
+});
+
+test('Hide solved hides solved puzzles from a list, except the one just played', () => {
+  const lib = [puzzle('1', { wrenches: 7 }), puzzle('2', { wrenches: 7 }), puzzle('3', { wrenches: 7 })];
+  const progress = recordAttempt(recordAttempt(emptyProgress(), libraryKey('1'), 'x', true), libraryKey('2'), 'x', true);
+  const changes: boolean[] = [];
+  const props = { library: lib, group: { kind: 'band', band: 1 } as const, progress, sort: 'likes' as const, onSort: () => {}, onHideSolved: (h: boolean) => changes.push(h) };
+  const { rerender } = render(<LibraryListScreen {...props} hideSolved={false} />);
+  expect(rowLinks()).toHaveLength(3);
+  fireEvent.click(screen.getByRole('checkbox', { name: 'Hide solved' }));
+  expect(changes).toEqual([true]);
+  rerender(<LibraryListScreen {...props} hideSolved focusId="2" />);
+  expect(rowLinks().map((a) => a.getAttribute('href'))).toEqual(['#/library/w-1/2', '#/library/w-1/3']);
+});

@@ -77,3 +77,37 @@ test('with the Solved! card turned off, a library win opens the next puzzle', as
   await page.getByRole('button', { name: 'Start' }).click();
   await expect(page.getByRole('heading', { name: 'Second Line' })).toBeVisible({ timeout: 15_000 });
 });
+
+test('search finds a puzzle, and Back from it returns to the search', async ({ page }, info) => {
+  const file = info.outputPath('library.json');
+  writeFileSync(file, JSON.stringify({ format: 'trainyard-library', version: 1, puzzles }));
+  await page.goto('./#/library');
+  await page.locator('input[type=file]').setInputFiles(file);
+  await page.getByRole('searchbox', { name: 'Search puzzles' }).fill('second');
+  await expect(page.getByRole('link', { name: /Port Credit/ })).toHaveCount(0);
+  await page.getByRole('link', { name: /Second Line/ }).click();
+  await expect(page.getByRole('heading', { name: 'Second Line' })).toBeVisible();
+  await page.getByRole('button', { name: 'Back' }).click();
+  await expect(page.getByRole('searchbox', { name: 'Search puzzles' })).toHaveValue('second');
+  await expect(page.getByRole('link', { name: /Second Line/ })).toBeVisible();
+  await page.screenshot({ path: 'test-results/library-search.png' });
+});
+
+test('with Hide solved on, Next skips a solved puzzle and moves on to the next group, saying so', async ({ page }, info) => {
+  const file = info.outputPath('library.json');
+  writeFileSync(file, JSON.stringify({ format: 'trainyard-library', version: 1, puzzles }));
+  await page.goto('./#/library');
+  await page.locator('input[type=file]').setInputFiles(file);
+  await page.getByRole('link', { name: /Port Credit/ }).click();
+  await page.getByRole('checkbox', { name: 'Hide solved' }).check();
+  await page.getByRole('link', { name: /Featured One/ }).click();
+  await page.waitForTimeout(200);
+  await drag(page, 3, 0, 6);
+  await page.getByRole('button', { name: 'Start' }).click();
+  await expect(page.getByText('Solved!')).toBeVisible({ timeout: 15_000 });
+  await page.getByRole('button', { name: /Next/ }).click();
+  // Featured One is also first in 1–5 wrenches, but it's solved, so Next goes on to 6–10
+  await expect(page.getByRole('heading', { name: 'Straight Shot' })).toBeVisible();
+  await expect(page.getByRole('status')).toHaveText('Now in 6–10 wrenches');
+  await page.screenshot({ path: 'test-results/library-next-group.png' });
+});
